@@ -44,8 +44,8 @@ contract DeathRoadNFT is ERC721, Ownable {
     }
 
 
-    constructor () ERC721("DeathRoadNFT", "DRACE") {
-
+    constructor (address DRACE_token) ERC721("DeathRoadNFT", "DRACE") {
+        DRACE = DRACE_token;
     }
 
     function setFeeTo(address payable _feeTo) public onlyOwner {
