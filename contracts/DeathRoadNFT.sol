@@ -13,6 +13,7 @@ contract DeathRoadNFT is ERC721, Ownable {
 
     event NewBox(address owner, uint256 boxId);
     event OpenBox(address owner, uint256 boxId, uint256 tokenId);
+    event UpgradeToken(address owner, uint256[3] oldTokenId, bool upgradeStatus, uint256 tokenId);
 
     bytes32[] public BoxType;
 
@@ -24,6 +25,8 @@ contract DeathRoadNFT is ERC721, Ownable {
 
     mapping (uint256 => bytes32[]) mappingFeatureNames;
     mapping (uint256 => bytes32[]) mappingFeatureValues;
+
+    mapping (address => uint256) mappingLuckyCharm;
 
     struct Box {
         bool isOpen;
@@ -48,6 +51,14 @@ contract DeathRoadNFT is ERC721, Ownable {
         DRACE = DRACE_token;
     }
 
+    function getBoxType() public returns(bytes32[]) {
+        return BoxType;
+    }
+
+    function getPackTypeOfBox(bytes32 _boxType) public returns(bytes32[]) {
+        return mappingPackTypeOfBox[_boxType];
+    }
+
     function setFeeTo(address payable _feeTo) public onlyOwner {
         feeTo = _feeTo;
     }
@@ -69,7 +80,8 @@ contract DeathRoadNFT is ERC721, Ownable {
         require(mappingBoxType[_boxType]);
         require(mappingPackType[_packType]);
 
-        uint256 boxId = currentBoxId++;
+        currentBoxId = currentBoxId++;
+        uint256 boxId = currentBoxId;
 
         mappingBoxOwner[boxId].isOpen = false;
         mappingBoxOwner[boxId].owner = msg.sender;
@@ -86,6 +98,13 @@ contract DeathRoadNFT is ERC721, Ownable {
         _buyBox(_boxType, _packType);
     }
 
+    function buyCharm(uint256 _amount, bytes32 r, bytes32 s, uint8 v, bytes32 signedData) public {
+        require(verifySignature(r, s, v, signedData), "Signature data is not correct");
+        IERC20 erc20 = IERC20(DRACE);
+        erc20.transferFrom(msg.sender, feeTo, _amount);
+        mappingLuckyCharm[msg.sender] = mappingLuckyCharm[msg.sender]++;
+    }
+
     function buyBoxByNative(bytes32 _boxType, bytes32 _packType, bytes32 r, bytes32 s, uint8 v, bytes32 signedData) public payable {
         require(verifySignature(r, s, v, signedData), "Signature data is not correct");
         feeTo.transfer(msg.value);
@@ -95,7 +114,8 @@ contract DeathRoadNFT is ERC721, Ownable {
     function openBox(uint256 boxId, bytes32[] memory _featureNames, bytes32[] memory _featureValues, bytes32 r, bytes32 s, uint8 v, bytes32 signedData) onlyBoxOwner(boxId) boxNotOpen(boxId) public {
         require(verifySignature(r, s, v, signedData), "Signature data is not correct");
 
-        uint256 tokenId = currentId++;
+        currentId = currentId++;
+        uint256 tokenId = currentId;
         require(!existFeatures(tokenId), "Token is already");
 
         _mint(msg.sender, tokenId);
@@ -138,5 +158,30 @@ contract DeathRoadNFT is ERC721, Ownable {
             return false;
         }
         return true;
+    }
+
+    function upgradeFeatures(uint256[3] memory tokenIds, bytes32[] memory _featureNames, bool fail, bool useCharm, bytes32[] memory _featureValues, bytes32 r, bytes32 s, uint8 v, bytes32 signedData) public {
+        require(verifySignature(r, s, v, signedData), "Signature data is not correct");
+        if (useCharm) {
+            require(mappingLuckyCharm[msg.sender] > 0);
+        }
+        uint256 i;
+        for (i = 0; i < tokenIds.length; i++) {
+            require(ownerOf(tokenIds[i]) == msg.sender, "You are not the owner of one of these NFTs");
+        }
+        if (!(fail && useCharm)) {
+            for (i = 0; i < tokenIds.length; i++) {
+                transferFrom(msg.sender, address(0), tokenIds[i]);
+            }
+        }
+        uint256 tokenId = 0;
+        if (!fail) {
+            tokenId = currentId++;
+            require(!existFeatures(tokenId), "Token is already");
+            _mint(msg.sender, tokenId);
+            setFeatures(tokenId, _featureNames, _featureValues);
+        }
+
+        emit UpgradeToken(msg.sender, tokenIds, fail, tokenId);
     }
 }
