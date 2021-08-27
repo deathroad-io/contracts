@@ -51,11 +51,11 @@ contract DeathRoadNFT is ERC721, Ownable {
         DRACE = DRACE_token;
     }
 
-    function getBoxType() public returns(bytes32[]) {
+    function getBoxType() public view returns(bytes32[] memory) {
         return BoxType;
     }
 
-    function getPackTypeOfBox(bytes32 _boxType) public returns(bytes32[]) {
+    function getPackTypeOfBox(bytes32 _boxType) public view returns(bytes32[] memory) {
         return mappingPackTypeOfBox[_boxType];
     }
 

@@ -1,17 +1,24 @@
-require("@nomiclabs/hardhat-waffle");
+require('dotenv').config();
 
-// The next line is part of the sample project, you don't need it in your
-// project. It imports a Hardhat task definition, that can be used for
-// testing the frontend.
+require("@nomiclabs/hardhat-web3");
+
+
 const {
   TASK_TEST,
   TASK_COMPILE_GET_COMPILER_INPUT
 } = require('hardhat/builtin-tasks/task-names');
 
-require("./tasks/faucet");
+require('@nomiclabs/hardhat-waffle');
+require('@nomiclabs/hardhat-etherscan');
+require('@nomiclabs/hardhat-ethers');
+require('@openzeppelin/hardhat-upgrades');
+require('hardhat-gas-reporter');
+require('hardhat-abi-exporter');
+require('solidity-coverage');
 require('hardhat-deploy-ethers');
 require('hardhat-deploy');
 
+// This must occur after hardhat-deploy!
 task(TASK_COMPILE_GET_COMPILER_INPUT).setAction(async (_, __, runSuper) => {
   const input = await runSuper();
   input.settings.metadata.useLiteralContent = process.env.USE_LITERAL_CONTENT != 'false';
@@ -27,10 +34,59 @@ task(
   async (args, hre, runSuper) => {
     await hre.run('compile');
     await hre.deployments.fixture();
-    return runSuper({ ...args, noCompile: true });
+    return runSuper({...args, noCompile: true});
   }
 );
 
 module.exports = {
-  solidity: "0.8.0"
+  defaultNetwork: "hardhat",
+  networks: {
+    hardhat: {
+    },
+    bsc: {
+      url: `https://bsc-dataseed.binance.org/`,
+      gasPrice: 6e9,
+      blockGasLimit: 22400000,
+      accounts: [process.env.PRIVATE_KEY]
+    },
+    bsctestnet: {
+      url: `https://data-seed-prebsc-1-s1.binance.org:8545/`,
+      gasPrice: 20e9,
+      blockGasLimit: 22400000,
+      accounts: [process.env.PRIVATE_KEY]
+    },
+  },
+  solidity: {
+    version: "0.8.0",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200
+      }
+    }
+  },
+  paths: {
+    sources: "./contracts",
+    tests: "./test",
+    cache: "./cache",
+    artifacts: "./build/artifacts",
+    deploy: './deploy',
+    deployments: './deployments'
+  },
+  mocha: {
+    timeout: 20000
+  },
+  gasReporter: {
+        currency: 'USD',
+        gasPrice: 1,
+        enabled: (process.env.REPORT_GAS) ? true : false
+  },
+  abiExporter: {
+    path: './abi',
+    clear: true,
+    flat: true,
+  },
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_APIKEY
+  }
 };

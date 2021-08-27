@@ -33,8 +33,15 @@
     "husky": "^4.2.5"
   },
   "dependencies": {
+    "@nomiclabs/hardhat-etherscan": "^2.1.5",
+    "@nomiclabs/hardhat-web3": "^2.0.0",
     "@openzeppelin/contracts": "^4.2.0",
+    "@openzeppelin/hardhat-upgrades": "^1.10.0",
+    "dotenv": "^10.0.0",
+    "hardhat-abi-exporter": "^2.2.1",
     "hardhat-deploy": "^0.8.11",
-    "hardhat-deploy-ethers": "*"
+    "hardhat-deploy-ethers": "*",
+    "hardhat-gas-reporter": "^1.0.4",
+    "solidity-coverage": "^0.7.17"
   }
 }
