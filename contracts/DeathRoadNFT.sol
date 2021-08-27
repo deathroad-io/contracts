@@ -2,8 +2,10 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract DeathRoadNFT is ERC721, Ownable {
+    using SafeMath for uint256;
     address public DRACE;
     address payable public feeTo;
     uint256 currentId = 0;
@@ -360,6 +362,9 @@ contract DeathRoadNFT is ERC721, Ownable {
                 //burn NFTs
                 _burn(u.tokenIds[i]);
             }
+        }
+        if (!success && u.useCharm) {
+            mappingLuckyCharm[u.user] = mappingLuckyCharm[u.user].sub(1);
         }
         uint256 tokenId = 0;
         if (success) {
