@@ -8,6 +8,8 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./DRACE.sol";
+import "./TokenVesting.sol";
+import "./FarmingRewardContainer.sol";
 
 interface IMigratorChef {
     // Perform LP token migration from legacy UniswapV2 to DRACE.
@@ -57,6 +59,10 @@ contract MasterChef is Ownable {
     }
     // The DRACE TOKEN!
     DRACE public drace;
+
+    // the token rewards container
+    FarmingRewardContainer public rewardContainer;
+
     // Dev address.
     address public devaddr;
     // Block number when bonus DRACE period ends.
@@ -75,6 +81,9 @@ contract MasterChef is Ownable {
     uint256 public totalAllocPoint = 0;
     // The block number when DRACE mining starts.
     uint256 public startBlock;
+
+    TokenVesting public tokenVesting;
+
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
     event EmergencyWithdraw(
@@ -88,13 +97,17 @@ contract MasterChef is Ownable {
         address _devaddr,
         uint256 _dracePerBlock,
         uint256 _startBlock,
-        uint256 _bonusEndBlock
+        uint256 _bonusEndBlock,
+        address _rewardContainer
     ) public {
         drace = _drace;
         devaddr = _devaddr;
         dracePerBlock = _dracePerBlock;
         bonusEndBlock = _bonusEndBlock;
         startBlock = _startBlock;
+
+        tokenVesting = new TokenVesting(address(_drace), 30 days);
+        rewardContainer = FarmingRewardContainer(_rewardContainer);
     }
 
     function poolLength() external view returns (uint256) {
@@ -222,8 +235,8 @@ contract MasterChef is Ownable {
             multiplier.mul(dracePerBlock).mul(pool.allocPoint).div(
                 totalAllocPoint
             );
-        drace.mint(devaddr, draceReward.div(10));
-        drace.mint(address(this), draceReward);
+        rewardContainer.getRewards(devaddr, draceReward.div(10));
+        rewardContainer.getRewards(address(this), draceReward);
         pool.accDRACEPerShare = pool.accDRACEPerShare.add(
             draceReward.mul(1e12).div(lpSupply)
         );
