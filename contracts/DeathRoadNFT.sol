@@ -103,14 +103,16 @@ contract DeathRoadNFT is ERC721, Ownable {
         bytes32 _boxType,
         bytes32 _packType,
         uint256 _amount,
+        uint256 _validTimestamp,
         bytes32 r,
         bytes32 s,
-        uint8 v,
-        bytes32 signedData
+        uint8 v
     ) public {
+        require(block.timestamp <= _validTimestamp, "price expried");
+        bytes32 message = keccak256(abi.encode(msg.sender, _amount, _validTimestamp));
         require(
-            verifySignature(r, s, v, signedData),
-            "Signature data is not correct"
+            verifySignature(r, s, v, message),
+            "buyBox: Price signature invalid"
         );
         IERC20 erc20 = IERC20(DRACE);
         erc20.transferFrom(msg.sender, feeTo, _amount);
