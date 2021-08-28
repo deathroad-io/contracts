@@ -4,8 +4,9 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "../interfaces/INotaryNFT.sol";
+import "../lib/SignerRecover.sol";
 
-contract DeathRoadNFT is ERC721, Ownable {
+contract DeathRoadNFT is ERC721, Ownable, SignerRecover {
     using SafeMath for uint256;
     address public DRACE;
     address payable public feeTo;
@@ -104,14 +105,14 @@ contract DeathRoadNFT is ERC721, Ownable {
         bytes32 _boxType,
         bytes32 _packType,
         uint256 _amount,
-        uint256 _validTimestamp,
+        uint256 _expiryTime,
         bytes32 r,
         bytes32 s,
         uint8 v
     ) public {
-        require(block.timestamp <= _validTimestamp, "price expried");
+        require(block.timestamp <= _expiryTime, "price expried");
         bytes32 message = keccak256(
-            abi.encode(msg.sender, _amount, _validTimestamp)
+            abi.encode("buyBox", msg.sender, _amount, _expiryTime)
         );
         require(
             verifySignature(r, s, v, message),
@@ -124,13 +125,17 @@ contract DeathRoadNFT is ERC721, Ownable {
 
     function buyCharm(
         uint256 _amount,
+        uint256 _expiryTime,
         bytes32 r,
         bytes32 s,
-        uint8 v,
-        bytes32 signedData
+        uint8 v
     ) public {
+        require(block.timestamp <= _expiryTime, "price expried");
+        bytes32 message = keccak256(
+            abi.encode("buyCharm", msg.sender, _amount, _expiryTime)
+        );
         require(
-            verifySignature(r, s, v, signedData),
+            verifySignature(r, s, v, message),
             "Signature data is not correct"
         );
         IERC20 erc20 = IERC20(DRACE);
@@ -139,15 +144,21 @@ contract DeathRoadNFT is ERC721, Ownable {
     }
 
     function buyBoxByNative(
+        uint256 _amount,
         bytes32 _boxType,
         bytes32 _packType,
+        uint256 _expiryTime,
         bytes32 r,
         bytes32 s,
-        uint8 v,
-        bytes32 signedData
+        uint8 v
     ) public payable {
+        require(block.timestamp <= _expiryTime, "price expried");
+        require(msg.value >= _amount, "transaction lower value");
+        bytes32 message = keccak256(
+            abi.encode("buyBoxByNative", msg.sender, _amount, _expiryTime, _boxType, _packType)
+        );
         require(
-            verifySignature(r, s, v, signedData),
+            verifySignature(r, s, v, message),
             "Signature data is not correct"
         );
         feeTo.transfer(msg.value);
@@ -192,14 +203,7 @@ contract DeathRoadNFT is ERC721, Ownable {
         uint8 v,
         bytes32 signedData
     ) internal view returns (bool) {
-        address signer = ecrecover(
-            keccak256(
-                abi.encodePacked("\x19Ethereum Signed Message:\n32", signedData)
-            ),
-            v,
-            r,
-            s
-        );
+        address signer = recoverSigner(r, s, v, signedData);
 
         return mappingApprover[signer];
     }

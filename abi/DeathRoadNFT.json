@@ -354,7 +354,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "_validTimestamp",
+        "name": "_expiryTime",
         "type": "uint256"
       },
       {
@@ -381,6 +381,11 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      },
+      {
         "internalType": "bytes32",
         "name": "_boxType",
         "type": "bytes32"
@@ -391,36 +396,8 @@
         "type": "bytes32"
       },
       {
-        "internalType": "bytes32",
-        "name": "r",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "s",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "uint8",
-        "name": "v",
-        "type": "uint8"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "signedData",
-        "type": "bytes32"
-      }
-    ],
-    "name": "buyBoxByNative",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "uint256",
-        "name": "_amount",
+        "name": "_expiryTime",
         "type": "uint256"
       },
       {
@@ -437,11 +414,39 @@
         "internalType": "uint8",
         "name": "v",
         "type": "uint8"
+      }
+    ],
+    "name": "buyBoxByNative",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_expiryTime",
+        "type": "uint256"
       },
       {
         "internalType": "bytes32",
-        "name": "signedData",
+        "name": "r",
         "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "s",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint8",
+        "name": "v",
+        "type": "uint8"
       }
     ],
     "name": "buyCharm",
