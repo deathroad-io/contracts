@@ -1,6 +1,6 @@
 pragma solidity ^0.8.0;
-import "./interfaces/INotaryNFT.sol";
-import "./interfaces/IDeathRoadNFT.sol";
+import "../interfaces/INotaryNFT.sol";
+import "../interfaces/IDeathRoadNFT.sol";
 
 contract NotaryNFT is INotaryNFT {
     function getUpgradeResult(bytes32 secret, address nftFactory) external override view returns (bool) {

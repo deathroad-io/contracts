@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interfaces/IDeathRoadNFT.sol";
 import "../lib/SignerRecover.sol";
-import "../TokenVesting.sol";
+import "../farming/TokenVesting.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract GameControl is Ownable, SignerRecover {
