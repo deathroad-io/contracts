@@ -234,47 +234,6 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover {
         return true;
     }
 
-    function upgradeFeatures(
-        uint256[3] memory tokenIds,
-        bytes32[] memory _featureNames,
-        bool fail,
-        bool useCharm,
-        bytes32[] memory _featureValues,
-        bytes32 r,
-        bytes32 s,
-        uint8 v,
-        bytes32 signedData
-    ) public {
-        require(
-            verifySignature(r, s, v, signedData),
-            "Signature data is not correct"
-        );
-        if (useCharm) {
-            require(mappingLuckyCharm[msg.sender] > 0);
-        }
-        uint256 i;
-        for (i = 0; i < tokenIds.length; i++) {
-            require(
-                ownerOf(tokenIds[i]) == msg.sender,
-                "You are not the owner of one of these NFTs"
-            );
-        }
-        if (!(fail && useCharm)) {
-            for (i = 0; i < tokenIds.length; i++) {
-                transferFrom(msg.sender, address(0), tokenIds[i]);
-            }
-        }
-        uint256 tokenId = 0;
-        if (!fail) {
-            tokenId = currentId++;
-            require(!existFeatures(tokenId), "Token is already");
-            _mint(msg.sender, tokenId);
-            setFeatures(tokenId, _featureNames, _featureValues);
-        }
-
-        emit UpgradeToken(msg.sender, tokenIds, fail, tokenId);
-    }
-
     struct UpgradeInfo {
         address user;
         bool useCharm;
