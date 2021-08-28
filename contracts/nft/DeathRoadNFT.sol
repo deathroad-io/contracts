@@ -368,9 +368,6 @@ contract DeathRoadNFT is ERC721, Ownable {
                 _burn(u.tokenIds[i]);
             }
         }
-        if (u.useCharm) {
-            mappingLuckyCharm[msg.sender] = mappingLuckyCharm[msg.sender]--;
-        }
         if (!success && u.useCharm) {
             mappingLuckyCharm[u.user] = mappingLuckyCharm[u.user].sub(1);
 
