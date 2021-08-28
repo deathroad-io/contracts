@@ -353,6 +353,11 @@
         "type": "uint256"
       },
       {
+        "internalType": "uint256",
+        "name": "_validTimestamp",
+        "type": "uint256"
+      },
+      {
         "internalType": "bytes32",
         "name": "r",
         "type": "bytes32"
@@ -366,11 +371,6 @@
         "internalType": "uint8",
         "name": "v",
         "type": "uint8"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "signedData",
-        "type": "bytes32"
       }
     ],
     "name": "buyBox",
@@ -848,6 +848,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "notaryHook",
+    "outputs": [
+      {
+        "internalType": "contract INotaryNFT",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -1020,6 +1033,19 @@
       }
     ],
     "name": "setFeeTo",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_notaryHook",
+        "type": "address"
+      }
+    ],
+    "name": "setNotaryHook",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

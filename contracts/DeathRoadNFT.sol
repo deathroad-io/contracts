@@ -3,6 +3,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "./interfaces/INotaryNFT.sol";
 
 contract DeathRoadNFT is ERC721, Ownable {
     using SafeMath for uint256;
@@ -109,7 +110,9 @@ contract DeathRoadNFT is ERC721, Ownable {
         uint8 v
     ) public {
         require(block.timestamp <= _validTimestamp, "price expried");
-        bytes32 message = keccak256(abi.encode(msg.sender, _amount, _validTimestamp));
+        bytes32 message = keccak256(
+            abi.encode(msg.sender, _amount, _validTimestamp)
+        );
         require(
             verifySignature(r, s, v, message),
             "buyBox: Price signature invalid"
@@ -367,11 +370,19 @@ contract DeathRoadNFT is ERC721, Ownable {
         }
         if (!success && u.useCharm) {
             mappingLuckyCharm[u.user] = mappingLuckyCharm[u.user].sub(1);
+
+            //returning NFTs back
+            transferFrom(address(this), msg.sender, u.tokenIds[0]);
+            transferFrom(address(this), msg.sender, u.tokenIds[1]);
+            transferFrom(address(this), msg.sender, u.tokenIds[2]);
         }
         uint256 tokenId = 0;
         if (success) {
             tokenId = currentId++;
-            require(!existFeatures(tokenId), "settleUpgradeFeatures: Token is already");
+            require(
+                !existFeatures(tokenId),
+                "settleUpgradeFeatures: Token is already"
+            );
             _mint(u.user, tokenId);
             setFeatures(tokenId, u.targetFeatureNames, u.targetFeatureValues);
         }
@@ -381,8 +392,11 @@ contract DeathRoadNFT is ERC721, Ownable {
         emit UpgradeToken(u.user, u.tokenIds, success, tokenId);
     }
 
+    INotaryNFT public notaryHook;
+    function setNotaryHook(address _notaryHook) external onlyOwner {
+        notaryHook = INotaryNFT(_notaryHook);
+    }
     function getUpgradeResult(bytes32 secret) public view returns (bool) {
-        //TODO
-        return true;
+        return notaryHook.getUpgradeResult(secret, address(this));
     }
 }

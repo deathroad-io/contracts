@@ -78,6 +78,25 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "allUpgrades",
+    "outputs": [
+      {
+        "internalType": "bytes32[]",
+        "name": "",
+        "type": "bytes32[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "to",
         "type": "address"
       },
@@ -325,6 +344,62 @@
     "name": "transferFrom",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "name": "upgradesInfo",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "internalType": "bool",
+            "name": "useCharm",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "settled",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256[3]",
+            "name": "tokenIds",
+            "type": "uint256[3]"
+          },
+          {
+            "internalType": "bytes32[]",
+            "name": "targetFeatureNames",
+            "type": "bytes32[]"
+          },
+          {
+            "internalType": "bytes32[]",
+            "name": "targetFeatureValues",
+            "type": "bytes32[]"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "userRandomValue",
+            "type": "bytes32"
+          }
+        ],
+        "internalType": "struct IDeathRoadNFT.UpgradeInfo",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   }
 ]

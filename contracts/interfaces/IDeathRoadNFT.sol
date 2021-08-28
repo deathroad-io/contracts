@@ -13,4 +13,17 @@ interface IDeathRoadNFT is IERC721 {
     function getFeatures(uint256 tokenId) external view returns (bytes32[] memory, bytes32[] memory);
 
     function existFeatures(uint256 tokenId) external view returns(bool);
+
+    struct UpgradeInfo {
+        address user;
+        bool useCharm;
+        bool settled;
+        uint256[3] tokenIds;
+        bytes32[] targetFeatureNames;
+        bytes32[] targetFeatureValues;
+        bytes32 userRandomValue;
+    }
+
+    function upgradesInfo(bytes32) external view returns (UpgradeInfo memory);
+    function allUpgrades(address) external view returns (bytes32[] memory);
 }
