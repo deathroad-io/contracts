@@ -81,15 +81,15 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover {
     }
 
     function setSpecialFeatures(uint256 tokenId, bytes32 _name, bytes32 _value,
-        uint256 _validTimestamp,
+        uint256 _expiryTime,
         bytes32 r,
         bytes32 s,
         uint8 v) public {
         require(ownerOf(tokenId) == msg.sender);
 
-        require(block.timestamp <= _validTimestamp, "price expired");
+        require(block.timestamp <= _expiryTime, "price expired");
         bytes32 message = keccak256(
-            abi.encode(msg.sender, _name, _value, _validTimestamp)
+            abi.encode(msg.sender, _name, _value, _expiryTime)
         );
         require(verifySignature(r, s, v, message), "buyBox: Price signature invalid");
 
@@ -142,9 +142,9 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover {
         bytes32 s,
         uint8 v
     ) public {
-        require(block.timestamp <= _expiryTime, "price expried");
+        require(block.timestamp <= _expiryTime, "price expired");
         bytes32 message = keccak256(
-            abi.encode("buyBox", msg.sender, _amount, _expiryTime)
+            abi.encode("buyBox", msg.sender, _boxType, _packType, _amount, _expiryTime)
         );
         require(
             verifySignature(r, s, v, message),
@@ -184,10 +184,10 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover {
         bytes32 s,
         uint8 v
     ) public payable {
-        require(block.timestamp <= _expiryTime, "price expried");
+        require(block.timestamp <= _expiryTime, "price expired");
         require(msg.value >= _amount, "transaction lower value");
         bytes32 message = keccak256(
-            abi.encode("buyBoxByNative", msg.sender, _amount, _expiryTime, _boxType, _packType)
+            abi.encode("buyBoxByNative", msg.sender, _boxType, _packType, _amount, _expiryTime)
         );
         require(
             verifySignature(r, s, v, message),
