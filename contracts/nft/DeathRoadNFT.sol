@@ -11,6 +11,7 @@ contract DeathRoadNFT is ERC721, Ownable {
     address payable public feeTo;
     uint256 currentId = 0;
     uint256 currentBoxId = 0;
+    address public gameContract;
 
     event NewBox(address owner, uint256 boxId);
     event OpenBox(address owner, uint256 boxId, uint256 tokenId);
@@ -33,6 +34,8 @@ contract DeathRoadNFT is ERC721, Ownable {
     mapping(uint256 => bytes32[]) public mappingFeatureValues;
 
     mapping(address => uint256) public mappingLuckyCharm;
+
+    mapping(uint256 => mapping(bytes32 => bytes32)) mappingTokenSpecialFeatures;
 
     struct Box {
         bool isOpen;
@@ -70,6 +73,35 @@ contract DeathRoadNFT is ERC721, Ownable {
 
     function setFeeTo(address payable _feeTo) public onlyOwner {
         feeTo = _feeTo;
+    }
+
+    function setGameContract(address _gameContract) public onlyOwner {
+        gameContract = _gameContract;
+    }
+
+    function setSpecialFeatures(uint256 tokenId, bytes32 _name, bytes32 _value,
+        uint256 _validTimestamp,
+        bytes32 r,
+        bytes32 s,
+        uint8 v) public {
+        require(ownerOf(tokenId) == msg.sender);
+
+        require(block.timestamp <= _validTimestamp, "price expired");
+        bytes32 message = keccak256(
+            abi.encode(msg.sender, _name, _value, _validTimestamp)
+        );
+        require(verifySignature(r, s, v, message), "buyBox: Price signature invalid");
+
+        mappingTokenSpecialFeatures[tokenId][_name] = _value;
+    }
+
+    function setSpecialFeaturesByGameContract(uint256 tokenId, bytes32 _name, bytes32 _value) public {
+        require(msg.sender == gameContract);
+        mappingTokenSpecialFeatures[tokenId][_name] = _value;
+    }
+
+    function getSpecialFeaturesOfToken(uint256 tokenId, bytes32 _name) public view returns (bytes32) {
+        return mappingTokenSpecialFeatures[tokenId][_name];
     }
 
     function addBoxType(bytes32 _boxType) public onlyOwner {
