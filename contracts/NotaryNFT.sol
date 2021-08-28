@@ -6,8 +6,8 @@ contract NotaryNFT is INotaryNFT {
     function getUpgradeResult(bytes32 secret, address nftFactory) external override view returns (bool) {
         IDeathRoadNFT factory = IDeathRoadNFT(nftFactory);
         bytes32 commitment = keccak256(abi.encode(secret));
-        UpgradeInfo memory info = factory.upgradesInfo(commitment);
-        
+        IDeathRoadNFT.UpgradeInfo memory info = factory.upgradesInfo(commitment);
+
         //TODO: implement notary
         return true;
     }
