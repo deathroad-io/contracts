@@ -8,8 +8,9 @@ import "../interfaces/INFTUsePeriod.sol";
 import "../lib/SignerRecover.sol";
 import "../farming/TokenVesting.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
-contract GameControl is Ownable, SignerRecover {
+contract GameControl is Ownable, SignerRecover, Initializable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
     struct DepositInfo {
@@ -35,11 +36,12 @@ contract GameControl is Ownable, SignerRecover {
     event TokenDeposit(address depositor, uint256 tokenId, uint256 timestamp);
     event TokenWithdraw(address withdrawer, uint256 tokenId, uint256 timestamp);
 
-    constructor(address _drace, address _draceNFT, address _operator, address _tokenVesting) {
+    function initialize(address _drace, address _draceNFT, address _operator, address _tokenVesting, address _tokenUsePeriodHook) external initializer {
         drace = IERC20(_drace);
         draceNFT = IDeathRoadNFT(_draceNFT);
         gameOperator = _operator;
         tokenVesting = TokenVesting(_tokenVesting);
+        tokenUsePeriodHook = INFTUsePeriod(_tokenUsePeriodHook);
     }
 
     function changeOperator(address _newOperator) external onlyOwner {

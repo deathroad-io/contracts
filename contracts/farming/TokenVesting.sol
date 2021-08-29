@@ -4,7 +4,9 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-contract TokenVesting {
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+
+contract TokenVesting is Initializable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -16,11 +18,14 @@ contract TokenVesting {
     uint256 public vestingPeriod;
     IERC20 public token;
     mapping(address => VestingInfo) public vestings;
-    constructor (address _token, uint256 _vestingPeriod) {
+
+    function initialize(address _token, uint256 _vestingPeriod)
+        external
+        initializer
+    {
         token = IERC20(_token);
         vestingPeriod = _vestingPeriod;
     }
-
 
     function unlock(address _addr) public {
         uint256 unlockable = getUnlockable(_addr);
@@ -31,6 +36,7 @@ contract TokenVesting {
             token.safeTransfer(_addr, unlockable);
         }
     }
+
     function lock(address _addr, uint256 _amount) external {
         unlock(_addr);
         if (_amount > 0) {
@@ -51,7 +57,9 @@ contract TokenVesting {
         uint256 lockedAt = vesting.lockedTil.sub(vestingPeriod);
         uint256 timeElapsed = block.timestamp.sub(lockedAt);
 
-        uint256 releasable = timeElapsed.mul(vesting.totalAmount).div(vestingPeriod);
+        uint256 releasable = timeElapsed.mul(vesting.totalAmount).div(
+            vestingPeriod
+        );
         if (releasable > vesting.totalAmount) {
             releasable = vesting.totalAmount;
         }

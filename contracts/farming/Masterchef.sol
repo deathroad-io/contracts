@@ -106,7 +106,8 @@ contract MasterChef is Ownable {
         bonusEndBlock = _bonusEndBlock;
         startBlock = _startBlock;
 
-        tokenVesting = new TokenVesting(address(_drace), 30 days);
+        tokenVesting = new TokenVesting();
+        tokenVesting.initialize(address(_drace), 30 days);
         rewardContainer = FarmingRewardContainer(_rewardContainer);
     }
 
