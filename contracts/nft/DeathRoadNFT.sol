@@ -201,13 +201,17 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover {
         uint256 boxId,
         bytes32[] memory _featureNames,
         bytes32[] memory _featureValues,
+        uint256 _expiryTime,
         bytes32 r,
         bytes32 s,
-        uint8 v,
-        bytes32 signedData
+        uint8 v
     ) public onlyBoxOwner(boxId) boxNotOpen(boxId) {
+        require(block.timestamp <= _expiryTime, "price expired");
+        bytes32 message = keccak256(
+            abi.encode("openBox", msg.sender, boxId, _expiryTime)
+        );
         require(
-            verifySignature(r, s, v, signedData),
+            verifySignature(r, s, v, message),
             "Signature data is not correct"
         );
 
@@ -227,6 +231,9 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover {
 
     function removeApprover(address _approver) public onlyOwner {
         mappingApprover[_approver] = false;
+    }
+    function isApprover(address _approver) public view returns (bool) {
+        return mappingApprover[_approver];
     }
 
     function verifySignature(
