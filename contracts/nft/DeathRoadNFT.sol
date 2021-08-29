@@ -164,7 +164,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         require(mappingBoxType[_boxType]);
         require(mappingPackType[_packType]);
 
-        currentBoxId = currentBoxId++;
+        currentBoxId = currentBoxId.add(1);
         uint256 boxId = currentBoxId;
 
         mappingBoxOwner[boxId].isOpen = false;
@@ -221,7 +221,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         );
         IERC20 erc20 = IERC20(DRACE);
         erc20.transferFrom(msg.sender, feeTo, _price);
-        mappingLuckyCharm[msg.sender] = mappingLuckyCharm[msg.sender]++;
+        mappingLuckyCharm[msg.sender] = mappingLuckyCharm[msg.sender].add(1);
     }
 
     function buyBoxByNative(
@@ -287,7 +287,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
             );
         }
 
-        currentId = currentId++;
+        currentId = currentId.add(1);
         uint256 tokenId = currentId;
         require(!existFeatures(tokenId), "Token is already");
 
@@ -468,7 +468,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
 
         uint256 tokenId = 0;
         if (success) {
-            currentId = currentId++;
+            currentId = currentId.add(1);
             tokenId = currentId;
             require(
                 !existFeatures(tokenId),
