@@ -3,11 +3,12 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "../interfaces/INotaryNFT.sol";
 import "../interfaces/IDeathRoadNFT.sol";
 import "../lib/SignerRecover.sol";
 
-contract DeathRoadNFT is ERC721, Ownable, SignerRecover {
+contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
     using SafeMath for uint256;
 
     address public DRACE;
@@ -70,8 +71,13 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover {
         _;
     }
 
-    constructor(address DRACE_token) ERC721("DeathRoadNFT", "DRACE") {
+    constructor() ERC721("DeathRoadNFT", "DRACE") {
+    }
+
+    function initialize(address DRACE_token, address payable _feeTo, address _notaryHook) external initializer {
         DRACE = DRACE_token;
+        feeTo = _feeTo;
+        notaryHook = INotaryNFT(_notaryHook);
     }
 
     function getBoxType() public view returns (bytes[] memory) {

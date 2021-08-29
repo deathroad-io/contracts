@@ -43,6 +43,7 @@
     "hardhat-deploy": "^0.8.11",
     "hardhat-deploy-ethers": "*",
     "hardhat-gas-reporter": "^1.0.4",
+    "sleep-promise": "^9.1.0",
     "solidity-coverage": "^0.7.17"
   }
 }

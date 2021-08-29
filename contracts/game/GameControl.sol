@@ -4,6 +4,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interfaces/IDeathRoadNFT.sol";
+import "../interfaces/INFTUsePeriod.sol";
 import "../lib/SignerRecover.sol";
 import "../farming/TokenVesting.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
@@ -113,9 +114,14 @@ contract GameControl is Ownable, SignerRecover {
         //do nothing
     }
 
+
+    INFTUsePeriod public tokenUsePeriodHook;
+    function setTokenUsePeriodHook(address _addr) external onlyOwner {
+        tokenUsePeriodHook = INFTUsePeriod(_addr);
+    }
     //each NFT has a period that it can only be used for playing if it was not used for playing more than period ago
     function getUsePeriod(uint256 _tokenId) public view returns (uint256) {
         //the higher level the token id is, the shorter period => users can play more times 
-        return 3600*2;  //default 2h
+        return tokenUsePeriodHook.getNFTUsePeriod(_tokenId, address(draceNFT));
     }
 }

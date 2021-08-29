@@ -10,7 +10,6 @@ contract NotaryNFT is INotaryNFT {
 
         uint256[3] memory tokenIDs = info.tokenIds;
 
-        
         //TODO: implement notary
         return true;
     }

@@ -56,8 +56,6 @@ const chainNameById = (chainId) => {
   }
 };
 
-const supportedChainIds = [1, 3, 4, 42, 31337, 56, 97, 1287, 4002, 80001, 43114, 89]
-
 const blockTimeFromDate = (dateStr) => {
   return Date.parse(dateStr) / 1000;
 };
@@ -239,7 +237,5 @@ module.exports = {
   toWei,
   toEth,
   toBN,
-  toStr,
-  supportedChainIds,
-  approvers
+  toStr
 };
