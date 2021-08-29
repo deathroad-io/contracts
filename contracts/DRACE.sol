@@ -8,9 +8,9 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 contract DRACE is ERC20('Deathroad Token', 'DRACE'), Ownable {
     using SafeMath for uint;
     // Creates `_amount` token to `_to`. Must only be called by the owner (MasterChef).
-    function mint(address _to, uint256 _amount) public onlyOwner {
-        _mint(_to, _amount);
-        _moveDelegates(address(0), _delegates[_to], _amount);
+    constructor(address _to) {
+        _mint(_to, 1000000000e18);
+        _moveDelegates(address(0), _delegates[_to], 1000000000e18);
     }
 
     // Copied and modified from YAM code:
