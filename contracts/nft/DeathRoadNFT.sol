@@ -421,7 +421,8 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover {
         }
         uint256 tokenId = 0;
         if (success) {
-            tokenId = currentId++;
+            currentId = currentId++;
+            tokenId = currentId;
             require(
                 !existFeatures(tokenId),
                 "settleUpgradeFeatures: Token is already"
