@@ -37,7 +37,8 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
     bytes[] public BoxType; //encoded value of string
 
     mapping(bytes => bool) public mappingBoxType;
-    mapping(bytes => bool) public mappingPackType;
+    //boxtype => packtype : check whether pack type for box type exist
+    mapping(bytes => mapping (bytes => bool)) public mappingPackType;
     mapping(bytes => bytes[]) public mappingPackTypeOfBox;
 
     mapping(address => bool) public mappingApprover;
@@ -60,7 +61,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
     }
 
     modifier boxNotOpen(uint256 boxId) {
-        require(!mappingBoxOwner[boxId].isOpen);
+        require(!mappingBoxOwner[boxId].isOpen, "box already open");
         _;
     }
 
@@ -113,7 +114,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         bytes32 s,
         uint8 v
     ) public {
-        require(ownerOf(tokenId) == msg.sender);
+        require(ownerOf(tokenId) == msg.sender, "setSpecialFeatures: msg.sender not token owner");
 
         require(block.timestamp <= _expiryTime, "price expired");
         bytes32 message = keccak256(
@@ -132,7 +133,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         bytes memory _name,
         bytes memory _value
     ) public {
-        require(msg.sender == gameContract);
+        require(msg.sender == gameContract, "setSpecialFeaturesByGameContract: caller is not the game contract");
         mappingTokenSpecialFeatures[tokenId][_name] = _value;
     }
 
@@ -154,15 +155,15 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         public
         onlyOwner
     {
-        require(mappingBoxType[_boxType] == true);
-        require(mappingPackType[_packType] != true);
-        mappingPackType[_packType] = true;
+        require(mappingBoxType[_boxType], "addPackType: invalid box type");
+        require(!mappingPackType[_boxType][_packType], "addPackType: pack type already exist");
+        mappingPackType[_boxType][_packType] = true;
         mappingPackTypeOfBox[_boxType].push(_packType);
     }
 
     function _buyBox(bytes memory _boxType, bytes memory _packType) internal {
-        require(mappingBoxType[_boxType]);
-        require(mappingPackType[_packType]);
+        require(mappingBoxType[_boxType], "_buyBox: invalid box type");
+        require(mappingPackType[_boxType][_packType], "_buyBox: invalid pack type");
 
         currentBoxId = currentBoxId.add(1);
         uint256 boxId = currentBoxId;
@@ -326,7 +327,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         bytes[] memory _featureNames,
         bytes[] memory _featureValues
     ) internal {
-        require(!existFeatures(tokenId));
+        require(!existFeatures(tokenId), "setFeatures: tokenId inexist");
 
         mappingFeatureNames[tokenId] = _featureNames;
         mappingFeatureValues[tokenId] = _featureValues;
