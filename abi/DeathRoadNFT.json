@@ -206,7 +206,7 @@
         "type": "uint256"
       }
     ],
-    "name": "BoxType",
+    "name": "Boxes",
     "outputs": [
       {
         "internalType": "bytes",
@@ -233,6 +233,25 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "Packs",
+    "outputs": [
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "_approver",
         "type": "address"
@@ -247,11 +266,11 @@
     "inputs": [
       {
         "internalType": "bytes",
-        "name": "_boxType",
+        "name": "_box",
         "type": "bytes"
       }
     ],
-    "name": "addBoxType",
+    "name": "addBoxes",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -260,16 +279,29 @@
     "inputs": [
       {
         "internalType": "bytes",
-        "name": "_boxType",
+        "name": "_box",
         "type": "bytes"
       },
       {
         "internalType": "bytes",
-        "name": "_packType",
+        "name": "_feature",
         "type": "bytes"
       }
     ],
-    "name": "addPackType",
+    "name": "addFeature",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "_pack",
+        "type": "bytes"
+      }
+    ],
+    "name": "addPacks",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -339,12 +371,12 @@
     "inputs": [
       {
         "internalType": "bytes",
-        "name": "_boxType",
+        "name": "_box",
         "type": "bytes"
       },
       {
         "internalType": "bytes",
-        "name": "_packType",
+        "name": "_pack",
         "type": "bytes"
       },
       {
@@ -387,12 +419,12 @@
       },
       {
         "internalType": "bytes",
-        "name": "_boxType",
+        "name": "_box",
         "type": "bytes"
       },
       {
         "internalType": "bytes",
-        "name": "_packType",
+        "name": "_pack",
         "type": "bytes"
       },
       {
@@ -563,7 +595,7 @@
         "type": "uint256"
       }
     ],
-    "name": "existFeatures",
+    "name": "existTokenFeatures",
     "outputs": [
       {
         "internalType": "bool",
@@ -621,32 +653,8 @@
   },
   {
     "inputs": [],
-    "name": "getBoxType",
+    "name": "getBoxes",
     "outputs": [
-      {
-        "internalType": "bytes[]",
-        "name": "",
-        "type": "bytes[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      }
-    ],
-    "name": "getFeatures",
-    "outputs": [
-      {
-        "internalType": "bytes[]",
-        "name": "_featureNames",
-        "type": "bytes[]"
-      },
       {
         "internalType": "bytes[]",
         "name": "",
@@ -660,11 +668,24 @@
     "inputs": [
       {
         "internalType": "bytes",
-        "name": "_boxType",
+        "name": "_box",
         "type": "bytes"
       }
     ],
-    "name": "getPackTypeOfBox",
+    "name": "getFeaturesOfBox",
+    "outputs": [
+      {
+        "internalType": "bytes[]",
+        "name": "",
+        "type": "bytes[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getPacks",
     "outputs": [
       {
         "internalType": "bytes[]",
@@ -694,6 +715,30 @@
         "internalType": "bytes",
         "name": "_value",
         "type": "bytes"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getTokenFeatures",
+    "outputs": [
+      {
+        "internalType": "bytes[]",
+        "name": "_featureNames",
+        "type": "bytes[]"
+      },
+      {
+        "internalType": "bytes[]",
+        "name": "",
+        "type": "bytes[]"
       }
     ],
     "stateMutability": "view",
@@ -825,12 +870,12 @@
       },
       {
         "internalType": "bytes",
-        "name": "boxType",
+        "name": "box",
         "type": "bytes"
       },
       {
         "internalType": "bytes",
-        "name": "packType",
+        "name": "pack",
         "type": "bytes"
       }
     ],
@@ -845,7 +890,7 @@
         "type": "bytes"
       }
     ],
-    "name": "mappingBoxType",
+    "name": "mappingBoxes",
     "outputs": [
       {
         "internalType": "bool",
@@ -859,22 +904,22 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
+        "internalType": "bytes",
         "name": "",
-        "type": "uint256"
+        "type": "bytes"
       },
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "mappingFeatureNames",
-    "outputs": [
       {
         "internalType": "bytes",
         "name": "",
         "type": "bytes"
+      }
+    ],
+    "name": "mappingFeatures",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -883,9 +928,9 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
+        "internalType": "bytes",
         "name": "",
-        "type": "uint256"
+        "type": "bytes"
       },
       {
         "internalType": "uint256",
@@ -893,7 +938,7 @@
         "type": "uint256"
       }
     ],
-    "name": "mappingFeatureValues",
+    "name": "mappingFeaturesOfBox",
     "outputs": [
       {
         "internalType": "bytes",
@@ -929,14 +974,9 @@
         "internalType": "bytes",
         "name": "",
         "type": "bytes"
-      },
-      {
-        "internalType": "bytes",
-        "name": "",
-        "type": "bytes"
       }
     ],
-    "name": "mappingPackType",
+    "name": "mappingPacks",
     "outputs": [
       {
         "internalType": "bool",
@@ -950,9 +990,9 @@
   {
     "inputs": [
       {
-        "internalType": "bytes",
+        "internalType": "uint256",
         "name": "",
-        "type": "bytes"
+        "type": "uint256"
       },
       {
         "internalType": "uint256",
@@ -960,7 +1000,31 @@
         "type": "uint256"
       }
     ],
-    "name": "mappingPackTypeOfBox",
+    "name": "mappingTokenFeatureNames",
+    "outputs": [
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "mappingTokenFeatureValues",
     "outputs": [
       {
         "internalType": "bytes",
