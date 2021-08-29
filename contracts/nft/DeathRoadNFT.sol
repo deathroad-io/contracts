@@ -29,6 +29,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover {
         address owner,
         uint256[3] oldTokenId,
         bool upgradeStatus,
+        bool useCharm,
         uint256 tokenId
     );
 
@@ -433,7 +434,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover {
 
         u.settled = true;
 
-        emit UpgradeToken(u.user, u.tokenIds, success, tokenId);
+        emit UpgradeToken(u.user, u.tokenIds, success, u.useCharm, tokenId);
     }
 
     INotaryNFT public notaryHook;
