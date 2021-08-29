@@ -20,8 +20,8 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
     struct Box {
         bool isOpen;
         address owner;
-        bytes boxType; // car, weapon, other,....
-        bytes packType; // iron, bronze, silver, gold, platinum, diamond
+        bytes box; // car, gun, rocket, other,...
+        bytes pack; // 1star, 2star, 3star, 4star, 5star, legend,...
     }
 
     event NewBox(address owner, uint256 boxId);
@@ -34,20 +34,22 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         uint256 tokenId
     );
 
-    bytes[] public BoxType; //encoded value of string
+    bytes[] public Boxes; //encoded value of string
+    bytes[] public Packs; //encoded value of string
 
-    mapping(bytes => bool) public mappingBoxType;
-    //boxtype => packtype : check whether pack type for box type exist
-    mapping(bytes => mapping (bytes => bool)) public mappingPackType;
-    mapping(bytes => bytes[]) public mappingPackTypeOfBox;
+    mapping(bytes => bool) public mappingBoxes;
+    mapping(bytes => bool) public mappingPacks;
+    //boxtype => feature : check whether pack type for box type exist
+    mapping(bytes => mapping (bytes => bool)) public mappingFeatures;
+    mapping(bytes => bytes[]) public mappingFeaturesOfBox;
 
     mapping(address => bool) public mappingApprover;
 
-    mapping(uint256 => bytes[]) public mappingFeatureNames;
+    mapping(uint256 => bytes[]) public mappingTokenFeatureNames;
 
     //feature values is encoded of ['string', 'bytes']
     //where string is feature data type, from which we decode the actual value contained in bytes
-    mapping(uint256 => bytes[]) public mappingFeatureValues;
+    mapping(uint256 => bytes[]) public mappingTokenFeatureValues;
 
     mapping(address => uint256) public mappingLuckyCharm;
 
@@ -85,16 +87,19 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         notaryHook = INotaryNFT(_notaryHook);
     }
 
-    function getBoxType() public view returns (bytes[] memory) {
-        return BoxType;
+    function getBoxes() public view returns (bytes[] memory) {
+        return Boxes;
+    }
+    function getPacks() public view returns (bytes[] memory) {
+        return Packs;
     }
 
-    function getPackTypeOfBox(bytes memory _boxType)
+    function getFeaturesOfBox(bytes memory _box)
         public
         view
         returns (bytes[] memory)
     {
-        return mappingPackTypeOfBox[_boxType];
+        return mappingFeaturesOfBox[_box];
     }
 
     function setFeeTo(address payable _feeTo) public onlyOwner {
@@ -116,13 +121,13 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
     ) public {
         require(ownerOf(tokenId) == msg.sender, "setSpecialFeatures: msg.sender not token owner");
 
-        require(block.timestamp <= _expiryTime, "price expired");
+        require(block.timestamp <= _expiryTime, "Expired");
         bytes32 message = keccak256(
             abi.encode(msg.sender, _name, _value, _expiryTime)
         );
         require(
             verifySignature(r, s, v, message),
-            "buyBox: Price signature invalid"
+            "setSpecialFeatures: Signature invalid"
         );
 
         mappingTokenSpecialFeatures[tokenId][_name] = _value;
@@ -145,64 +150,70 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         return mappingTokenSpecialFeatures[tokenId][_name];
     }
 
-    function addBoxType(bytes memory _boxType) public onlyOwner {
-        require(mappingBoxType[_boxType] != true);
-        mappingBoxType[_boxType] = true;
-        BoxType.push(_boxType);
+    function addBoxes(bytes memory _box) public onlyOwner {
+        require(mappingBoxes[_box] != true);
+        mappingBoxes[_box] = true;
+        Boxes.push(_box);
     }
 
-    function addPackType(bytes memory _boxType, bytes memory _packType)
+    function addPacks(bytes memory _pack) public onlyOwner {
+        require(mappingPacks[_pack] != true);
+        mappingPacks[_pack] = true;
+        Packs.push(_pack);
+    }
+
+    function addFeature(bytes memory _box, bytes memory _feature)
         public
         onlyOwner
     {
-        require(mappingBoxType[_boxType], "addPackType: invalid box type");
-        require(!mappingPackType[_boxType][_packType], "addPackType: pack type already exist");
-        mappingPackType[_boxType][_packType] = true;
-        mappingPackTypeOfBox[_boxType].push(_packType);
+        require(mappingBoxes[_box], "addFeature: invalid box type");
+        require(!mappingFeatures[_box][_feature], "addFeature: feature already exist");
+        mappingFeatures[_box][_feature] = true;
+        mappingFeaturesOfBox[_box].push(_feature);
     }
 
-    function _buyBox(bytes memory _boxType, bytes memory _packType) internal {
-        require(mappingBoxType[_boxType], "_buyBox: invalid box type");
-        require(mappingPackType[_boxType][_packType], "_buyBox: invalid pack type");
+    function _buyBox(bytes memory _box, bytes memory _pack) internal {
+        require(mappingBoxes[_box], "_buyBox: invalid box type");
+        require(mappingPacks[_pack], "_buyBox: invalid pack");
 
         currentBoxId = currentBoxId.add(1);
         uint256 boxId = currentBoxId;
 
         mappingBoxOwner[boxId].isOpen = false;
         mappingBoxOwner[boxId].owner = msg.sender;
-        mappingBoxOwner[boxId].boxType = _boxType;
-        mappingBoxOwner[boxId].packType = _packType;
+        mappingBoxOwner[boxId].box = _box;
+        mappingBoxOwner[boxId].pack = _pack;
 
         emit NewBox(msg.sender, boxId);
     }
 
     function buyBox(
-        bytes memory _boxType,
-        bytes memory _packType,
+        bytes memory _box,
+        bytes memory _pack,
         uint256 _price,
         uint256 _expiryTime,
         bytes32 r,
         bytes32 s,
         uint8 v
     ) public {
-        require(block.timestamp <= _expiryTime, "price expired");
+        require(block.timestamp <= _expiryTime, "Expired");
         bytes32 message = keccak256(
             abi.encode(
                 "buyBox",
                 msg.sender,
-                _boxType,
-                _packType,
+                _box,
+                _pack,
                 _price,
                 _expiryTime
             )
         );
         require(
             verifySignature(r, s, v, message),
-            "buyBox: Price signature invalid"
+            "buyBox: Signature invalid"
         );
         IERC20 erc20 = IERC20(DRACE);
         erc20.transferFrom(msg.sender, feeTo, _price);
-        _buyBox(_boxType, _packType);
+        _buyBox(_box, _pack);
     }
 
     function buyCharm(
@@ -212,13 +223,13 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         bytes32 s,
         uint8 v
     ) public {
-        require(block.timestamp <= _expiryTime, "price expried");
+        require(block.timestamp <= _expiryTime, "Expired");
         bytes32 message = keccak256(
             abi.encode("buyCharm", msg.sender, _price, _expiryTime)
         );
         require(
             verifySignature(r, s, v, message),
-            "Signature data is not correct"
+            "Signature invalid"
         );
         IERC20 erc20 = IERC20(DRACE);
         erc20.transferFrom(msg.sender, feeTo, _price);
@@ -227,31 +238,31 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
 
     function buyBoxByNative(
         uint256 _price,
-        bytes memory _boxType,
-        bytes memory _packType,
+        bytes memory _box,
+        bytes memory _pack,
         uint256 _expiryTime,
         bytes32 r,
         bytes32 s,
         uint8 v
     ) public payable {
-        require(block.timestamp <= _expiryTime, "price expired");
+        require(block.timestamp <= _expiryTime, "Expired");
         require(msg.value >= _price, "transaction lower value");
         bytes32 message = keccak256(
             abi.encode(
                 "buyBoxByNative",
                 msg.sender,
-                _boxType,
-                _packType,
+                _box,
+                _pack,
                 _price,
                 _expiryTime
             )
         );
         require(
             verifySignature(r, s, v, message),
-            "Signature data is not correct"
+            "Signature invalid"
         );
         feeTo.transfer(msg.value);
-        _buyBox(_boxType, _packType);
+        _buyBox(_box, _pack);
     }
 
     function openBox(
@@ -266,7 +277,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         if (msg.sender != owner()) {
             require(
                 block.timestamp <= _expiryTime,
-                "openBox: commitment expried"
+                "openBox: Expired"
             );
             require(
                 _featureNames.length == _featureValues.length,
@@ -284,13 +295,13 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
             );
             require(
                 verifySignature(r, s, v, message),
-                "Signature data is not correct"
+                "Signature invalid"
             );
         }
 
         currentId = currentId.add(1);
         uint256 tokenId = currentId;
-        require(!existFeatures(tokenId), "Token is already");
+        require(!existTokenFeatures(tokenId), "Token is already");
 
         _mint(msg.sender, tokenId);
 
@@ -327,22 +338,22 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         bytes[] memory _featureNames,
         bytes[] memory _featureValues
     ) internal {
-        require(!existFeatures(tokenId), "setFeatures: tokenId inexist");
+        require(!existTokenFeatures(tokenId), "setTokenFeatures: tokenId is exist");
 
-        mappingFeatureNames[tokenId] = _featureNames;
-        mappingFeatureValues[tokenId] = _featureValues;
+        mappingTokenFeatureNames[tokenId] = _featureNames;
+        mappingTokenFeatureValues[tokenId] = _featureValues;
     }
 
-    function getFeatures(uint256 tokenId)
+    function getTokenFeatures(uint256 tokenId)
         public
         view
         returns (bytes[] memory _featureNames, bytes[] memory)
     {
-        return (mappingFeatureNames[tokenId], mappingFeatureValues[tokenId]);
+        return (mappingTokenFeatureNames[tokenId], mappingTokenFeatureValues[tokenId]);
     }
 
-    function existFeatures(uint256 tokenId) public view returns (bool) {
-        if (mappingFeatureNames[tokenId].length == 0) {
+    function existTokenFeatures(uint256 tokenId) public view returns (bool) {
+        if (mappingTokenFeatureNames[tokenId].length == 0) {
             return false;
         }
         return true;
@@ -377,7 +388,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         );
         require(
             block.timestamp <= _expiryTime,
-            "commitUpgradeFeatures: commitment expried"
+            "commitUpgradeFeatures: commitment expired"
         );
         require(
             upgradesInfo[_commitment].user == address(0),
@@ -403,7 +414,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         );
         require(
             verifySignature(r, s, v, message),
-            "commitUpgradeFeatures:Signature data is not correct"
+            "commitUpgradeFeatures:Signature invalid"
         );
 
         //need to lock token Ids here
@@ -417,7 +428,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
             user: msg.sender,
             useCharm: _useCharm,
             successRate: _successRate,
-            upgradeStatus: false, 
+            upgradeStatus: false,
             settled: false,
             tokenIds: _tokenIds,
             targetFeatureNames: _featureNames,
@@ -472,7 +483,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
             currentId = currentId.add(1);
             tokenId = currentId;
             require(
-                !existFeatures(tokenId),
+                !existTokenFeatures(tokenId),
                 "settleUpgradeFeatures: Token is already"
             );
             _mint(u.user, tokenId);
