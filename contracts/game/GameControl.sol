@@ -34,7 +34,7 @@ contract GameControl is Ownable, SignerRecover {
     event TokenDeposit(address depositor, uint256 tokenId, uint256 timestamp);
     event TokenWithdraw(address withdrawer, uint256 tokenId, uint256 timestamp);
 
-    constructor(address _drace, address _draceNFT, address _operator, address _tokenVesting) public {
+    constructor(address _drace, address _draceNFT, address _operator, address _tokenVesting) {
         drace = IERC20(_drace);
         draceNFT = IDeathRoadNFT(_draceNFT);
         gameOperator = _operator;

@@ -741,6 +741,25 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "_approver",
+        "type": "address"
+      }
+    ],
+    "name": "isApprover",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "",
         "type": "address"
       }
@@ -1167,7 +1186,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "_validTimestamp",
+        "name": "_expiryTime",
         "type": "uint256"
       },
       {

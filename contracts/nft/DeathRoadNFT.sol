@@ -94,20 +94,18 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover {
         gameContract = _gameContract;
     }
 
-    function setSpecialFeatures(
-        uint256 tokenId,
-        bytes memory _name,
-        bytes memory _value,
-        uint256 _validTimestamp,
+
+    function setSpecialFeatures(uint256 tokenId, bytes memory _name, bytes memory _value,
+        uint256 _expiryTime,
         bytes32 r,
         bytes32 s,
         uint8 v
     ) public {
         require(ownerOf(tokenId) == msg.sender);
 
-        require(block.timestamp <= _validTimestamp, "price expired");
+        require(block.timestamp <= _expiryTime, "price expired");
         bytes32 message = keccak256(
-            abi.encode(msg.sender, _name, _value, _validTimestamp)
+            abi.encode(msg.sender, _name, _value, _expiryTime)
         );
         require(
             verifySignature(r, s, v, message),
@@ -174,9 +172,9 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover {
         bytes32 s,
         uint8 v
     ) public {
-        require(block.timestamp <= _expiryTime, "price expried");
+        require(block.timestamp <= _expiryTime, "price expired");
         bytes32 message = keccak256(
-            abi.encode("buyBox", msg.sender, _price, _expiryTime)
+            abi.encode("buyBox", msg.sender, _boxType, _packType, _price, _expiryTime)
         );
         require(
             verifySignature(r, s, v, message),
@@ -216,17 +214,10 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover {
         bytes32 s,
         uint8 v
     ) public payable {
-        require(block.timestamp <= _expiryTime, "price expried");
+        require(block.timestamp <= _expiryTime, "price expired");
         require(msg.value >= _price, "transaction lower value");
         bytes32 message = keccak256(
-            abi.encode(
-                "buyBoxByNative",
-                msg.sender,
-                _price,
-                _expiryTime,
-                _boxType,
-                _packType
-            )
+            abi.encode("buyBoxByNative", msg.sender, _boxType, _packType, _price, _expiryTime)
         );
         require(
             verifySignature(r, s, v, message),
@@ -269,6 +260,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover {
             );
         }
 
+
         currentId = currentId++;
         uint256 tokenId = currentId;
         require(!existFeatures(tokenId), "Token is already");
@@ -286,6 +278,9 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover {
 
     function removeApprover(address _approver) public onlyOwner {
         mappingApprover[_approver] = false;
+    }
+    function isApprover(address _approver) public view returns (bool) {
+        return mappingApprover[_approver];
     }
 
     function verifySignature(
