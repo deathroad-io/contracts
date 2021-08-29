@@ -254,6 +254,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
             );
             bytes32 message = keccak256(
                 abi.encode(
+                    "openBox",
                     msg.sender,
                     boxId,
                     _featureNames,
