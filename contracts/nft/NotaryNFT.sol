@@ -8,6 +8,9 @@ contract NotaryNFT is INotaryNFT {
         bytes32 commitment = keccak256(abi.encode(secret));
         IDeathRoadNFT.UpgradeInfo memory info = factory.upgradesInfo(commitment);
 
+        uint256[3] memory tokenIDs = info.tokenIds;
+
+        
         //TODO: implement notary
         return true;
     }

@@ -379,18 +379,18 @@
             "type": "uint256[3]"
           },
           {
-            "internalType": "bytes32[]",
+            "internalType": "bytes[]",
             "name": "targetFeatureNames",
-            "type": "bytes32[]"
+            "type": "bytes[]"
           },
           {
-            "internalType": "bytes32[]",
+            "internalType": "bytes[]",
             "name": "targetFeatureValues",
-            "type": "bytes32[]"
+            "type": "bytes[]"
           },
           {
             "internalType": "bytes32",
-            "name": "userRandomValue",
+            "name": "previousBlockHash",
             "type": "bytes32"
           }
         ],

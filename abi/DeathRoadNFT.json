@@ -209,9 +209,9 @@
     "name": "BoxType",
     "outputs": [
       {
-        "internalType": "bytes32",
+        "internalType": "bytes",
         "name": "",
-        "type": "bytes32"
+        "type": "bytes"
       }
     ],
     "stateMutability": "view",
@@ -246,9 +246,9 @@
   {
     "inputs": [
       {
-        "internalType": "bytes32",
+        "internalType": "bytes",
         "name": "_boxType",
-        "type": "bytes32"
+        "type": "bytes"
       }
     ],
     "name": "addBoxType",
@@ -259,14 +259,14 @@
   {
     "inputs": [
       {
-        "internalType": "bytes32",
+        "internalType": "bytes",
         "name": "_boxType",
-        "type": "bytes32"
+        "type": "bytes"
       },
       {
-        "internalType": "bytes32",
+        "internalType": "bytes",
         "name": "_packType",
-        "type": "bytes32"
+        "type": "bytes"
       }
     ],
     "name": "addPackType",
@@ -338,18 +338,18 @@
   {
     "inputs": [
       {
-        "internalType": "bytes32",
+        "internalType": "bytes",
         "name": "_boxType",
-        "type": "bytes32"
+        "type": "bytes"
       },
       {
-        "internalType": "bytes32",
+        "internalType": "bytes",
         "name": "_packType",
-        "type": "bytes32"
+        "type": "bytes"
       },
       {
         "internalType": "uint256",
-        "name": "_amount",
+        "name": "_price",
         "type": "uint256"
       },
       {
@@ -382,18 +382,18 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "_amount",
+        "name": "_price",
         "type": "uint256"
       },
       {
-        "internalType": "bytes32",
+        "internalType": "bytes",
         "name": "_boxType",
-        "type": "bytes32"
+        "type": "bytes"
       },
       {
-        "internalType": "bytes32",
+        "internalType": "bytes",
         "name": "_packType",
-        "type": "bytes32"
+        "type": "bytes"
       },
       {
         "internalType": "uint256",
@@ -425,7 +425,7 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "_amount",
+        "name": "_price",
         "type": "uint256"
       },
       {
@@ -462,14 +462,14 @@
         "type": "uint256[3]"
       },
       {
-        "internalType": "bytes32[]",
+        "internalType": "bytes[]",
         "name": "_featureNames",
-        "type": "bytes32[]"
+        "type": "bytes[]"
       },
       {
-        "internalType": "bytes32[]",
+        "internalType": "bytes[]",
         "name": "_featureValues",
-        "type": "bytes32[]"
+        "type": "bytes[]"
       },
       {
         "internalType": "bool",
@@ -477,9 +477,9 @@
         "type": "bool"
       },
       {
-        "internalType": "bytes32",
-        "name": "_userRandomValue",
-        "type": "bytes32"
+        "internalType": "uint256",
+        "name": "_expiryTime",
+        "type": "uint256"
       },
       {
         "internalType": "bytes32",
@@ -505,6 +505,49 @@
     "name": "commitUpgradeFeatures",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "_featureValue",
+        "type": "bytes"
+      }
+    ],
+    "name": "decodeFeatureValue",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "_dataType",
+        "type": "string"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_encodedValue",
+        "type": "bytes"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "_type",
+        "type": "bytes"
+      }
+    ],
+    "name": "decodeType",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -540,6 +583,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "gameContract",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -563,9 +619,9 @@
     "name": "getBoxType",
     "outputs": [
       {
-        "internalType": "bytes32[]",
+        "internalType": "bytes[]",
         "name": "",
-        "type": "bytes32[]"
+        "type": "bytes[]"
       }
     ],
     "stateMutability": "view",
@@ -582,14 +638,14 @@
     "name": "getFeatures",
     "outputs": [
       {
-        "internalType": "bytes32[]",
-        "name": "",
-        "type": "bytes32[]"
+        "internalType": "bytes[]",
+        "name": "_featureNames",
+        "type": "bytes[]"
       },
       {
-        "internalType": "bytes32[]",
+        "internalType": "bytes[]",
         "name": "",
-        "type": "bytes32[]"
+        "type": "bytes[]"
       }
     ],
     "stateMutability": "view",
@@ -598,17 +654,41 @@
   {
     "inputs": [
       {
-        "internalType": "bytes32",
+        "internalType": "bytes",
         "name": "_boxType",
-        "type": "bytes32"
+        "type": "bytes"
       }
     ],
     "name": "getPackTypeOfBox",
     "outputs": [
       {
-        "internalType": "bytes32[]",
+        "internalType": "bytes[]",
         "name": "",
-        "type": "bytes32[]"
+        "type": "bytes[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_name",
+        "type": "bytes"
+      }
+    ],
+    "name": "getSpecialFeaturesOfToken",
+    "outputs": [
+      {
+        "internalType": "bytes",
+        "name": "_value",
+        "type": "bytes"
       }
     ],
     "stateMutability": "view",
@@ -697,14 +777,14 @@
         "type": "address"
       },
       {
-        "internalType": "bytes32",
+        "internalType": "bytes",
         "name": "boxType",
-        "type": "bytes32"
+        "type": "bytes"
       },
       {
-        "internalType": "bytes32",
+        "internalType": "bytes",
         "name": "packType",
-        "type": "bytes32"
+        "type": "bytes"
       }
     ],
     "stateMutability": "view",
@@ -713,9 +793,9 @@
   {
     "inputs": [
       {
-        "internalType": "bytes32",
+        "internalType": "bytes",
         "name": "",
-        "type": "bytes32"
+        "type": "bytes"
       }
     ],
     "name": "mappingBoxType",
@@ -745,9 +825,9 @@
     "name": "mappingFeatureNames",
     "outputs": [
       {
-        "internalType": "bytes32",
+        "internalType": "bytes",
         "name": "",
-        "type": "bytes32"
+        "type": "bytes"
       }
     ],
     "stateMutability": "view",
@@ -769,9 +849,9 @@
     "name": "mappingFeatureValues",
     "outputs": [
       {
-        "internalType": "bytes32",
+        "internalType": "bytes",
         "name": "",
-        "type": "bytes32"
+        "type": "bytes"
       }
     ],
     "stateMutability": "view",
@@ -799,9 +879,9 @@
   {
     "inputs": [
       {
-        "internalType": "bytes32",
+        "internalType": "bytes",
         "name": "",
-        "type": "bytes32"
+        "type": "bytes"
       }
     ],
     "name": "mappingPackType",
@@ -818,9 +898,9 @@
   {
     "inputs": [
       {
-        "internalType": "bytes32",
+        "internalType": "bytes",
         "name": "",
-        "type": "bytes32"
+        "type": "bytes"
       },
       {
         "internalType": "uint256",
@@ -831,9 +911,9 @@
     "name": "mappingPackTypeOfBox",
     "outputs": [
       {
-        "internalType": "bytes32",
+        "internalType": "bytes",
         "name": "",
-        "type": "bytes32"
+        "type": "bytes"
       }
     ],
     "stateMutability": "view",
@@ -873,14 +953,19 @@
         "type": "uint256"
       },
       {
-        "internalType": "bytes32[]",
+        "internalType": "bytes[]",
         "name": "_featureNames",
-        "type": "bytes32[]"
+        "type": "bytes[]"
       },
       {
-        "internalType": "bytes32[]",
+        "internalType": "bytes[]",
         "name": "_featureValues",
-        "type": "bytes32[]"
+        "type": "bytes[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_expiryTime",
+        "type": "uint256"
       },
       {
         "internalType": "bytes32",
@@ -896,11 +981,6 @@
         "internalType": "uint8",
         "name": "v",
         "type": "uint8"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "signedData",
-        "type": "bytes32"
       }
     ],
     "name": "openBox",
@@ -1046,11 +1126,90 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "_gameContract",
+        "type": "address"
+      }
+    ],
+    "name": "setGameContract",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "_notaryHook",
         "type": "address"
       }
     ],
     "name": "setNotaryHook",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_name",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_value",
+        "type": "bytes"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_validTimestamp",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "r",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "s",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint8",
+        "name": "v",
+        "type": "uint8"
+      }
+    ],
+    "name": "setSpecialFeatures",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_name",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_value",
+        "type": "bytes"
+      }
+    ],
+    "name": "setSpecialFeaturesByGameContract",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1158,59 +1317,6 @@
   {
     "inputs": [
       {
-        "internalType": "uint256[3]",
-        "name": "tokenIds",
-        "type": "uint256[3]"
-      },
-      {
-        "internalType": "bytes32[]",
-        "name": "_featureNames",
-        "type": "bytes32[]"
-      },
-      {
-        "internalType": "bool",
-        "name": "fail",
-        "type": "bool"
-      },
-      {
-        "internalType": "bool",
-        "name": "useCharm",
-        "type": "bool"
-      },
-      {
-        "internalType": "bytes32[]",
-        "name": "_featureValues",
-        "type": "bytes32[]"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "r",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "s",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "uint8",
-        "name": "v",
-        "type": "uint8"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "signedData",
-        "type": "bytes32"
-      }
-    ],
-    "name": "upgradeFeatures",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "bytes32",
         "name": "",
         "type": "bytes32"
@@ -1235,7 +1341,7 @@
       },
       {
         "internalType": "bytes32",
-        "name": "userRandomValue",
+        "name": "previousBlockHash",
         "type": "bytes32"
       }
     ],
