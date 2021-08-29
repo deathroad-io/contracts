@@ -22,6 +22,8 @@ interface IDeathRoadNFT is IERC721 {
         address user;
         bool useCharm;
         bool settled;
+        bool upgradeStatus;
+        uint256 successRate;    //percentX10
         uint256[3] tokenIds;
         bytes[] targetFeatureNames;
         bytes[] targetFeatureValues;

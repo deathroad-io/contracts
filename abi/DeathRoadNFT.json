@@ -472,19 +472,24 @@
         "type": "bytes[]"
       },
       {
+        "internalType": "uint256",
+        "name": "_successRate",
+        "type": "uint256"
+      },
+      {
         "internalType": "bool",
         "name": "_useCharm",
         "type": "bool"
       },
       {
-        "internalType": "uint256",
-        "name": "_expiryTime",
-        "type": "uint256"
-      },
-      {
         "internalType": "bytes32",
         "name": "_commitment",
         "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_expiryTime",
+        "type": "uint256"
       },
       {
         "internalType": "bytes32",
@@ -1380,6 +1385,16 @@
         "internalType": "bool",
         "name": "settled",
         "type": "bool"
+      },
+      {
+        "internalType": "bool",
+        "name": "upgradeStatus",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "successRate",
+        "type": "uint256"
       },
       {
         "internalType": "bytes32",

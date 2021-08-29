@@ -374,6 +374,16 @@
             "type": "bool"
           },
           {
+            "internalType": "bool",
+            "name": "upgradeStatus",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "successRate",
+            "type": "uint256"
+          },
+          {
             "internalType": "uint256[3]",
             "name": "tokenIds",
             "type": "uint256[3]"

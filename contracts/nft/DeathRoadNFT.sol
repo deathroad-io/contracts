@@ -72,10 +72,13 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         _;
     }
 
-    constructor() ERC721("DeathRoadNFT", "DRACE") {
-    }
+    constructor() ERC721("DeathRoadNFT", "DRACE") {}
 
-    function initialize(address DRACE_token, address payable _feeTo, address _notaryHook) external initializer {
+    function initialize(
+        address DRACE_token,
+        address payable _feeTo,
+        address _notaryHook
+    ) external initializer {
         DRACE = DRACE_token;
         feeTo = _feeTo;
         notaryHook = INotaryNFT(_notaryHook);
@@ -101,8 +104,10 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         gameContract = _gameContract;
     }
 
-
-    function setSpecialFeatures(uint256 tokenId, bytes memory _name, bytes memory _value,
+    function setSpecialFeatures(
+        uint256 tokenId,
+        bytes memory _name,
+        bytes memory _value,
         uint256 _expiryTime,
         bytes32 r,
         bytes32 s,
@@ -181,7 +186,14 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
     ) public {
         require(block.timestamp <= _expiryTime, "price expired");
         bytes32 message = keccak256(
-            abi.encode("buyBox", msg.sender, _boxType, _packType, _price, _expiryTime)
+            abi.encode(
+                "buyBox",
+                msg.sender,
+                _boxType,
+                _packType,
+                _price,
+                _expiryTime
+            )
         );
         require(
             verifySignature(r, s, v, message),
@@ -224,7 +236,14 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         require(block.timestamp <= _expiryTime, "price expired");
         require(msg.value >= _price, "transaction lower value");
         bytes32 message = keccak256(
-            abi.encode("buyBoxByNative", msg.sender, _boxType, _packType, _price, _expiryTime)
+            abi.encode(
+                "buyBoxByNative",
+                msg.sender,
+                _boxType,
+                _packType,
+                _price,
+                _expiryTime
+            )
         );
         require(
             verifySignature(r, s, v, message),
@@ -268,7 +287,6 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
             );
         }
 
-
         currentId = currentId++;
         uint256 tokenId = currentId;
         require(!existFeatures(tokenId), "Token is already");
@@ -287,6 +305,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
     function removeApprover(address _approver) public onlyOwner {
         mappingApprover[_approver] = false;
     }
+
     function isApprover(address _approver) public view returns (bool) {
         return mappingApprover[_approver];
     }
@@ -343,13 +362,18 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         uint256[3] memory _tokenIds,
         bytes[] memory _featureNames,
         bytes[] memory _featureValues,
+        uint256 _successRate,
         bool _useCharm,
-        uint256 _expiryTime,
         bytes32 _commitment,
+        uint256 _expiryTime,
         bytes32 r,
         bytes32 s,
         uint8 v
     ) public {
+        require(
+            _successRate < 1000,
+            "commitUpgradeFeatures: _successRate too high"
+        );
         require(
             block.timestamp <= _expiryTime,
             "commitUpgradeFeatures: commitment expried"
@@ -370,8 +394,10 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
                 _tokenIds,
                 _featureNames,
                 _featureValues,
+                _successRate,
                 _useCharm,
-                _commitment
+                _commitment,
+                _expiryTime
             )
         );
         require(
@@ -389,6 +415,8 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         upgradesInfo[_commitment] = IDeathRoadNFT.UpgradeInfo({
             user: msg.sender,
             useCharm: _useCharm,
+            successRate: _successRate,
+            upgradeStatus: false, 
             settled: false,
             tokenIds: _tokenIds,
             targetFeatureNames: _featureNames,
@@ -419,14 +447,25 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
                 _burn(u.tokenIds[i]);
             }
         }
+        bool shouldBurn = true;
         if (!success && u.useCharm) {
-            mappingLuckyCharm[u.user] = mappingLuckyCharm[u.user].sub(1);
+            if (mappingLuckyCharm[u.user] > 0) {
+                mappingLuckyCharm[u.user] = mappingLuckyCharm[u.user].sub(1);
 
-            //returning NFTs back
-            transferFrom(address(this), msg.sender, u.tokenIds[0]);
-            transferFrom(address(this), msg.sender, u.tokenIds[1]);
-            transferFrom(address(this), msg.sender, u.tokenIds[2]);
+                //returning NFTs back
+                transferFrom(address(this), msg.sender, u.tokenIds[0]);
+                transferFrom(address(this), msg.sender, u.tokenIds[1]);
+                transferFrom(address(this), msg.sender, u.tokenIds[2]);
+                shouldBurn = false;
+            }
         }
+        if (shouldBurn) {
+            //burning all input NFTs
+            _burn(u.tokenIds[0]);
+            _burn(u.tokenIds[1]);
+            _burn(u.tokenIds[2]);
+        }
+
         uint256 tokenId = 0;
         if (success) {
             currentId = currentId++;
@@ -438,7 +477,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
             _mint(u.user, tokenId);
             setFeatures(tokenId, u.targetFeatureNames, u.targetFeatureValues);
         }
-
+        u.upgradeStatus = success;
         u.settled = true;
 
         emit UpgradeToken(u.user, u.tokenIds, success, u.useCharm, tokenId);
