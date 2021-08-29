@@ -46,6 +46,9 @@ const {
     log('  - Initializing  DeathRoadNFT        ');
     await deathRoadNFT.initialize(draceAddress, signers[0].address, notaryNFT.address)
 
+    log('  - Adding approver ');
+    await deathRoadNFT.addApprover('0x75785F9CE180C951c8178BABadFE904ec883D820');
+
     deployData['DeathRoadNFT'] = {
       abi: getContractAbi('DeathRoadNFT'),
       address: deathRoadNFT.address,
