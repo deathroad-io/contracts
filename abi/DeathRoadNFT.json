@@ -184,6 +184,12 @@
       },
       {
         "indexed": false,
+        "internalType": "bool",
+        "name": "useCharm",
+        "type": "bool"
+      },
+      {
+        "indexed": false,
         "internalType": "uint256",
         "name": "tokenId",
         "type": "uint256"

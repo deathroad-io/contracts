@@ -87,6 +87,6 @@ module.exports = {
     flat: true,
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_APIKEY
+    apiKey: process.env.BSC_APIKEY
   }
 };
