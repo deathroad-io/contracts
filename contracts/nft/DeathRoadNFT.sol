@@ -40,7 +40,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
     mapping(bytes => bool) public mappingBoxes;
     mapping(bytes => bool) public mappingPacks;
     //boxtype => feature : check whether pack type for box type exist
-    mapping(bytes => mapping (bytes => bool)) public mappingFeatures;
+    mapping(bytes => mapping(bytes => bool)) public mappingFeatures;
     mapping(bytes => bytes[]) public mappingFeaturesOfBox;
 
     mapping(address => bool) public mappingApprover;
@@ -90,6 +90,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
     function getBoxes() public view returns (bytes[] memory) {
         return Boxes;
     }
+
     function getPacks() public view returns (bytes[] memory) {
         return Packs;
     }
@@ -119,7 +120,10 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         bytes32 s,
         uint8 v
     ) public {
-        require(ownerOf(tokenId) == msg.sender, "setSpecialFeatures: msg.sender not token owner");
+        require(
+            ownerOf(tokenId) == msg.sender,
+            "setSpecialFeatures: msg.sender not token owner"
+        );
 
         require(block.timestamp <= _expiryTime, "Expired");
         bytes32 message = keccak256(
@@ -138,7 +142,10 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         bytes memory _name,
         bytes memory _value
     ) public {
-        require(msg.sender == gameContract, "setSpecialFeaturesByGameContract: caller is not the game contract");
+        require(
+            msg.sender == gameContract,
+            "setSpecialFeaturesByGameContract: caller is not the game contract"
+        );
         mappingTokenSpecialFeatures[tokenId][_name] = _value;
     }
 
@@ -167,7 +174,10 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         onlyOwner
     {
         require(mappingBoxes[_box], "addFeature: invalid box type");
-        require(!mappingFeatures[_box][_feature], "addFeature: feature already exist");
+        require(
+            !mappingFeatures[_box][_feature],
+            "addFeature: feature already exist"
+        );
         mappingFeatures[_box][_feature] = true;
         mappingFeaturesOfBox[_box].push(_feature);
     }
@@ -198,19 +208,9 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
     ) public {
         require(block.timestamp <= _expiryTime, "Expired");
         bytes32 message = keccak256(
-            abi.encode(
-                "buyBox",
-                msg.sender,
-                _box,
-                _pack,
-                _price,
-                _expiryTime
-            )
+            abi.encode("buyBox", msg.sender, _box, _pack, _price, _expiryTime)
         );
-        require(
-            verifySignature(r, s, v, message),
-            "buyBox: Signature invalid"
-        );
+        require(verifySignature(r, s, v, message), "buyBox: Signature invalid");
         IERC20 erc20 = IERC20(DRACE);
         erc20.transferFrom(msg.sender, feeTo, _price);
         _buyBox(_box, _pack);
@@ -227,87 +227,121 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         bytes32 message = keccak256(
             abi.encode("buyCharm", msg.sender, _price, _expiryTime)
         );
-        require(
-            verifySignature(r, s, v, message),
-            "Signature invalid"
-        );
+        require(verifySignature(r, s, v, message), "Signature invalid");
         IERC20 erc20 = IERC20(DRACE);
         erc20.transferFrom(msg.sender, feeTo, _price);
         mappingLuckyCharm[msg.sender] = mappingLuckyCharm[msg.sender].add(1);
     }
 
-    function buyBoxByNative(
-        uint256 _price,
-        bytes memory _box,
-        bytes memory _pack,
+    mapping(bytes32 => IDeathRoadNFT.OpenBoxInfo) public openBoxInfo;
+    mapping(address => bytes32[]) public allOpenBoxes;
+    mapping(uint256 => bool) public commitedBoxes;
+    event CommitOpenBox(address user, bytes32 commitment);
+
+    function getBasicOpenBoxInfo(bytes32 commitment)
+        external
+        view
+        returns (
+            IDeathRoadNFT.OpenBoxBasicInfo memory
+        )
+    {
+        return IDeathRoadNFT.OpenBoxBasicInfo(openBoxInfo[commitment].user,
+            openBoxInfo[commitment].boxId,
+            openBoxInfo[commitment].totalRate,
+            openBoxInfo[commitment].featureNamesSet,
+            openBoxInfo[commitment].featureValuesSet,
+            openBoxInfo[commitment].previousBlockHash);
+    }
+
+    function getSuccessRateRange(bytes32 commitment, uint256 _index) external view returns (uint256[2] memory) {
+        return openBoxInfo[commitment].successRateRanges[_index];
+    }
+
+    function commitOpenBox(
+        uint256 boxId,
+        bytes[][] memory _featureNamesSet,
+        bytes[][] memory _featureValuesSet,
+        uint256[] memory _successRates,
+        bytes32 _commitment,
         uint256 _expiryTime,
         bytes32 r,
         bytes32 s,
         uint8 v
-    ) public payable {
-        require(block.timestamp <= _expiryTime, "Expired");
-        require(msg.value >= _price, "transaction lower value");
+    ) public onlyBoxOwner(boxId) boxNotOpen(boxId) {
+        require(!commitedBoxes[boxId], "commitOpenBox: box already commited");
+
+        require(
+            block.timestamp <= _expiryTime,
+            "commitOpenBox: commitment expired"
+        );
+        require(
+            openBoxInfo[_commitment].user == address(0),
+            "commitOpenBox:commitment overlap"
+        );
+
+        require(
+            _featureNamesSet.length == _featureValuesSet.length &&
+                _featureNamesSet.length == _successRates.length,
+            "commitOpenBox:invalid input length"
+        );
+
         bytes32 message = keccak256(
             abi.encode(
-                "buyBoxByNative",
+                "commitOpenBox",
                 msg.sender,
-                _box,
-                _pack,
-                _price,
+                boxId,
+                _featureNamesSet,
+                _featureValuesSet,
+                _successRates,
+                _commitment,
                 _expiryTime
             )
         );
-        require(
-            verifySignature(r, s, v, message),
-            "Signature invalid"
-        );
-        feeTo.transfer(msg.value);
-        _buyBox(_box, _pack);
+        require(verifySignature(r, s, v, message), "Signature invalid");
+
+        IDeathRoadNFT.OpenBoxInfo storage info = openBoxInfo[_commitment];
+        //compute successRateRange
+        uint256 total = 0;
+        for (uint256 i; i < _successRates.length; i++) {
+            info.successRateRanges[i][0] = total;
+            total = total.add(_successRates[i]);
+            info.successRateRanges[i][1] = total;
+        }
+        info.totalRate = total;
+        info.user = msg.sender;
+        info.boxId = boxId;
+        info.featureNamesSet = _featureNamesSet;
+        info.featureValuesSet = _featureValuesSet;
+        info.previousBlockHash = blockhash(block.number - 1);
+        allOpenBoxes[msg.sender].push(_commitment);
+
+        emit CommitOpenBox(msg.sender, _commitment);
     }
 
-    function openBox(
-        uint256 boxId,
-        bytes[] memory _featureNames,
-        bytes[] memory _featureValues,
-        uint256 _expiryTime,
-        bytes32 r,
-        bytes32 s,
-        uint8 v
-    ) public onlyBoxOwnerOrOwner(boxId) boxNotOpen(boxId) {
-        if (msg.sender != owner()) {
-            require(
-                block.timestamp <= _expiryTime,
-                "openBox: Expired"
-            );
-            require(
-                _featureNames.length == _featureValues.length,
-                "openBox:invalid input length"
-            );
-            bytes32 message = keccak256(
-                abi.encode(
-                    "openBox",
-                    msg.sender,
-                    boxId,
-                    _featureNames,
-                    _featureValues,
-                    _expiryTime
-                )
-            );
-            require(
-                verifySignature(r, s, v, message),
-                "Signature invalid"
-            );
-        }
+    //client compute result index off-chain, the function will verify it
+    function settleOpenBox(bytes32 secret, uint256 _resultIndex) external {
+        bytes32 commitment = keccak256(abi.encode(secret));
+        require(
+            openBoxInfo[commitment].user != address(0),
+            "settleOpenBox: commitment not exist"
+        );
+        require(
+            !openBoxInfo[commitment].settled,
+            "settleOpenBox: already settled"
+        );
+        openBoxInfo[commitment].settled = true;
+        openBoxInfo[commitment].openBoxStatus = true;
+        require(notaryHook.getOpenBoxResult(secret, _resultIndex, address(this)), "settleOpenBox: incorrect random result");
 
         currentId = currentId.add(1);
         uint256 tokenId = currentId;
         require(!existTokenFeatures(tokenId), "Token is already");
 
-        _mint(msg.sender, tokenId);
+        _mint( openBoxInfo[commitment].user, tokenId);
 
-        setFeatures(tokenId, _featureNames, _featureValues);
+        setFeatures(tokenId, openBoxInfo[commitment].featureNamesSet[_resultIndex], openBoxInfo[commitment].featureValuesSet[_resultIndex]);
 
-        emit OpenBox(msg.sender, boxId, tokenId);
+        emit OpenBox(openBoxInfo[commitment].user, openBoxInfo[commitment].boxId, tokenId);
     }
 
     function addApprover(address _approver) public onlyOwner {
@@ -338,7 +372,10 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         bytes[] memory _featureNames,
         bytes[] memory _featureValues
     ) internal {
-        require(!existTokenFeatures(tokenId), "setTokenFeatures: tokenId is exist");
+        require(
+            !existTokenFeatures(tokenId),
+            "setTokenFeatures: tokenId is exist"
+        );
 
         mappingTokenFeatureNames[tokenId] = _featureNames;
         mappingTokenFeatureValues[tokenId] = _featureValues;
@@ -349,7 +386,10 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         view
         returns (bytes[] memory _featureNames, bytes[] memory)
     {
-        return (mappingTokenFeatureNames[tokenId], mappingTokenFeatureValues[tokenId]);
+        return (
+            mappingTokenFeatureNames[tokenId],
+            mappingTokenFeatureValues[tokenId]
+        );
     }
 
     function existTokenFeatures(uint256 tokenId) public view returns (bool) {
@@ -503,24 +543,5 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
 
     function getUpgradeResult(bytes32 secret) public view returns (bool) {
         return notaryHook.getUpgradeResult(secret, address(this));
-    }
-
-    //decode functions
-    function decodeType(bytes memory _type)
-        external
-        view
-        returns (string memory)
-    {
-        string memory _decoded = abi.decode(_type, (string));
-        return _decoded;
-    }
-
-    function decodeFeatureValue(bytes memory _featureValue)
-        external
-        view
-        returns (string memory _dataType, bytes memory _encodedValue)
-    {
-        (_dataType, _encodedValue) = abi.decode(_featureValue, (string, bytes));
-        return (_dataType, _encodedValue);
     }
 }

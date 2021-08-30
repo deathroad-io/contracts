@@ -7,6 +7,35 @@
         "type": "bytes32"
       },
       {
+        "internalType": "uint256",
+        "name": "_resultIndex",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "nftFactory",
+        "type": "address"
+      }
+    ],
+    "name": "getOpenBoxResult",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "secret",
+        "type": "bytes32"
+      },
+      {
         "internalType": "address",
         "name": "nftFactory",
         "type": "address"

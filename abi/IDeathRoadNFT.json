@@ -171,6 +171,57 @@
   {
     "inputs": [
       {
+        "internalType": "bytes32",
+        "name": "commitment",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getBasicOpenBoxInfo",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "boxId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalRate",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes[][]",
+            "name": "featureNamesSet",
+            "type": "bytes[][]"
+          },
+          {
+            "internalType": "bytes[][]",
+            "name": "featureValuesSet",
+            "type": "bytes[][]"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "previousBlockHash",
+            "type": "bytes32"
+          }
+        ],
+        "internalType": "struct IDeathRoadNFT.OpenBoxBasicInfo",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "tokenId",
         "type": "uint256"
@@ -187,6 +238,30 @@
         "internalType": "bytes32[]",
         "name": "",
         "type": "bytes32[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "commitment",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_index",
+        "type": "uint256"
+      }
+    ],
+    "name": "getSuccessRateRange",
+    "outputs": [
+      {
+        "internalType": "uint256[2]",
+        "name": "",
+        "type": "uint256[2]"
       }
     ],
     "stateMutability": "view",

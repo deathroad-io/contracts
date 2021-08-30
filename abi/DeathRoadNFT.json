@@ -70,6 +70,25 @@
         "type": "bytes32"
       }
     ],
+    "name": "CommitOpenBox",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "commitment",
+        "type": "bytes32"
+      }
+    ],
     "name": "CommitUpgradeFeature",
     "type": "event"
   },
@@ -319,6 +338,30 @@
         "type": "uint256"
       }
     ],
+    "name": "allOpenBoxes",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "name": "allUpgrades",
     "outputs": [
       {
@@ -418,49 +461,6 @@
         "type": "uint256"
       },
       {
-        "internalType": "bytes",
-        "name": "_box",
-        "type": "bytes"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_pack",
-        "type": "bytes"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_expiryTime",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "r",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "s",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "uint8",
-        "name": "v",
-        "type": "uint8"
-      }
-    ],
-    "name": "buyBoxByNative",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_price",
-        "type": "uint256"
-      },
-      {
         "internalType": "uint256",
         "name": "_expiryTime",
         "type": "uint256"
@@ -482,6 +482,59 @@
       }
     ],
     "name": "buyCharm",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "boxId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes[][]",
+        "name": "_featureNamesSet",
+        "type": "bytes[][]"
+      },
+      {
+        "internalType": "bytes[][]",
+        "name": "_featureValuesSet",
+        "type": "bytes[][]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "_successRates",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "_commitment",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_expiryTime",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "r",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "s",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint8",
+        "name": "v",
+        "type": "uint8"
+      }
+    ],
+    "name": "commitOpenBox",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -547,41 +600,17 @@
   {
     "inputs": [
       {
-        "internalType": "bytes",
-        "name": "_featureValue",
-        "type": "bytes"
-      }
-    ],
-    "name": "decodeFeatureValue",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "_dataType",
-        "type": "string"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_encodedValue",
-        "type": "bytes"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes",
-        "name": "_type",
-        "type": "bytes"
-      }
-    ],
-    "name": "decodeType",
-    "outputs": [
-      {
-        "internalType": "string",
+        "internalType": "uint256",
         "name": "",
-        "type": "string"
+        "type": "uint256"
+      }
+    ],
+    "name": "commitedBoxes",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -652,6 +681,57 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "commitment",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getBasicOpenBoxInfo",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "boxId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalRate",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes[][]",
+            "name": "featureNamesSet",
+            "type": "bytes[][]"
+          },
+          {
+            "internalType": "bytes[][]",
+            "name": "featureValuesSet",
+            "type": "bytes[][]"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "previousBlockHash",
+            "type": "bytes32"
+          }
+        ],
+        "internalType": "struct IDeathRoadNFT.OpenBoxBasicInfo",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "getBoxes",
     "outputs": [
@@ -715,6 +795,30 @@
         "internalType": "bytes",
         "name": "_value",
         "type": "bytes"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "commitment",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_index",
+        "type": "uint256"
+      }
+    ],
+    "name": "getSuccessRateRange",
+    "outputs": [
+      {
+        "internalType": "uint256[2]",
+        "name": "",
+        "type": "uint256[2]"
       }
     ],
     "stateMutability": "view",
@@ -1064,44 +1168,45 @@
   {
     "inputs": [
       {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "name": "openBoxInfo",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
         "internalType": "uint256",
         "name": "boxId",
         "type": "uint256"
       },
       {
-        "internalType": "bytes[]",
-        "name": "_featureNames",
-        "type": "bytes[]"
+        "internalType": "bool",
+        "name": "settled",
+        "type": "bool"
       },
       {
-        "internalType": "bytes[]",
-        "name": "_featureValues",
-        "type": "bytes[]"
+        "internalType": "bool",
+        "name": "openBoxStatus",
+        "type": "bool"
       },
       {
         "internalType": "uint256",
-        "name": "_expiryTime",
+        "name": "totalRate",
         "type": "uint256"
       },
       {
         "internalType": "bytes32",
-        "name": "r",
+        "name": "previousBlockHash",
         "type": "bytes32"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "s",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "uint8",
-        "name": "v",
-        "type": "uint8"
       }
     ],
-    "name": "openBox",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -1326,6 +1431,24 @@
       }
     ],
     "name": "setSpecialFeaturesByGameContract",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "secret",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_resultIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "settleOpenBox",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
