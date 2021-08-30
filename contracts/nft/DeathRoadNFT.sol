@@ -247,7 +247,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
     mapping(bytes32 => IDeathRoadNFT.OpenBoxInfo) public openBoxInfo;
     mapping(address => bytes32[]) public allOpenBoxes;
     mapping(uint256 => bool) public commitedBoxes;
-    event CommitOpenBox(address user, bytes32 commitment);
+    event CommitOpenBox(address user, uint256 boxId, bytes32 commitment);
 
     function getBasicOpenBoxInfo(bytes32 commitment)
         external
@@ -328,7 +328,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         info.previousBlockHash = blockhash(block.number - 1);
         allOpenBoxes[msg.sender].push(_commitment);
 
-        emit CommitOpenBox(msg.sender, _commitment);
+        emit CommitOpenBox(msg.sender, boxId, _commitment);
     }
 
     //in case server lose secret, it basically revoke box for user to open again
