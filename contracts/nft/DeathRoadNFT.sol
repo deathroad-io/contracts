@@ -269,7 +269,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         uint8 v
     ) public onlyBoxOwner(boxId) boxNotOpen(boxId) {
         require(!commitedBoxes[boxId], "commitOpenBox: box already commited");
-
+        commitedBoxes[boxId] = true;
         require(
             block.timestamp <= _expiryTime,
             "commitOpenBox: commitment expired"
@@ -318,6 +318,11 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         emit CommitOpenBox(msg.sender, _commitment);
     }
 
+    //in case server lose secret, it basically revoke box for user to open again
+    function revokeBoxId(uint256 boxId) external onlyOwner {
+        commitedBoxes[boxId] = false;
+    }
+
     //client compute result index off-chain, the function will verify it
     function settleOpenBox(bytes32 secret, uint256 _resultIndex) external {
         bytes32 commitment = keccak256(abi.encode(secret));
@@ -325,6 +330,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
             openBoxInfo[commitment].user != address(0),
             "settleOpenBox: commitment not exist"
         );
+        require(commitedBoxes[openBoxInfo[commitment].boxId], "settleOpenBox: box must be committed");
         require(
             !openBoxInfo[commitment].settled,
             "settleOpenBox: already settled"
