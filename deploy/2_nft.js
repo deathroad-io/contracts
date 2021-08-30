@@ -48,7 +48,7 @@ const {
 
     log('  - Adding approver ');
     await deathRoadNFT.addApprover('0x75785F9CE180C951c8178BABadFE904ec883D820');
-
+    await deathRoadNFT.setSettleFeeReceiver("0xD0e3376e1c3Af2C11730aA4E89BE839D4a1BD761")
     deployData['DeathRoadNFT'] = {
       abi: getContractAbi('DeathRoadNFT'),
       address: deathRoadNFT.address,

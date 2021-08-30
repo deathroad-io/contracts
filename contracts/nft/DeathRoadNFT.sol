@@ -34,6 +34,10 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         uint256 tokenId
     );
 
+    //commit reveal needs 2 steps, the reveal step needs to pay fee by bot, this fee is to compensate for bots
+    uint256 public SETTLE_FEE = 0.005 ether;
+    address payable public SETTLE_FEE_RECEIVER;
+
     bytes[] public Boxes; //encoded value of string
     bytes[] public Packs; //encoded value of string
 
@@ -85,6 +89,13 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         DRACE = DRACE_token;
         feeTo = _feeTo;
         notaryHook = INotaryNFT(_notaryHook);
+    }
+
+    function setSettleFee(uint256 _fee) external onlyOwner {
+        SETTLE_FEE = _fee;
+    }
+    function setSettleFeeReceiver(address payable _bot) external onlyOwner {
+        SETTLE_FEE_RECEIVER = _bot;
     }
 
     function getBoxes() public view returns (bytes[] memory) {
@@ -267,7 +278,9 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         bytes32 r,
         bytes32 s,
         uint8 v
-    ) public onlyBoxOwner(boxId) boxNotOpen(boxId) {
+    ) public payable onlyBoxOwner(boxId) boxNotOpen(boxId) {
+        require(msg.value == SETTLE_FEE, "commitOpenBox: must pay settle fee");
+        SETTLE_FEE_RECEIVER.transfer(msg.value);
         require(!commitedBoxes[boxId], "commitOpenBox: box already commited");
         commitedBoxes[boxId] = true;
         require(
@@ -427,7 +440,9 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         bytes32 r,
         bytes32 s,
         uint8 v
-    ) public {
+    ) public payable {
+        require(msg.value == SETTLE_FEE, "commitOpenBox: must pay settle fee");
+        SETTLE_FEE_RECEIVER.transfer(msg.value);
         require(
             _successRate < 1000,
             "commitUpgradeFeatures: _successRate too high"
