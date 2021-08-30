@@ -13,8 +13,8 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
 
     address public DRACE;
     address payable public feeTo;
-    uint256 currentId = 0;
-    uint256 currentBoxId = 0;
+    uint256 public currentId = 0;
+    uint256 public currentBoxId = 0;
     address public gameContract;
 
     struct Box {
@@ -45,7 +45,6 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
     mapping(bytes => bool) public mappingPacks;
     //boxtype => feature : check whether pack type for box type exist
     mapping(bytes => mapping(bytes => bool)) public mappingFeatures;
-    mapping(bytes => bytes[]) public mappingFeaturesOfBox;
 
     mapping(address => bool) public mappingApprover;
 
@@ -57,7 +56,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
 
     mapping(address => uint256) public mappingLuckyCharm;
 
-    mapping(uint256 => mapping(bytes => bytes)) mappingTokenSpecialFeatures;
+    mapping(uint256 => mapping(bytes => bytes)) public mappingTokenSpecialFeatures;
 
     mapping(uint256 => Box) public mappingBoxOwner;
 
@@ -68,14 +67,6 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
 
     modifier boxNotOpen(uint256 boxId) {
         require(!mappingBoxOwner[boxId].isOpen, "box already open");
-        _;
-    }
-
-    modifier onlyBoxOwnerOrOwner(uint256 boxId) {
-        require(
-            mappingBoxOwner[boxId].owner == msg.sender || msg.sender == owner(),
-            "!not box owner"
-        );
         _;
     }
 
@@ -104,14 +95,6 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
 
     function getPacks() public view returns (bytes[] memory) {
         return Packs;
-    }
-
-    function getFeaturesOfBox(bytes memory _box)
-        public
-        view
-        returns (bytes[] memory)
-    {
-        return mappingFeaturesOfBox[_box];
     }
 
     function setFeeTo(address payable _feeTo) public onlyOwner {
@@ -160,14 +143,6 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         mappingTokenSpecialFeatures[tokenId][_name] = _value;
     }
 
-    function getSpecialFeaturesOfToken(uint256 tokenId, bytes memory _name)
-        public
-        view
-        returns (bytes memory _value)
-    {
-        return mappingTokenSpecialFeatures[tokenId][_name];
-    }
-
     function addBoxes(bytes memory _box) public onlyOwner {
         require(mappingBoxes[_box] != true);
         mappingBoxes[_box] = true;
@@ -190,7 +165,6 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
             "addFeature: feature already exist"
         );
         mappingFeatures[_box][_feature] = true;
-        mappingFeaturesOfBox[_box].push(_feature);
     }
 
     function _buyBox(bytes memory _box, bytes memory _pack) internal {
@@ -363,16 +337,8 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         emit OpenBox(openBoxInfo[commitment].user, openBoxInfo[commitment].boxId, tokenId);
     }
 
-    function addApprover(address _approver) public onlyOwner {
-        mappingApprover[_approver] = true;
-    }
-
-    function removeApprover(address _approver) public onlyOwner {
-        mappingApprover[_approver] = false;
-    }
-
-    function isApprover(address _approver) public view returns (bool) {
-        return mappingApprover[_approver];
+    function addApprover(address _approver, bool _val) public onlyOwner {
+        mappingApprover[_approver] = _val;
     }
 
     function verifySignature(

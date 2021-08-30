@@ -65,6 +65,12 @@
       },
       {
         "indexed": false,
+        "internalType": "uint256",
+        "name": "boxId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
         "internalType": "bytes32",
         "name": "commitment",
         "type": "bytes32"
@@ -300,6 +306,11 @@
         "internalType": "address",
         "name": "_approver",
         "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "_val",
+        "type": "bool"
       }
     ],
     "name": "addApprover",
@@ -643,6 +654,32 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "currentBoxId",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "currentId",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -771,25 +808,6 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "bytes",
-        "name": "_box",
-        "type": "bytes"
-      }
-    ],
-    "name": "getFeaturesOfBox",
-    "outputs": [
-      {
-        "internalType": "bytes[]",
-        "name": "",
-        "type": "bytes[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "getPacks",
     "outputs": [
@@ -797,30 +815,6 @@
         "internalType": "bytes[]",
         "name": "",
         "type": "bytes[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_name",
-        "type": "bytes"
-      }
-    ],
-    "name": "getSpecialFeaturesOfToken",
-    "outputs": [
-      {
-        "internalType": "bytes",
-        "name": "_value",
-        "type": "bytes"
       }
     ],
     "stateMutability": "view",
@@ -944,25 +938,6 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_approver",
-        "type": "address"
-      }
-    ],
-    "name": "isApprover",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
         "name": "",
         "type": "address"
       }
@@ -1058,30 +1033,6 @@
   {
     "inputs": [
       {
-        "internalType": "bytes",
-        "name": "",
-        "type": "bytes"
-      },
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "mappingFeaturesOfBox",
-    "outputs": [
-      {
-        "internalType": "bytes",
-        "name": "",
-        "type": "bytes"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "address",
         "name": "",
         "type": "address"
@@ -1155,6 +1106,30 @@
       }
     ],
     "name": "mappingTokenFeatureValues",
+    "outputs": [
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "name": "mappingTokenSpecialFeatures",
     "outputs": [
       {
         "internalType": "bytes",
@@ -1265,19 +1240,6 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_approver",
-        "type": "address"
-      }
-    ],
-    "name": "removeApprover",
-    "outputs": [],
-    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
