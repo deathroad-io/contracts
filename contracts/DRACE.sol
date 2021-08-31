@@ -1,14 +1,15 @@
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 // DRACEToken with Governance.
-contract DRACE is ERC20('Deathroad Token', 'DRACE'), Ownable {
+contract DRACE is ERC20Burnable, Ownable {
     using SafeMath for uint;
     // Creates `_amount` token to `_to`. Must only be called by the owner (MasterChef).
-    constructor(address _to) {
+    constructor(address _to) ERC20('Deathroad Token', 'DRACE') {
         _mint(_to, 1000000000e18);
         _moveDelegates(address(0), _delegates[_to], 1000000000e18);
     }
