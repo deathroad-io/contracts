@@ -398,6 +398,64 @@
         "type": "uint256"
       },
       {
+        "internalType": "bytes[]",
+        "name": "_featureNames",
+        "type": "bytes[]"
+      },
+      {
+        "internalType": "bytes[][]",
+        "name": "_featureValuesSet",
+        "type": "bytes[][]"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "_commitment",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_expiryTime",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "r",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "s",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint8",
+        "name": "v",
+        "type": "uint8"
+      }
+    ],
+    "name": "buyAndCommitOpenBox",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "_box",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_pack",
+        "type": "bytes"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_price",
+        "type": "uint256"
+      },
+      {
         "internalType": "uint256",
         "name": "_expiryTime",
         "type": "uint256"

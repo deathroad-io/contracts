@@ -135,9 +135,10 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         nft.addFeature(_box, _feature);
     }
 
-    function _buyBox(bytes memory _box, bytes memory _pack) internal {
+    function _buyBox(bytes memory _box, bytes memory _pack) internal returns (uint256) {
         uint256 boxId = nft.buyBox(msg.sender, _box, _pack);
         emit NewBox(msg.sender, boxId);
+        return boxId;
     }
 
     function buyBox(
@@ -230,6 +231,55 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
             )
         );
         require(verifySignature(r, s, v, message), "Signature invalid");
+
+        OpenBoxInfo storage info = _openBoxInfo[_commitment];
+
+        info.user = msg.sender;
+        info.boxId = boxId;
+        info.featureNames = _featureNames;
+        info.featureValuesSet = _featureValuesSet;
+        info.previousBlockHash = blockhash(block.number - 1);
+        allOpenBoxes[msg.sender].push(_commitment);
+
+        emit CommitOpenBox(msg.sender, boxId, _commitment);
+    }
+
+    function buyAndCommitOpenBox(
+        bytes memory _box,
+        bytes memory _pack,
+        uint256 _price,
+        bytes[] memory _featureNames, //all have same set of feature sames
+        bytes[][] memory _featureValuesSet,
+        bytes32 _commitment,
+        uint256 _expiryTime,
+        bytes32 r,
+        bytes32 s,
+        uint8 v
+    ) external payable {
+        require(msg.value == SETTLE_FEE, "commitOpenBox: must pay settle fee");
+        SETTLE_FEE_RECEIVER.transfer(msg.value);
+
+        //verify signature
+        require(block.timestamp <= _expiryTime, "buyAndCommitOpenBox:Expired");
+        bytes32 message = keccak256(
+            abi.encode("buyAndCommitOpenBox", msg.sender, _box, _pack, _price, _featureNames, _featureValuesSet, _commitment, _expiryTime)
+        );
+        require(verifySignature(r, s, v, message), "buyAndCommitOpenBox: Signature invalid");
+        IERC20 erc20 = IERC20(DRACE);
+        erc20.transferFrom(msg.sender, feeTo, _price);
+        uint256 boxId = _buyBox(_box, _pack);
+
+        //commit open box
+        commitedBoxes[boxId] = true;
+        require(
+            _openBoxInfo[_commitment].user == address(0),
+            "buyAndCommitOpenBox:commitment overlap"
+        );
+
+        require(
+            _featureNames.length == _featureValuesSet[0].length,
+            "buyAndCommitOpenBox:invalid input length"
+        );
 
         OpenBoxInfo storage info = _openBoxInfo[_commitment];
 
