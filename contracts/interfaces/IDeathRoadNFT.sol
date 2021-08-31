@@ -5,63 +5,56 @@ interface IDeathRoadNFT is IERC721 {
     struct Box {
         bool isOpen;
         address owner;
-        bytes32 boxType; // car, weapon, other,....
-        bytes32 packType; // iron, bronze, silver, gold, platinum, diamond
+        bytes box; // car, gun, rocket, other,...
+        bytes pack; // 1star, 2star, 3star, 4star, 5star, legend,...
     }
 
-    function getFeatures(uint256 tokenId)
+    function getBoxes() external view returns (bytes[] memory);
+
+    function getPacks() external view returns (bytes[] memory);
+
+    function setTokenSpecialFeatures(
+        uint256 tokenId,
+        bytes memory _name,
+        bytes memory _value
+    ) external;
+
+    function addBoxes(bytes memory _box) external;
+
+    function addPacks(bytes memory _pack) external;
+
+    function addFeature(bytes memory _box, bytes memory _feature) external;
+
+    function buyBox(
+        address _recipient,
+        bytes memory _box,
+        bytes memory _pack
+    ) external returns (uint256);
+
+    function buyCharm(address _recipient) external;
+
+    function isBoxOwner(address _addr, uint256 _boxId)
         external
         view
-        returns (bytes32[] memory, bytes32[] memory);
+        returns (bool);
 
-    function existFeatures(uint256 tokenId) external view returns (bool);
+    function isBoxOpen(uint256 _boxId) external view returns (bool);
 
-    struct FeatureValue {
-        string dataType;
-        bytes encodedValue;
-    }
-    struct UpgradeInfo {
-        address user;
-        bool useCharm;
-        bool settled;
-        bool upgradeStatus;
-        uint256 successRate; //percentX10
-        uint256[3] tokenIds;
-        bytes[] targetFeatureNames;
-        bytes[] targetFeatureValues;
-        bytes32 previousBlockHash;
-    }
+    function mint(
+        address _recipient,
+        bytes[] memory _featureNames,
+        bytes[] memory _featureValues
+    ) external returns (uint256 _tokenId);
 
-    struct OpenBoxInfo {
-        address user;
-        uint256 boxId;
-        bool settled;
-        bool openBoxStatus;
-        mapping(uint256 => uint256[2]) successRateRanges;
-        uint256 totalRate;
-        bytes[] featureNames;
-        bytes[][] featureValuesSet;
-        bytes32 previousBlockHash;
-    }
+    function setBoxOpen(uint256 _boxId, bool _val) external;
 
-    struct OpenBoxBasicInfo {
-        address user;
-        uint256 boxId;
-        uint256 totalRate;
-        bytes[] featureNames;
-        bytes[][] featureValuesSet;
-        bytes32 previousBlockHash;
-    }
-
-    function upgradesInfo(bytes32) external view returns (UpgradeInfo memory);
-
-    function allUpgrades(address) external view returns (bytes32[] memory);
-
-    function getBasicOpenBoxInfo(bytes32 commitment)
+    function getTokenFeatures(uint256 tokenId)
         external
         view
-        returns (
-            OpenBoxBasicInfo memory
-        );
-    function getSuccessRateRange(bytes32 commitment, uint256 _index) external view returns (uint256[2] memory);
+        returns (bytes[] memory _featureNames, bytes[] memory);
+
+    function existTokenFeatures(uint256 tokenId) external view returns (bool);
+    function mappingLuckyCharm(address) external view returns (uint256);
+    function burn(uint256 tokenId) external;
+    function decreaseCharm(address _addr) external;
 }

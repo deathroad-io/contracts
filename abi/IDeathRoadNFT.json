@@ -77,20 +77,45 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
+        "internalType": "bytes",
+        "name": "_box",
+        "type": "bytes"
       }
     ],
-    "name": "allUpgrades",
-    "outputs": [
+    "name": "addBoxes",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
       {
-        "internalType": "bytes32[]",
-        "name": "",
-        "type": "bytes32[]"
+        "internalType": "bytes",
+        "name": "_box",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_feature",
+        "type": "bytes"
       }
     ],
-    "stateMutability": "view",
+    "name": "addFeature",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "_pack",
+        "type": "bytes"
+      }
+    ],
+    "name": "addPacks",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -138,7 +163,75 @@
         "type": "uint256"
       }
     ],
-    "name": "existFeatures",
+    "name": "burn",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_recipient",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_box",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_pack",
+        "type": "bytes"
+      }
+    ],
+    "name": "buyBox",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_recipient",
+        "type": "address"
+      }
+    ],
+    "name": "buyCharm",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_addr",
+        "type": "address"
+      }
+    ],
+    "name": "decreaseCharm",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "existTokenFeatures",
     "outputs": [
       {
         "internalType": "bool",
@@ -169,51 +262,26 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "commitment",
-        "type": "bytes32"
-      }
-    ],
-    "name": "getBasicOpenBoxInfo",
+    "inputs": [],
+    "name": "getBoxes",
     "outputs": [
       {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "user",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "boxId",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "totalRate",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bytes[]",
-            "name": "featureNames",
-            "type": "bytes[]"
-          },
-          {
-            "internalType": "bytes[][]",
-            "name": "featureValuesSet",
-            "type": "bytes[][]"
-          },
-          {
-            "internalType": "bytes32",
-            "name": "previousBlockHash",
-            "type": "bytes32"
-          }
-        ],
-        "internalType": "struct IDeathRoadNFT.OpenBoxBasicInfo",
+        "internalType": "bytes[]",
         "name": "",
-        "type": "tuple"
+        "type": "bytes[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getPacks",
+    "outputs": [
+      {
+        "internalType": "bytes[]",
+        "name": "",
+        "type": "bytes[]"
       }
     ],
     "stateMutability": "view",
@@ -227,41 +295,17 @@
         "type": "uint256"
       }
     ],
-    "name": "getFeatures",
+    "name": "getTokenFeatures",
     "outputs": [
       {
-        "internalType": "bytes32[]",
-        "name": "",
-        "type": "bytes32[]"
+        "internalType": "bytes[]",
+        "name": "_featureNames",
+        "type": "bytes[]"
       },
       {
-        "internalType": "bytes32[]",
+        "internalType": "bytes[]",
         "name": "",
-        "type": "bytes32[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "commitment",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_index",
-        "type": "uint256"
-      }
-    ],
-    "name": "getSuccessRateRange",
-    "outputs": [
-      {
-        "internalType": "uint256[2]",
-        "name": "",
-        "type": "uint256[2]"
+        "type": "bytes[]"
       }
     ],
     "stateMutability": "view",
@@ -289,6 +333,97 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_boxId",
+        "type": "uint256"
+      }
+    ],
+    "name": "isBoxOpen",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_addr",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_boxId",
+        "type": "uint256"
+      }
+    ],
+    "name": "isBoxOwner",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "mappingLuckyCharm",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_recipient",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes[]",
+        "name": "_featureNames",
+        "type": "bytes[]"
+      },
+      {
+        "internalType": "bytes[]",
+        "name": "_featureValues",
+        "type": "bytes[]"
+      }
+    ],
+    "name": "mint",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -382,6 +517,47 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "_boxId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "_val",
+        "type": "bool"
+      }
+    ],
+    "name": "setBoxOpen",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_name",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_value",
+        "type": "bytes"
+      }
+    ],
+    "name": "setTokenSpecialFeatures",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "bytes4",
         "name": "interfaceId",
         "type": "bytes4"
@@ -419,72 +595,6 @@
     "name": "transferFrom",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "name": "upgradesInfo",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "user",
-            "type": "address"
-          },
-          {
-            "internalType": "bool",
-            "name": "useCharm",
-            "type": "bool"
-          },
-          {
-            "internalType": "bool",
-            "name": "settled",
-            "type": "bool"
-          },
-          {
-            "internalType": "bool",
-            "name": "upgradeStatus",
-            "type": "bool"
-          },
-          {
-            "internalType": "uint256",
-            "name": "successRate",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256[3]",
-            "name": "tokenIds",
-            "type": "uint256[3]"
-          },
-          {
-            "internalType": "bytes[]",
-            "name": "targetFeatureNames",
-            "type": "bytes[]"
-          },
-          {
-            "internalType": "bytes[]",
-            "name": "targetFeatureValues",
-            "type": "bytes[]"
-          },
-          {
-            "internalType": "bytes32",
-            "name": "previousBlockHash",
-            "type": "bytes32"
-          }
-        ],
-        "internalType": "struct IDeathRoadNFT.UpgradeInfo",
-        "name": "",
-        "type": "tuple"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   }
 ]
