@@ -9,36 +9,36 @@ const {
   const _ = require('lodash');
   
   module.exports = async (hre) => {
-    const { ethers, getNamedAccounts } = hre;
-    const { deployer } = await getNamedAccounts();
-    const network = await hre.network;
-    const deployData = {};
+    // const { ethers, getNamedAccounts } = hre;
+    // const { deployer } = await getNamedAccounts();
+    // const network = await hre.network;
+    // const deployData = {};
 
-    const signers = await ethers.getSigners()
-    const chainId = chainIdByName(network.name);
+    // const signers = await ethers.getSigners()
+    // const chainId = chainIdByName(network.name);
 
-    log('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-    log('DeathRoad DRACE token deployment');
-    log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n');
+    // log('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+    // log('DeathRoad DRACE token deployment');
+    // log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n');
 
-    log('  Using Network: ', chainNameById(chainId));
-    log('  Using Accounts:');
-    log('  - Deployer:          ', signers[0].address);
-    log('  - network id:          ', chainId);
-    log(' ');
+    // log('  Using Network: ', chainNameById(chainId));
+    // log('  Using Accounts:');
+    // log('  - Deployer:          ', signers[0].address);
+    // log('  - network id:          ', chainId);
+    // log(' ');
 
-    log('  Deploying DRACE Token...');
-    const DRACE = await ethers.getContractFactory('DRACE');
-    const draceInstance = await DRACE.deploy()
-    const drace = await draceInstance.deployed()
-    log('  - DRACE:         ', drace.address);
-    deployData['DRACE'] = {
-      abi: getContractAbi('DRACE'),
-      address: drace.address,
-      deployTransaction: drace.deployTransaction,
-    }
+    // log('  Deploying DRACE Token...');
+    // const DRACE = await ethers.getContractFactory('DRACE');
+    // const draceInstance = await DRACE.deploy()
+    // const drace = await draceInstance.deployed()
+    // log('  - DRACE:         ', drace.address);
+    // deployData['DRACE'] = {
+    //   abi: getContractAbi('DRACE'),
+    //   address: drace.address,
+    //   deployTransaction: drace.deployTransaction,
+    // }
 
-    saveDeploymentData(chainId, deployData);
+    // saveDeploymentData(chainId, deployData);
     log('\n  Contract Deployment Data saved to "deployments" directory.');
 
     log('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n');

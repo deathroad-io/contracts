@@ -522,7 +522,7 @@
     "name": "nft",
     "outputs": [
       {
-        "internalType": "contract IDeathRoadNFT",
+        "internalType": "contract IERC721",
         "name": "",
         "type": "address"
       }

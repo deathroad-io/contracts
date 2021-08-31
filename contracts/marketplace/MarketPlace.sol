@@ -1,16 +1,15 @@
 pragma solidity ^0.8.0;
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import "../interfaces/IDeathRoadNFT.sol";
 contract MarketPlace is Ownable, Initializable {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
-    IDeathRoadNFT public nft;
+    IERC721 public nft;
     IERC20 public drace;
     uint256 public feePercentX10 = 10;  //default 1%
     address public feeReceiver;
@@ -33,12 +32,12 @@ contract MarketPlace is Ownable, Initializable {
     event FeeTransfer(address owner, address buyer, address feeReceiver, uint256 updatedAt, uint256 tokenId, uint256 fee, uint256 saleId);
 
     modifier onlySaleOwner(uint256 _saleId) {
-        require(msg.sender == saleList[_saleId].owner, "Invcalid sale owner");
+        require(msg.sender == saleList[_saleId].owner, "Invalid sale owner");
         _;
     }
 
     function initialize(address _draceNFT, address _drace, address _feeReceiver) external initializer {
-        nft = IDeathRoadNFT(_draceNFT);
+        nft = IERC721(_draceNFT);
         drace = IERC20(_drace);
         feeReceiver = _feeReceiver;
     }
@@ -105,6 +104,8 @@ contract MarketPlace is Ownable, Initializable {
         //transfer to seller
         drace.safeTransferFrom(msg.sender, sale.owner, price.mul(1000 - feePercentX10).div(1000));
         sale.lastUpdated = block.timestamp;
+
+        nft.transferFrom(address(this), msg.sender, sale.tokenId);
 
         emit TokenPurchase(sale.owner, msg.sender, block.timestamp, sale.tokenId, sale.price, _saleId);
         emit FeeTransfer(sale.owner, msg.sender, feeReceiver, block.timestamp, sale.tokenId, price.mul(feePercentX10).div(1000), _saleId);
