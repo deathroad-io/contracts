@@ -39,7 +39,7 @@ interface IDeathRoadNFT is IERC721 {
         bool openBoxStatus;
         mapping(uint256 => uint256[2]) successRateRanges;
         uint256 totalRate;
-        bytes[][] featureNamesSet;
+        bytes[] featureNames;
         bytes[][] featureValuesSet;
         bytes32 previousBlockHash;
     }
@@ -48,7 +48,7 @@ interface IDeathRoadNFT is IERC721 {
         address user;
         uint256 boxId;
         uint256 totalRate;
-        bytes[][] featureNamesSet;
+        bytes[] featureNames;
         bytes[][] featureValuesSet;
         bytes32 previousBlockHash;
     }

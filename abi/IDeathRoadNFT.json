@@ -196,9 +196,9 @@
             "type": "uint256"
           },
           {
-            "internalType": "bytes[][]",
-            "name": "featureNamesSet",
-            "type": "bytes[][]"
+            "internalType": "bytes[]",
+            "name": "featureNames",
+            "type": "bytes[]"
           },
           {
             "internalType": "bytes[][]",

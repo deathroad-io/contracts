@@ -20,7 +20,7 @@ contract NotaryNFT is INotaryNFT {
         bytes32 commitment = keccak256(abi.encode(secret));
         IDeathRoadNFT.OpenBoxBasicInfo memory info = factory.getBasicOpenBoxInfo(commitment);
 
-        bytes32 hash = keccak256(abi.encode(info.user, info.boxId, info.featureNamesSet, info.featureValuesSet, info.previousBlockHash, secret));
+        bytes32 hash = keccak256(abi.encode(info.user, info.boxId, info.featureNames, info.featureValuesSet, info.previousBlockHash, secret));
         uint256 h = uint256(hash);
         uint256 randomResult = h.mod(info.totalRate);
 

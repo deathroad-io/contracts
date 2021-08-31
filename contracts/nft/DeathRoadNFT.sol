@@ -233,7 +233,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         return IDeathRoadNFT.OpenBoxBasicInfo(openBoxInfo[commitment].user,
             openBoxInfo[commitment].boxId,
             openBoxInfo[commitment].totalRate,
-            openBoxInfo[commitment].featureNamesSet,
+            openBoxInfo[commitment].featureNames,
             openBoxInfo[commitment].featureValuesSet,
             openBoxInfo[commitment].previousBlockHash);
     }
@@ -244,7 +244,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
 
     function commitOpenBox(
         uint256 boxId,
-        bytes[][] memory _featureNamesSet,
+        bytes[] memory _featureNames,    //all have same set of feature sames
         bytes[][] memory _featureValuesSet,
         uint256[] memory _successRates,
         bytes32 _commitment,
@@ -267,8 +267,8 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         );
 
         require(
-            _featureNamesSet.length == _featureValuesSet.length &&
-                _featureNamesSet.length == _successRates.length,
+            _featureNames.length == _featureValuesSet[0].length &&
+                _featureValuesSet.length == _successRates.length,
             "commitOpenBox:invalid input length"
         );
 
@@ -277,7 +277,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
                 "commitOpenBox",
                 msg.sender,
                 boxId,
-                _featureNamesSet,
+                _featureNames,
                 _featureValuesSet,
                 _successRates,
                 _commitment,
@@ -297,7 +297,7 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
         info.totalRate = total;
         info.user = msg.sender;
         info.boxId = boxId;
-        info.featureNamesSet = _featureNamesSet;
+        info.featureNames = _featureNames;
         info.featureValuesSet = _featureValuesSet;
         info.previousBlockHash = blockhash(block.number - 1);
         allOpenBoxes[msg.sender].push(_commitment);
@@ -313,28 +313,29 @@ contract DeathRoadNFT is ERC721, Ownable, SignerRecover, Initializable {
     //client compute result index off-chain, the function will verify it
     function settleOpenBox(bytes32 secret, uint256 _resultIndex) external {
         bytes32 commitment = keccak256(abi.encode(secret));
+        IDeathRoadNFT.OpenBoxInfo storage info = openBoxInfo[commitment];
         require(
-            openBoxInfo[commitment].user != address(0),
+            info.user != address(0),
             "settleOpenBox: commitment not exist"
         );
-        require(commitedBoxes[openBoxInfo[commitment].boxId], "settleOpenBox: box must be committed");
+        require(commitedBoxes[info.boxId], "settleOpenBox: box must be committed");
         require(
-            !openBoxInfo[commitment].settled,
+            !info.settled,
             "settleOpenBox: already settled"
         );
-        openBoxInfo[commitment].settled = true;
-        openBoxInfo[commitment].openBoxStatus = true;
+        info.settled = true;
+        info.openBoxStatus = true;
         require(notaryHook.getOpenBoxResult(secret, _resultIndex, address(this)), "settleOpenBox: incorrect random result");
 
         currentId = currentId.add(1);
         uint256 tokenId = currentId;
         require(!existTokenFeatures(tokenId), "Token is already");
 
-        _mint( openBoxInfo[commitment].user, tokenId);
+        _mint( info.user, tokenId);
 
-        setFeatures(tokenId, openBoxInfo[commitment].featureNamesSet[_resultIndex], openBoxInfo[commitment].featureValuesSet[_resultIndex]);
+        setFeatures(tokenId, info.featureNames, info.featureValuesSet[_resultIndex]);
 
-        emit OpenBox(openBoxInfo[commitment].user, openBoxInfo[commitment].boxId, tokenId);
+        emit OpenBox(info.user, info.boxId, tokenId);
     }
 
     function addApprover(address _approver, bool _val) public onlyOwner {
