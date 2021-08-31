@@ -9,7 +9,7 @@ import "../interfaces/IDeathRoadNFT.sol";
 import "../interfaces/INFTFactory.sol";
 import "../lib/SignerRecover.sol";
 
-contract NFTFactory is Ownable, SignerRecover, Initializable {
+contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
     using SafeMath for uint256;
 
     address public DRACE;
@@ -33,6 +33,7 @@ contract NFTFactory is Ownable, SignerRecover, Initializable {
     mapping(address => bool) public mappingApprover;
 
     IDeathRoadNFT public nft;
+
     constructor() {}
 
     function initialize(
@@ -60,6 +61,7 @@ contract NFTFactory is Ownable, SignerRecover, Initializable {
     function setSettleFee(uint256 _fee) external onlyOwner {
         SETTLE_FEE = _fee;
     }
+
     function setSettleFeeReceiver(address payable _bot) external onlyOwner {
         SETTLE_FEE_RECEIVER = _bot;
     }
@@ -102,7 +104,7 @@ contract NFTFactory is Ownable, SignerRecover, Initializable {
             verifySignature(r, s, v, message),
             "setSpecialFeatures: Signature invalid"
         );
-        
+
         nft.setTokenSpecialFeatures(tokenId, _name, _value);
     }
 
@@ -174,35 +176,24 @@ contract NFTFactory is Ownable, SignerRecover, Initializable {
         nft.buyCharm(msg.sender);
     }
 
-    mapping(bytes32 => INFTFactory.OpenBoxInfo) public openBoxInfo;
+    mapping(bytes32 => OpenBoxInfo) public _openBoxInfo;
     mapping(address => bytes32[]) public allOpenBoxes;
     mapping(uint256 => bool) public commitedBoxes;
     event CommitOpenBox(address user, uint256 boxId, bytes32 commitment);
 
-    function getBasicOpenBoxInfo(bytes32 commitment)
+    function openBoxInfo(bytes32 _comm)
         external
         view
-        returns (
-            INFTFactory.OpenBoxBasicInfo memory
-        )
+        override
+        returns (OpenBoxInfo memory)
     {
-        return INFTFactory.OpenBoxBasicInfo(openBoxInfo[commitment].user,
-            openBoxInfo[commitment].boxId,
-            openBoxInfo[commitment].totalRate,
-            openBoxInfo[commitment].featureNames,
-            openBoxInfo[commitment].featureValuesSet,
-            openBoxInfo[commitment].previousBlockHash);
-    }
-
-    function getSuccessRateRange(bytes32 commitment, uint256 _index) external view returns (uint256[2] memory) {
-        return openBoxInfo[commitment].successRateRanges[_index];
+        return _openBoxInfo[_comm];
     }
 
     function commitOpenBox(
         uint256 boxId,
-        bytes[] memory _featureNames,    //all have same set of feature sames
+        bytes[] memory _featureNames, //all have same set of feature sames
         bytes[][] memory _featureValuesSet,
-        uint256[] memory _successRates,
         bytes32 _commitment,
         uint256 _expiryTime,
         bytes32 r,
@@ -218,13 +209,12 @@ contract NFTFactory is Ownable, SignerRecover, Initializable {
             "commitOpenBox: commitment expired"
         );
         require(
-            openBoxInfo[_commitment].user == address(0),
+            _openBoxInfo[_commitment].user == address(0),
             "commitOpenBox:commitment overlap"
         );
 
         require(
-            _featureNames.length == _featureValuesSet[0].length &&
-                _featureValuesSet.length == _successRates.length,
+            _featureNames.length == _featureValuesSet[0].length,
             "commitOpenBox:invalid input length"
         );
 
@@ -235,22 +225,14 @@ contract NFTFactory is Ownable, SignerRecover, Initializable {
                 boxId,
                 _featureNames,
                 _featureValuesSet,
-                _successRates,
                 _commitment,
                 _expiryTime
             )
         );
         require(verifySignature(r, s, v, message), "Signature invalid");
 
-        INFTFactory.OpenBoxInfo storage info = openBoxInfo[_commitment];
-        //compute successRateRange
-        uint256 total = 0;
-        for (uint256 i; i < _successRates.length; i++) {
-            info.successRateRanges[i][0] = total;
-            total = total.add(_successRates[i]);
-            info.successRateRanges[i][1] = total;
-        }
-        info.totalRate = total;
+        OpenBoxInfo storage info = _openBoxInfo[_commitment];
+
         info.user = msg.sender;
         info.boxId = boxId;
         info.featureNames = _featureNames;
@@ -267,24 +249,28 @@ contract NFTFactory is Ownable, SignerRecover, Initializable {
     }
 
     //client compute result index off-chain, the function will verify it
-    function settleOpenBox(bytes32 secret, uint256 _resultIndex) external {
+    function settleOpenBox(bytes32 secret) external {
         bytes32 commitment = keccak256(abi.encode(secret));
-        INFTFactory.OpenBoxInfo storage info = openBoxInfo[commitment];
+        OpenBoxInfo storage info = _openBoxInfo[commitment];
+        require(info.user != address(0), "settleOpenBox: commitment not exist");
         require(
-            info.user != address(0),
-            "settleOpenBox: commitment not exist"
+            commitedBoxes[info.boxId],
+            "settleOpenBox: box must be committed"
         );
-        require(commitedBoxes[info.boxId], "settleOpenBox: box must be committed");
-        require(
-            !info.settled,
-            "settleOpenBox: already settled"
-        );
+        require(!info.settled, "settleOpenBox: already settled");
         info.settled = true;
         info.openBoxStatus = true;
-        require(notaryHook.getOpenBoxResult(secret, _resultIndex, address(this)), "settleOpenBox: incorrect random result");
+        uint256 resultIndex = notaryHook.getOpenBoxResult(
+            secret,
+            address(this)
+        );
 
         //mint
-        uint256 tokenId = nft.mint(info.user, info.featureNames, info.featureValuesSet[_resultIndex]);
+        uint256 tokenId = nft.mint(
+            info.user,
+            info.featureNames,
+            info.featureValuesSet[resultIndex]
+        );
 
         nft.setBoxOpen(info.boxId, true);
 
@@ -309,18 +295,33 @@ contract NFTFactory is Ownable, SignerRecover, Initializable {
     function getTokenFeatures(uint256 tokenId)
         public
         view
+        override
         returns (bytes[] memory _featureNames, bytes[] memory)
     {
         return nft.getTokenFeatures(tokenId);
     }
 
-    function existTokenFeatures(uint256 tokenId) public view returns (bool) {
+    function existTokenFeatures(uint256 tokenId)
+        public
+        view
+        override
+        returns (bool)
+    {
         return nft.existTokenFeatures(tokenId);
     }
 
-    mapping(bytes32 => INFTFactory.UpgradeInfo) public upgradesInfo;
+    mapping(bytes32 => UpgradeInfo) public _upgradesInfo;
     mapping(address => bytes32[]) public allUpgrades;
     event CommitUpgradeFeature(address user, bytes32 commitment);
+
+    function upgradesInfo(bytes32 _comm)
+        external
+        view
+        override
+        returns (UpgradeInfo memory)
+    {
+        return _upgradesInfo[_comm];
+    }
 
     //upgrade consists of 2 steps following commit-reveal scheme to ensure transparency and security
     //1. commitment by sending hash of a secret value
@@ -332,8 +333,8 @@ contract NFTFactory is Ownable, SignerRecover, Initializable {
     function commitUpgradeFeatures(
         uint256[3] memory _tokenIds,
         bytes[] memory _featureNames,
-        bytes[] memory _featureValues,
-        uint256 _successRate,
+        bytes[][] memory _featureValuesSet,
+        uint256 _failureRate,
         bool _useCharm,
         bytes32 _commitment,
         uint256 _expiryTime,
@@ -342,17 +343,17 @@ contract NFTFactory is Ownable, SignerRecover, Initializable {
         uint8 v
     ) public payable {
         require(msg.value == SETTLE_FEE, "commitOpenBox: must pay settle fee");
-        SETTLE_FEE_RECEIVER.transfer(msg.value);
         require(
-            _successRate < 1000,
-            "commitUpgradeFeatures: _successRate too high"
+            _featureNames.length == _featureValuesSet[0].length,
+            "commitUpgradeFeatures:invalid input length"
         );
+        SETTLE_FEE_RECEIVER.transfer(msg.value);
         require(
             block.timestamp <= _expiryTime,
             "commitUpgradeFeatures: commitment expired"
         );
         require(
-            upgradesInfo[_commitment].user == address(0),
+            _upgradesInfo[_commitment].user == address(0),
             "commitment overlap"
         );
         if (_useCharm) {
@@ -366,8 +367,8 @@ contract NFTFactory is Ownable, SignerRecover, Initializable {
             abi.encode(
                 _tokenIds,
                 _featureNames,
-                _featureValues,
-                _successRate,
+                _featureValuesSet,
+                _failureRate,
                 _useCharm,
                 _commitment,
                 _expiryTime
@@ -385,15 +386,15 @@ contract NFTFactory is Ownable, SignerRecover, Initializable {
 
         allUpgrades[msg.sender].push(_commitment);
 
-        upgradesInfo[_commitment] = INFTFactory.UpgradeInfo({
+        _upgradesInfo[_commitment] = UpgradeInfo({
             user: msg.sender,
             useCharm: _useCharm,
-            successRate: _successRate,
+            failureRate: _failureRate,
             upgradeStatus: false,
             settled: false,
             tokenIds: _tokenIds,
             targetFeatureNames: _featureNames,
-            targetFeatureValues: _featureValues,
+            targetFeatureValuesSet: _featureValuesSet,
             previousBlockHash: blockhash(block.number - 1)
         });
         emit CommitUpgradeFeature(msg.sender, _commitment);
@@ -402,25 +403,20 @@ contract NFTFactory is Ownable, SignerRecover, Initializable {
     function settleUpgradeFeatures(bytes32 secret) external {
         bytes32 commitment = keccak256(abi.encode(secret));
         require(
-            upgradesInfo[commitment].user != address(0),
+            _upgradesInfo[commitment].user != address(0),
             "settleUpgradeFeatures: commitment not exist"
         );
         require(
-            !upgradesInfo[commitment].settled,
+            !_upgradesInfo[commitment].settled,
             "settleUpgradeFeatures: updated already settled"
         );
 
-        bool success = getUpgradeResult(secret);
+        (bool success, uint256 resultIndex) = notaryHook.getUpgradeResult(secret, address(this));
 
-        INFTFactory.UpgradeInfo storage u = upgradesInfo[commitment];
-
-        if (success || !u.useCharm) {
-            for (uint256 i = 0; i < u.tokenIds.length; i++) {
-                //burn NFTs
-                nft.burn(u.tokenIds[i]);
-            }
-        }
+        UpgradeInfo storage u = _upgradesInfo[commitment];
+        
         bool shouldBurn = true;
+
         if (!success && u.useCharm) {
             if (nft.mappingLuckyCharm(u.user) > 0) {
                 nft.decreaseCharm(u.user);
@@ -434,14 +430,19 @@ contract NFTFactory is Ownable, SignerRecover, Initializable {
         }
         if (shouldBurn) {
             //burning all input NFTs
-            nft.burn(u.tokenIds[0]);
-            nft.burn(u.tokenIds[1]);
-            nft.burn(u.tokenIds[2]);
+            for (uint256 i = 0; i < u.tokenIds.length; i++) {
+                //burn NFTs
+                nft.burn(u.tokenIds[i]);
+            }
         }
 
         uint256 tokenId = 0;
         if (success) {
-            tokenId = nft.mint(u.user, u.targetFeatureNames, u.targetFeatureValues);
+            tokenId = nft.mint(
+                u.user,
+                u.targetFeatureNames,
+                u.targetFeatureValuesSet[resultIndex]
+            );
         }
         u.upgradeStatus = success;
         u.settled = true;
@@ -453,9 +454,5 @@ contract NFTFactory is Ownable, SignerRecover, Initializable {
 
     function setNotaryHook(address _notaryHook) external onlyOwner {
         notaryHook = INotaryNFT(_notaryHook);
-    }
-
-    function getUpgradeResult(bytes32 secret) public view returns (bool) {
-        return notaryHook.getUpgradeResult(secret, address(this));
     }
 }

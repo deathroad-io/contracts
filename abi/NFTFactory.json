@@ -190,6 +190,89 @@
   {
     "inputs": [
       {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "name": "_openBoxInfo",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "boxId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "settled",
+        "type": "bool"
+      },
+      {
+        "internalType": "bool",
+        "name": "openBoxStatus",
+        "type": "bool"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "previousBlockHash",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "name": "_upgradesInfo",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "useCharm",
+        "type": "bool"
+      },
+      {
+        "internalType": "bool",
+        "name": "settled",
+        "type": "bool"
+      },
+      {
+        "internalType": "bool",
+        "name": "upgradeStatus",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "failureRate",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "previousBlockHash",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "_approver",
         "type": "address"
@@ -391,11 +474,6 @@
         "type": "bytes[][]"
       },
       {
-        "internalType": "uint256[]",
-        "name": "_successRates",
-        "type": "uint256[]"
-      },
-      {
         "internalType": "bytes32",
         "name": "_commitment",
         "type": "bytes32"
@@ -439,13 +517,13 @@
         "type": "bytes[]"
       },
       {
-        "internalType": "bytes[]",
-        "name": "_featureValues",
-        "type": "bytes[]"
+        "internalType": "bytes[][]",
+        "name": "_featureValuesSet",
+        "type": "bytes[][]"
       },
       {
         "internalType": "uint256",
-        "name": "_successRate",
+        "name": "_failureRate",
         "type": "uint256"
       },
       {
@@ -549,57 +627,6 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "commitment",
-        "type": "bytes32"
-      }
-    ],
-    "name": "getBasicOpenBoxInfo",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "user",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "boxId",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "totalRate",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bytes[]",
-            "name": "featureNames",
-            "type": "bytes[]"
-          },
-          {
-            "internalType": "bytes[][]",
-            "name": "featureValuesSet",
-            "type": "bytes[][]"
-          },
-          {
-            "internalType": "bytes32",
-            "name": "previousBlockHash",
-            "type": "bytes32"
-          }
-        ],
-        "internalType": "struct INFTFactory.OpenBoxBasicInfo",
-        "name": "",
-        "type": "tuple"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "getBoxes",
     "outputs": [
@@ -628,30 +655,6 @@
   {
     "inputs": [
       {
-        "internalType": "bytes32",
-        "name": "commitment",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_index",
-        "type": "uint256"
-      }
-    ],
-    "name": "getSuccessRateRange",
-    "outputs": [
-      {
-        "internalType": "uint256[2]",
-        "name": "",
-        "type": "uint256[2]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "uint256",
         "name": "tokenId",
         "type": "uint256"
@@ -668,25 +671,6 @@
         "internalType": "bytes[]",
         "name": "",
         "type": "bytes[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "secret",
-        "type": "bytes32"
-      }
-    ],
-    "name": "getUpgradeResult",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -769,41 +753,53 @@
     "inputs": [
       {
         "internalType": "bytes32",
-        "name": "",
+        "name": "_comm",
         "type": "bytes32"
       }
     ],
     "name": "openBoxInfo",
     "outputs": [
       {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "boxId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bool",
-        "name": "settled",
-        "type": "bool"
-      },
-      {
-        "internalType": "bool",
-        "name": "openBoxStatus",
-        "type": "bool"
-      },
-      {
-        "internalType": "uint256",
-        "name": "totalRate",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "previousBlockHash",
-        "type": "bytes32"
+        "components": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "boxId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "settled",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "openBoxStatus",
+            "type": "bool"
+          },
+          {
+            "internalType": "bytes[]",
+            "name": "featureNames",
+            "type": "bytes[]"
+          },
+          {
+            "internalType": "bytes[][]",
+            "name": "featureValuesSet",
+            "type": "bytes[][]"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "previousBlockHash",
+            "type": "bytes32"
+          }
+        ],
+        "internalType": "struct INFTFactory.OpenBoxInfo",
+        "name": "",
+        "type": "tuple"
       }
     ],
     "stateMutability": "view",
@@ -979,11 +975,6 @@
         "internalType": "bytes32",
         "name": "secret",
         "type": "bytes32"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_resultIndex",
-        "type": "uint256"
       }
     ],
     "name": "settleOpenBox",
@@ -1021,41 +1012,63 @@
     "inputs": [
       {
         "internalType": "bytes32",
-        "name": "",
+        "name": "_comm",
         "type": "bytes32"
       }
     ],
     "name": "upgradesInfo",
     "outputs": [
       {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "internalType": "bool",
-        "name": "useCharm",
-        "type": "bool"
-      },
-      {
-        "internalType": "bool",
-        "name": "settled",
-        "type": "bool"
-      },
-      {
-        "internalType": "bool",
-        "name": "upgradeStatus",
-        "type": "bool"
-      },
-      {
-        "internalType": "uint256",
-        "name": "successRate",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "previousBlockHash",
-        "type": "bytes32"
+        "components": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "internalType": "bool",
+            "name": "useCharm",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "settled",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "upgradeStatus",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "failureRate",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256[3]",
+            "name": "tokenIds",
+            "type": "uint256[3]"
+          },
+          {
+            "internalType": "bytes[]",
+            "name": "targetFeatureNames",
+            "type": "bytes[]"
+          },
+          {
+            "internalType": "bytes[][]",
+            "name": "targetFeatureValuesSet",
+            "type": "bytes[][]"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "previousBlockHash",
+            "type": "bytes32"
+          }
+        ],
+        "internalType": "struct INFTFactory.UpgradeInfo",
+        "name": "",
+        "type": "tuple"
       }
     ],
     "stateMutability": "view",

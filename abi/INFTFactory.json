@@ -2,31 +2,12 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "allUpgrades",
-    "outputs": [
-      {
-        "internalType": "bytes32[]",
-        "name": "",
-        "type": "bytes32[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "uint256",
         "name": "tokenId",
         "type": "uint256"
       }
     ],
-    "name": "existFeatures",
+    "name": "existTokenFeatures",
     "outputs": [
       {
         "internalType": "bool",
@@ -40,12 +21,36 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getTokenFeatures",
+    "outputs": [
+      {
+        "internalType": "bytes[]",
+        "name": "",
+        "type": "bytes[]"
+      },
+      {
+        "internalType": "bytes[]",
+        "name": "",
+        "type": "bytes[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "bytes32",
-        "name": "commitment",
+        "name": "",
         "type": "bytes32"
       }
     ],
-    "name": "getBasicOpenBoxInfo",
+    "name": "openBoxInfo",
     "outputs": [
       {
         "components": [
@@ -60,9 +65,14 @@
             "type": "uint256"
           },
           {
-            "internalType": "uint256",
-            "name": "totalRate",
-            "type": "uint256"
+            "internalType": "bool",
+            "name": "settled",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "openBoxStatus",
+            "type": "bool"
           },
           {
             "internalType": "bytes[]",
@@ -80,57 +90,9 @@
             "type": "bytes32"
           }
         ],
-        "internalType": "struct INFTFactory.OpenBoxBasicInfo",
+        "internalType": "struct INFTFactory.OpenBoxInfo",
         "name": "",
         "type": "tuple"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      }
-    ],
-    "name": "getFeatures",
-    "outputs": [
-      {
-        "internalType": "bytes32[]",
-        "name": "",
-        "type": "bytes32[]"
-      },
-      {
-        "internalType": "bytes32[]",
-        "name": "",
-        "type": "bytes32[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "commitment",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_index",
-        "type": "uint256"
-      }
-    ],
-    "name": "getSuccessRateRange",
-    "outputs": [
-      {
-        "internalType": "uint256[2]",
-        "name": "",
-        "type": "uint256[2]"
       }
     ],
     "stateMutability": "view",
@@ -170,7 +132,7 @@
           },
           {
             "internalType": "uint256",
-            "name": "successRate",
+            "name": "failureRate",
             "type": "uint256"
           },
           {
@@ -184,9 +146,9 @@
             "type": "bytes[]"
           },
           {
-            "internalType": "bytes[]",
-            "name": "targetFeatureValues",
-            "type": "bytes[]"
+            "internalType": "bytes[][]",
+            "name": "targetFeatureValuesSet",
+            "type": "bytes[][]"
           },
           {
             "internalType": "bytes32",
