@@ -26,6 +26,12 @@ contract MarketPlace is Ownable, Initializable {
 
     SaleInfo[] public saleList;
 
+    event NewTokenSale(address owner, uint256 updatedAt, uint256 tokenId, uint256 price, uint256 saleId);
+    event TokenSaleUpdated(address owner, uint256 updatedAt, uint256 tokenId, uint256 price, uint256 saleId);
+    event SaleCancelled(address owner, uint256 updatedAt, uint256 tokenId, uint256 price, uint256 saleId);
+    event TokenPurchase(address owner, address buyer, uint256 updatedAt, uint256 tokenId, uint256 price, uint256 saleId);
+    event FeeTransfer(address owner, address buyer, address feeReceiver, uint256 updatedAt, uint256 tokenId, uint256 fee, uint256 saleId);
+
     modifier onlySaleOwner(uint256 _saleId) {
         require(msg.sender == saleList[_saleId].owner, "Invcalid sale owner");
         _;
@@ -51,6 +57,7 @@ contract MarketPlace is Ownable, Initializable {
     //_val: true => open for sale
     //_val: false => cancel sale, return token to owner
     function setTokenSale(uint256 _tokenId, uint256 _price) external {
+        require(_price > 0, "price must not be 0");
         //transfer token from sender to contract
         nft.transferFrom(msg.sender, address(this), _tokenId);
         //create a sale
@@ -62,12 +69,17 @@ contract MarketPlace is Ownable, Initializable {
             _tokenId,
             _price
         ));
+        emit NewTokenSale(msg.sender, block.timestamp, _tokenId, _price, saleList.length - 1);
     }
 
     function changeTokenSalePrice(uint256 _saleId, uint256 _newPrice) external onlySaleOwner (_saleId ) {
+        require(_newPrice > 0, "price must not be 0");
         SaleInfo storage sale = saleList[_saleId];
         require(sale.isActive && !sale.isSold, "changeTokenSalePrice: sale inactive or already sold");
         sale.price = _newPrice;
+        sale.lastUpdated = block.timestamp;
+
+        emit TokenSaleUpdated(msg.sender, block.timestamp, sale.tokenId, _newPrice, _saleId);
     }
 
     function cancelTokenSale(uint256 _saleId) external onlySaleOwner (_saleId) {
@@ -75,6 +87,9 @@ contract MarketPlace is Ownable, Initializable {
         require(sale.isActive && !sale.isSold, "cancelTokenSale: sale inactive or already sold");
         sale.isActive = false;
         nft.transferFrom(address(this), msg.sender, sale.tokenId);
+        sale.lastUpdated = block.timestamp;
+
+        emit SaleCancelled(msg.sender, block.timestamp, sale.tokenId, sale.price, _saleId);
     }
 
     function buyToken(uint256 _saleId) external {
@@ -89,6 +104,10 @@ contract MarketPlace is Ownable, Initializable {
         drace.safeTransferFrom(msg.sender, feeReceiver, price.mul(feePercentX10).div(1000));
         //transfer to seller
         drace.safeTransferFrom(msg.sender, sale.owner, price.mul(1000 - feePercentX10).div(1000));
+        sale.lastUpdated = block.timestamp;
+
+        emit TokenPurchase(sale.owner, msg.sender, block.timestamp, sale.tokenId, sale.price, _saleId);
+        emit FeeTransfer(sale.owner, msg.sender, feeReceiver, block.timestamp, sale.tokenId, price.mul(feePercentX10).div(1000), _saleId);
     }
 
     function getAllSales() external view returns (SaleInfo[] memory) {
