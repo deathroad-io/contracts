@@ -49,6 +49,12 @@ module.exports = {
       blockGasLimit: 22400000,
       accounts: [process.env.PRIVATE_KEY]
     },
+    local: {
+      url: `http://localhost:8545/`,
+      gasPrice: 6e9,
+      blockGasLimit: 22400000,
+      mnemonic: "question doll affair ill quality inform figure skate black warm trim harbor"
+    },
     bsctestnet: {
       url: `https://data-seed-prebsc-1-s1.binance.org:8545/`,
       gasPrice: 20e9,

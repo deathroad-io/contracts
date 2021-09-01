@@ -1,9 +1,9 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-describe("Bridge", function() {
-  it("Deployment should assign the total supply of tokens to the owner", async function() {
-    const [owner, seller, buyer, feeReceiver] = await ethers.getSigners();
+describe("Marketplace", function() {
+  it("Marketplace", async function() {
+    const [owner, seller, buyer] = await ethers.getSigners();
 
     const DRACE = await ethers.getContractFactory("DRACE");
     const draceInstance = await DRACE.deploy(owner.address);
@@ -16,12 +16,16 @@ describe("Bridge", function() {
     const ERC721MockInstance = await ERC721Mock.deploy();
     const nft = await ERC721MockInstance.deployed()
 
+    const FeeDistribution = await ethers.getContractFactory("FeeDistribution");
+    const FeeDistributionInstance = await FeeDistribution.deploy();
+    const distributor = await FeeDistributionInstance.deployed()
+
     const MarketPlace = await ethers.getContractFactory("MarketPlace");
     const MarketPlaceInstance = await MarketPlace.deploy();
     const mp = await MarketPlaceInstance.deployed()
-    await mp.initialize(nft.address, drace.address, feeReceiver.address)
+    await mp.initialize(nft.address, drace.address, distributor.address)
 
-    expect(await drace.balanceOf(feeReceiver.address)).to.equal(0);
+    expect(await drace.balanceOf(distributor.address)).to.equal(0);
 
     await nft.mint(seller.address)
     await nft.mint(seller.address)
@@ -83,5 +87,34 @@ describe("Bridge", function() {
 
     expect(await nft.ownerOf(1)).to.equal(buyer.address)
     expect(await nft.ownerOf(2)).to.equal(buyer.address)
+  });
+
+  it("Distribution", async function() {
+    const routerAddress = "0x10ED43C718714eb63d5aA57B78B54704E256024E"
+    const [owner, foundation, playToEarn, liquidityReceiver] = await ethers.getSigners();
+
+    const DRACE = await ethers.getContractFactory("DRACE");
+    const draceInstance = await DRACE.deploy(owner.address);
+    const drace = await draceInstance.deployed()
+
+    const ownerBalance = await drace.balanceOf(owner.address);
+    expect(await drace.totalSupply()).to.equal(ownerBalance);
+
+    const FeeDistribution = await ethers.getContractFactory("FeeDistribution");
+    const FeeDistributionInstance = await FeeDistribution.deploy();
+    const distributor = await FeeDistributionInstance.deployed()
+    await distributor.initialize(drace.address, [foundation.address, playToEarn.address, ethers.constants.AddressZero], [250, 250, 150])
+    await distributor.setLiquidityReceiver(liquidityReceiver.address)
+    await distributor.setRouter(routerAddress)
+
+    //adding liquidity
+    const router = await ethers.getContractAt("IPancakeRouter02", routerAddress)
+    await drace.approve(routerAddress, ethers.constants.MaxUint256)
+
+    await router.addLiquidityETH(drace.address, ethers.utils.parseEther('100'), 0, 0, owner.address, ethers.constants.MaxUint256, {value: ethers.utils.parseEther('100')})
+
+    await drace.transfer(distributor.address, ethers.utils.parseEther('10'))
+    await distributor.distribute()
+
   });
 });

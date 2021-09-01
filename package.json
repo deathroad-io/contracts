@@ -6,7 +6,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "hardhat test",
+    "test": "hardhat test --network local",
     "compile": "hardhat compile"
   },
   "repository": {

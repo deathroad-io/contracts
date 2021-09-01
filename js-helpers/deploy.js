@@ -34,7 +34,7 @@ const chainIdByName = (chainName) => {
     case 'mumbaitestnet': return 80001;
     case 'fujitestnet': return 43113;
     case 'tomotestnet': return 89;
-    default: return 0;
+    default: return 1337;
   }
 };
 
