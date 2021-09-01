@@ -57,7 +57,7 @@ module.exports = async (hre) => {
   }
 
   log('  - Initializing  TokenVesting        ');
-  await tokenVesting.initialize(draceAddress, 86400 * 30)
+  await tokenVesting.initialize(draceAddress, 86400 * 2)
 
   log('  Deploying NFTUsePeriod Contract...');
   const NFTUsePeriod = await ethers.getContractFactory('NFTUsePeriod');

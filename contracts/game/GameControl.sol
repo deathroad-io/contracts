@@ -33,31 +33,33 @@ contract GameControl is
     IDeathRoadNFT public draceNFT;
     IERC20 public drace;
     mapping(uint256 => DepositInfo) public tokenDeposits;
-    address public gameOperator;
+    mapping(address => bool) public mappingApprover;
     TokenVesting public tokenVesting;
-    uint256 public gameIndex;
+    uint256 public gameCount;
     mapping(address => uint256) public cumulativeRewards;
-    mapping(address => uint256[]) public gameIdList;
+    mapping(address => uint256[]) public gameIdList;    //list of game id users play
+    mapping(address => uint256) public playerGameCounts;    //game count for each user
 
     event TokenDeposit(address depositor, uint256 tokenId, uint256 timestamp);
     event TokenWithdraw(address withdrawer, uint256 tokenId, uint256 timestamp);
+    event GameStart(address player, bytes tokenIds, uint256 timestamp, uint256 playerGameCount, uint256 globalGameCount);
 
     function initialize(
         address _drace,
         address _draceNFT,
-        address _operator,
+        address _approver,
         address _tokenVesting,
         address _tokenUsePeriodHook
     ) external initializer {
         drace = IERC20(_drace);
         draceNFT = IDeathRoadNFT(_draceNFT);
-        gameOperator = _operator;
+        mappingApprover[_approver] = true;
         tokenVesting = TokenVesting(_tokenVesting);
         tokenUsePeriodHook = INFTUsePeriod(_tokenUsePeriodHook);
     }
 
-    function changeOperator(address _newOperator) external onlyOwner {
-        gameOperator = _newOperator;
+    function addApprover(address _approver, bool _val) public onlyOwner {
+        mappingApprover[_approver] = _val;
     }
 
     function depositNFTsToPlay(uint256[] memory _tokenIds) external {
@@ -105,7 +107,7 @@ contract GameControl is
             abi.encode(msg.sender, _tokenIds, _validTimestamp)
         );
         address signer = recoverSigner(r, s, v, message);
-        require(signer == gameOperator, "invalid operator");
+        require(mappingApprover[signer], "invalid operator");
 
         //verify token ids deposited and not used period a go
         for (uint256 i = 0; i < _tokenIds.length; i++) {
@@ -124,8 +126,9 @@ contract GameControl is
             tokenLastUseTimestamp[_tokenIds[i]].timestamp = block.timestamp;
             tokenLastUseTimestamp[_tokenIds[i]].user = msg.sender;
         }
-        gameIdList[msg.sender].push(gameIndex);
-        gameIndex++;
+        gameIdList[msg.sender].push(gameCount);
+        playerGameCounts[msg.sender]++;
+        gameCount++;
     }
 
     function distributeRewards(
@@ -146,15 +149,15 @@ contract GameControl is
             abi.encode(_recipient, _rewardAmount, _cumulativeReward)
         );
         address signer = recoverSigner(r, s, v, message);
-        require(signer == gameOperator, "distributeRewards::invalid operator");
+        require(mappingApprover[signer], "distributeRewards::invalid operator");
 
         cumulativeRewards[_recipient] = cumulativeRewards[_recipient].add(
             _rewardAmount
         );
 
         //distribute rewards
-        //20% released immediately, 80% vested
-        uint256 toRelease = _rewardAmount.mul(20).div(100);
+        //50% released immediately, 50% vested
+        uint256 toRelease = _rewardAmount.mul(50).div(100);
         uint256 vesting = _rewardAmount.sub(toRelease);
         drace.safeTransfer(_recipient, toRelease);
         drace.safeApprove(address(tokenVesting), vesting);

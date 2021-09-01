@@ -77,7 +77,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
     function setFeeTo(address payable _feeTo) public onlyOwner {
         feeTo = _feeTo;
     }
-    
+
     function addBoxes(bytes memory _box) public onlyOwner {
         nft.addBoxes(_box);
     }
@@ -138,7 +138,12 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
     mapping(bytes32 => OpenBoxInfo) public _openBoxInfo;
     mapping(address => bytes32[]) public allOpenBoxes;
     mapping(uint256 => bool) public commitedBoxes;
+    bytes32[] public allBoxCommitments;
     event CommitOpenBox(address owner, uint256 boxId, bytes32 commitment);
+
+    function getAllBoxCommitments() external view returns (bytes32[] memory) {
+        return allBoxCommitments;
+    }
 
     function openBoxInfo(bytes32 _comm)
         external
@@ -163,6 +168,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         SETTLE_FEE_RECEIVER.transfer(msg.value);
         require(!commitedBoxes[boxId], "commitOpenBox: box already commited");
         commitedBoxes[boxId] = true;
+        allBoxCommitments.push(_commitment);
         require(
             block.timestamp <= _expiryTime,
             "commitOpenBox: commitment expired"
@@ -229,6 +235,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
 
         //commit open box
         commitedBoxes[boxId] = true;
+        allBoxCommitments.push(_commitment);
         require(
             _openBoxInfo[_commitment].user == address(0),
             "buyAndCommitOpenBox:commitment overlap"
@@ -257,7 +264,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
     }
 
     //client compute result index off-chain, the function will verify it
-    function settleOpenBox(bytes32 secret) external {
+    function settleOpenBox(bytes32 secret) public {
         bytes32 commitment = keccak256(abi.encode(secret));
         OpenBoxInfo storage info = _openBoxInfo[commitment];
         require(info.user != address(0), "settleOpenBox: commitment not exist");
@@ -320,7 +327,12 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
 
     mapping(bytes32 => UpgradeInfo) public _upgradesInfo;
     mapping(address => bytes32[]) public allUpgrades;
+    bytes32[] public allUpgradeCommitments;
     event CommitUpgradeFeature(address owner, bytes32 commitment);
+
+    function getAllUpgradeCommitments() external view returns (bytes32[] memory) {
+        return allUpgradeCommitments;
+    }
 
     function upgradesInfo(bytes32 _comm)
         external
@@ -364,6 +376,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
             _upgradesInfo[_commitment].user == address(0),
             "commitment overlap"
         );
+        allUpgradeCommitments.push(_commitment);
         if (_useCharm) {
             require(
                 nft.mappingLuckyCharm(msg.sender) > 0,
@@ -410,7 +423,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         emit CommitUpgradeFeature(msg.sender, _commitment);
     }
 
-    function settleUpgradeFeatures(bytes32 secret) external {
+    function settleUpgradeFeatures(bytes32 secret) public {
         bytes32 commitment = keccak256(abi.encode(secret));
         require(
             _upgradesInfo[commitment].user != address(0),
@@ -458,6 +471,16 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         u.settled = true;
 
         emit UpgradeToken(u.user, u.tokenIds, success, u.useCharm, tokenId);
+    }
+
+    function settleAllRemainingCommitments(bytes32[] memory _boxCommitments, bytes32[] memory _upgradeCommitments) public {
+        for(uint256 i = 0; i < _boxCommitments.length; i++) {
+            settleOpenBox(_boxCommitments[i]);
+        }
+
+        for(uint256 i = 0; i < _upgradeCommitments.length; i++) {
+            settleUpgradeFeatures(_upgradeCommitments[i]);
+        }
     }
 
     INotaryNFT public notaryHook;
