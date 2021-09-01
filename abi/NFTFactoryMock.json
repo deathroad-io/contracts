@@ -5,7 +5,7 @@
       {
         "indexed": false,
         "internalType": "address",
-        "name": "user",
+        "name": "owner",
         "type": "address"
       },
       {
@@ -30,7 +30,7 @@
       {
         "indexed": false,
         "internalType": "address",
-        "name": "user",
+        "name": "owner",
         "type": "address"
       },
       {
