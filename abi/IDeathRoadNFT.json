@@ -535,29 +535,6 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_name",
-        "type": "bytes"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_value",
-        "type": "bytes"
-      }
-    ],
-    "name": "setTokenSpecialFeatures",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "bytes4",
         "name": "interfaceId",
         "type": "bytes4"

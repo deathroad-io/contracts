@@ -13,12 +13,6 @@ interface IDeathRoadNFT is IERC721 {
 
     function getPacks() external view returns (bytes[] memory);
 
-    function setTokenSpecialFeatures(
-        uint256 tokenId,
-        bytes memory _name,
-        bytes memory _value
-    ) external;
-
     function addBoxes(bytes memory _box) external;
 
     function addPacks(bytes memory _pack) external;

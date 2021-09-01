@@ -673,19 +673,6 @@
   },
   {
     "inputs": [],
-    "name": "gameContract",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "getBoxes",
     "outputs": [
       {
@@ -913,19 +900,6 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_gameContract",
-        "type": "address"
-      }
-    ],
-    "name": "setGameContract",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
         "name": "_notaryHook",
         "type": "address"
       }
@@ -957,72 +931,6 @@
       }
     ],
     "name": "setSettleFeeReceiver",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_name",
-        "type": "bytes"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_value",
-        "type": "bytes"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_expiryTime",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "r",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "s",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "uint8",
-        "name": "v",
-        "type": "uint8"
-      }
-    ],
-    "name": "setSpecialFeatures",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_name",
-        "type": "bytes"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_value",
-        "type": "bytes"
-      }
-    ],
-    "name": "setSpecialFeaturesByGameContract",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
