@@ -690,30 +690,6 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes",
-        "name": "",
-        "type": "bytes"
-      }
-    ],
-    "name": "mappingTokenSpecialFeatures",
-    "outputs": [
-      {
-        "internalType": "bytes",
-        "name": "",
-        "type": "bytes"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "address",
         "name": "_recipient",
         "type": "address"
@@ -911,29 +887,6 @@
       }
     ],
     "name": "setFeatures",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_name",
-        "type": "bytes"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_value",
-        "type": "bytes"
-      }
-    ],
-    "name": "setTokenSpecialFeatures",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

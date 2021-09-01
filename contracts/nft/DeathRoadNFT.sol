@@ -33,9 +33,6 @@ contract DeathRoadNFT is ERC721, IDeathRoadNFT, Ownable, SignerRecover, Initiali
 
     mapping(address => uint256) public override mappingLuckyCharm;
 
-    mapping(uint256 => mapping(bytes => bytes))
-        public mappingTokenSpecialFeatures;
-
     mapping(uint256 => Box) public mappingBoxOwner;
     address public factory;
 
@@ -60,14 +57,6 @@ contract DeathRoadNFT is ERC721, IDeathRoadNFT, Ownable, SignerRecover, Initiali
 
     function getPacks() public view override returns (bytes[] memory) {
         return Packs;
-    }
-
-    function setTokenSpecialFeatures(
-        uint256 tokenId,
-        bytes memory _name,
-        bytes memory _value
-    ) public override onlyFactory {
-        mappingTokenSpecialFeatures[tokenId][_name] = _value;
     }
 
     function addBoxes(bytes memory _box) public override onlyFactory {

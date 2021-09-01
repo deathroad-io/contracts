@@ -15,7 +15,6 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
 
     address public DRACE;
     address payable public feeTo;
-    address public gameContract;
 
     event NewBox(address owner, uint256 boxId);
     event OpenBox(address owner, uint256 boxId, uint256 tokenId);
@@ -78,49 +77,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
     function setFeeTo(address payable _feeTo) public onlyOwner {
         feeTo = _feeTo;
     }
-
-    function setGameContract(address _gameContract) public onlyOwner {
-        gameContract = _gameContract;
-    }
-
-    function setSpecialFeatures(
-        uint256 tokenId,
-        bytes memory _name,
-        bytes memory _value,
-        uint256 _expiryTime,
-        bytes32 r,
-        bytes32 s,
-        uint8 v
-    ) public {
-        require(
-            nft.ownerOf(tokenId) == msg.sender,
-            "setSpecialFeatures: msg.sender not token owner"
-        );
-
-        require(block.timestamp <= _expiryTime, "Expired");
-        bytes32 message = keccak256(
-            abi.encode(msg.sender, _name, _value, _expiryTime)
-        );
-        require(
-            verifySignature(r, s, v, message),
-            "setSpecialFeatures: Signature invalid"
-        );
-
-        nft.setTokenSpecialFeatures(tokenId, _name, _value);
-    }
-
-    function setSpecialFeaturesByGameContract(
-        uint256 tokenId,
-        bytes memory _name,
-        bytes memory _value
-    ) public {
-        require(
-            msg.sender == gameContract,
-            "setSpecialFeaturesByGameContract: caller is not the game contract"
-        );
-        nft.setTokenSpecialFeatures(tokenId, _name, _value);
-    }
-
+    
     function addBoxes(bytes memory _box) public onlyOwner {
         nft.addBoxes(_box);
     }
