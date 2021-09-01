@@ -114,7 +114,7 @@ describe("Marketplace", function() {
     await router.addLiquidityETH(drace.address, ethers.utils.parseEther('100'), 0, 0, owner.address, ethers.constants.MaxUint256, {value: ethers.utils.parseEther('100')})
 
     await drace.transfer(distributor.address, ethers.utils.parseEther('10'))
-    await distributor.distribute()
+    await expect(distributor.distribute()).to.be.reverted
 
   });
 });
