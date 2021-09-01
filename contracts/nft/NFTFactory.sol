@@ -180,7 +180,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
     mapping(bytes32 => OpenBoxInfo) public _openBoxInfo;
     mapping(address => bytes32[]) public allOpenBoxes;
     mapping(uint256 => bool) public commitedBoxes;
-    event CommitOpenBox(address user, uint256 boxId, bytes32 commitment);
+    event CommitOpenBox(address owner, uint256 boxId, bytes32 commitment);
 
     function openBoxInfo(bytes32 _comm)
         external
@@ -362,7 +362,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
 
     mapping(bytes32 => UpgradeInfo) public _upgradesInfo;
     mapping(address => bytes32[]) public allUpgrades;
-    event CommitUpgradeFeature(address user, bytes32 commitment);
+    event CommitUpgradeFeature(address owner, bytes32 commitment);
 
     function upgradesInfo(bytes32 _comm)
         external
@@ -464,7 +464,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         (bool success, uint256 resultIndex) = notaryHook.getUpgradeResult(secret, address(this));
 
         UpgradeInfo storage u = _upgradesInfo[commitment];
-        
+
         bool shouldBurn = true;
 
         if (!success && u.useCharm) {
