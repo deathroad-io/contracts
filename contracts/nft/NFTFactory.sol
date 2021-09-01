@@ -9,6 +9,7 @@ import "../interfaces/IDeathRoadNFT.sol";
 import "../interfaces/INFTFactory.sol";
 import "../lib/SignerRecover.sol";
 
+
 contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
     using SafeMath for uint256;
 
@@ -392,7 +393,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         bytes32 s,
         uint8 v
     ) public payable {
-        require(msg.value == SETTLE_FEE, "commitOpenBox: must pay settle fee");
+        require(msg.value == SETTLE_FEE, "commitUpgradeFeatures: must pay settle fee");
         require(
             _featureNames.length == _featureValuesSet[0].length,
             "commitUpgradeFeatures:invalid input length"
@@ -415,6 +416,8 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         //verify infor
         bytes32 message = keccak256(
             abi.encode(
+                "commitUpgradeFeatures",
+                msg.sender,
                 _tokenIds,
                 _featureNames,
                 _featureValuesSet,
