@@ -51,4 +51,5 @@ interface IDeathRoadNFT is IERC721 {
     function mappingLuckyCharm(address) external view returns (uint256);
     function burn(uint256 tokenId) external;
     function decreaseCharm(address _addr) external;
+    function latestTokenMinted(address _addr) external view returns (uint256);
 }

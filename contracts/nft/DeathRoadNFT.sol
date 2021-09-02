@@ -34,6 +34,7 @@ contract DeathRoadNFT is ERC721, IDeathRoadNFT, Ownable, SignerRecover, Initiali
     mapping(address => uint256) public override mappingLuckyCharm;
 
     mapping(uint256 => Box) public mappingBoxOwner;
+    mapping(address => uint256) public override latestTokenMinted;
     address public factory;
 
     constructor() ERC721("DeathRoadNFT", "DRACE") {}
@@ -124,7 +125,7 @@ contract DeathRoadNFT is ERC721, IDeathRoadNFT, Ownable, SignerRecover, Initiali
         _mint(_recipient, tokenId);
 
         setFeatures(tokenId, _featureNames, _featureValues);
-
+        latestTokenMinted[_recipient] = tokenId;
         return tokenId;
     }
 

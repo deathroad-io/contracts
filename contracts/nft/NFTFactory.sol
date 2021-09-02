@@ -208,6 +208,10 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         emit CommitOpenBox(msg.sender, boxId, _commitment);
     }
 
+    function getLatestTokenMinted(address _addr) external view returns (uint256) {
+        return nft.latestTokenMinted(_addr);
+    }
+
     function buyAndCommitOpenBox(
         bytes memory _box,
         bytes memory _pack,
