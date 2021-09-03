@@ -1,5 +1,6 @@
 pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
@@ -8,7 +9,7 @@ import "../interfaces/INotaryNFT.sol";
 import "../interfaces/IDeathRoadNFT.sol";
 import "../lib/SignerRecover.sol";
 
-contract DeathRoadNFT is ERC721, IDeathRoadNFT, Ownable, SignerRecover, Initializable {
+contract DeathRoadNFT is ERC721Enumerable, IDeathRoadNFT, Ownable, SignerRecover, Initializable {
     using SafeMath for uint256;
 
     address payable public feeTo;
