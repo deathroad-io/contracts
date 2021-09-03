@@ -37,12 +37,18 @@ contract GameControl is
     TokenVesting public tokenVesting;
     uint256 public gameCount;
     mapping(address => uint256) public cumulativeRewards;
-    mapping(address => uint256[]) public gameIdList;    //list of game id users play
-    mapping(address => uint256) public playerGameCounts;    //game count for each user
+    mapping(address => uint256[]) public gameIdList; //list of game id users play
+    mapping(address => uint256) public playerGameCounts; //game count for each user
 
     event TokenDeposit(address depositor, uint256 tokenId, uint256 timestamp);
     event TokenWithdraw(address withdrawer, uint256 tokenId, uint256 timestamp);
-    event GameStart(address player, bytes tokenIds, uint256 timestamp, uint256 playerGameCount, uint256 globalGameCount);
+    event GameStart(
+        address player,
+        bytes tokenIds,
+        uint256 timestamp,
+        uint256 playerGameCount,
+        uint256 globalGameCount
+    );
 
     function initialize(
         address _drace,
@@ -111,10 +117,18 @@ contract GameControl is
 
         //verify token ids deposited and not used period a go
         for (uint256 i = 0; i < _tokenIds.length; i++) {
-            require(
-                tokenDeposits[_tokenIds[i]].depositor == msg.sender,
-                "NFT token ID not deposited yet"
-            );
+            //check token deposited, if not, deposit it
+            if (tokenDeposits[_tokenIds[i]].depositor != msg.sender) {
+                //not deposit yet
+                draceNFT.safeTransferFrom(
+                    msg.sender,
+                    address(this),
+                    _tokenIds[i]
+                );
+                tokenDeposits[_tokenIds[i]].depositor = msg.sender;
+                tokenDeposits[_tokenIds[i]].timestamp = block.timestamp;
+                emit TokenDeposit(msg.sender, _tokenIds[i], block.timestamp);
+            }
             require(
                 tokenLastUseTimestamp[_tokenIds[i]].timestamp.add(
                     getUsePeriod(_tokenIds[i])
@@ -126,6 +140,15 @@ contract GameControl is
             tokenLastUseTimestamp[_tokenIds[i]].timestamp = block.timestamp;
             tokenLastUseTimestamp[_tokenIds[i]].user = msg.sender;
         }
+
+        emit GameStart(
+            msg.sender,
+            abi.encode(_tokenIds),
+            block.timestamp,
+            playerGameCounts[msg.sender],
+            gameCount
+        );
+
         gameIdList[msg.sender].push(gameCount);
         playerGameCounts[msg.sender]++;
         gameCount++;
