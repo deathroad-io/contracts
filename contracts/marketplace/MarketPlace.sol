@@ -21,6 +21,7 @@ contract MarketPlace is Ownable, Initializable {
         uint256 lastUpdated;
         uint256 tokenId;
         uint256 price;
+        uint256 saleId;
     }
 
     SaleInfo[] public saleList;
@@ -66,7 +67,8 @@ contract MarketPlace is Ownable, Initializable {
             msg.sender,
             block.timestamp,
             _tokenId,
-            _price
+            _price,
+            saleList.length
         ));
         emit NewTokenSale(msg.sender, block.timestamp, _tokenId, _price, saleList.length - 1);
     }

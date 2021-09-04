@@ -365,6 +365,11 @@
             "internalType": "uint256",
             "name": "price",
             "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "saleId",
+            "type": "uint256"
           }
         ],
         "internalType": "struct MarketPlace.SaleInfo[]",
@@ -409,6 +414,11 @@
           {
             "internalType": "uint256",
             "name": "price",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "saleId",
             "type": "uint256"
           }
         ],
@@ -478,6 +488,11 @@
           {
             "internalType": "uint256",
             "name": "price",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "saleId",
             "type": "uint256"
           }
         ],
@@ -588,6 +603,11 @@
       {
         "internalType": "uint256",
         "name": "price",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "saleId",
         "type": "uint256"
       }
     ],
