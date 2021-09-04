@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 contract DRACE is ERC20Burnable, Ownable {
     using SafeMath for uint;
     // Creates `_amount` token to `_to`. Must only be called by the owner (MasterChef).
-    constructor(address _to) ERC20('Deathroad Token', 'DRACE') {
+    constructor(address _to) ERC20('DeathRoad Token', 'DRACE') {
         _mint(_to, 1000000000e18);
         _moveDelegates(address(0), _delegates[_to], 1000000000e18);
     }

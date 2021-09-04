@@ -253,6 +253,29 @@
         "internalType": "uint256",
         "name": "_cumulativeReward",
         "type": "uint256"
+      }
+    ],
+    "name": "distributeRewardMock",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_recipient",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_rewardAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_cumulativeReward",
+        "type": "uint256"
       },
       {
         "internalType": "bytes32",
@@ -524,6 +547,19 @@
       }
     ],
     "name": "startGame",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "_tokenIds",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "startGameMock",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

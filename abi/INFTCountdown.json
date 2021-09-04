@@ -12,7 +12,7 @@
         "type": "address"
       }
     ],
-    "name": "getNFTUsePeriod",
+    "name": "getCountdownPeriod",
     "outputs": [
       {
         "internalType": "uint256",

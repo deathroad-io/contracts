@@ -4,35 +4,43 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interfaces/IDeathRoadNFT.sol";
-import "../interfaces/INFTUsePeriod.sol";
+import "../interfaces/INFTCountdown.sol";
 import "../lib/SignerRecover.sol";
 import "../farming/TokenVesting.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "../lib/BlackholePrevention.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 contract GameControl is
     Ownable,
     SignerRecover,
     Initializable,
-    BlackholePrevention
+    BlackholePrevention,
+    IERC721Receiver
 {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
     struct DepositInfo {
         address depositor;
         uint256 timestamp;
+        uint256 tokenId;
     }
 
     struct TokenUse {
         uint256 timestamp;
         address user;
+        uint256 tokenId;
     }
 
     mapping(uint256 => TokenUse) public tokenLastUseTimestamp; //used for prevent from playing more than token frequency
     IDeathRoadNFT public draceNFT;
     IERC20 public drace;
     mapping(uint256 => DepositInfo) public tokenDeposits;
+
+    //approvers will verify whether:
+    //1. Game is in maintenance or not
+    //2. Users are using at least one car and one gun in the token id list
     mapping(address => bool) public mappingApprover;
     TokenVesting public tokenVesting;
     uint256 public gameCount;
@@ -55,13 +63,13 @@ contract GameControl is
         address _draceNFT,
         address _approver,
         address _tokenVesting,
-        address _tokenUsePeriodHook
+        address _countdownPeriod
     ) external initializer {
         drace = IERC20(_drace);
         draceNFT = IDeathRoadNFT(_draceNFT);
         mappingApprover[_approver] = true;
         tokenVesting = TokenVesting(_tokenVesting);
-        tokenUsePeriodHook = INFTUsePeriod(_tokenUsePeriodHook);
+        countdownPeriod = INFTCountdown(_countdownPeriod);
     }
 
     function addApprover(address _approver, bool _val) public onlyOwner {
@@ -70,9 +78,10 @@ contract GameControl is
 
     function depositNFTsToPlay(uint256[] memory _tokenIds) external {
         for (uint256 i = 0; i < _tokenIds.length; i++) {
-            draceNFT.safeTransferFrom(msg.sender, address(this), _tokenIds[i]);
+            draceNFT.transferFrom(msg.sender, address(this), _tokenIds[i]);
             tokenDeposits[_tokenIds[i]].depositor = msg.sender;
             tokenDeposits[_tokenIds[i]].timestamp = block.timestamp;
+            tokenDeposits[_tokenIds[i]].tokenId = _tokenIds[i];
             emit TokenDeposit(msg.sender, _tokenIds[i], block.timestamp);
         }
     }
@@ -87,7 +96,7 @@ contract GameControl is
                     "game is in play"
                 );
 
-                draceNFT.safeTransferFrom(
+                draceNFT.transferFrom(
                     address(this),
                     msg.sender,
                     _tokenIds[i]
@@ -115,23 +124,28 @@ contract GameControl is
         address signer = recoverSigner(r, s, v, message);
         require(mappingApprover[signer], "invalid operator");
 
+        _startGame(_tokenIds);
+    }
+
+    function _startGame(uint256[] memory _tokenIds) internal {
         //verify token ids deposited and not used period a go
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             //check token deposited, if not, deposit it
             if (tokenDeposits[_tokenIds[i]].depositor != msg.sender) {
                 //not deposit yet
-                draceNFT.safeTransferFrom(
+                draceNFT.transferFrom(
                     msg.sender,
                     address(this),
                     _tokenIds[i]
                 );
                 tokenDeposits[_tokenIds[i]].depositor = msg.sender;
                 tokenDeposits[_tokenIds[i]].timestamp = block.timestamp;
+                tokenDeposits[_tokenIds[i]].tokenId = _tokenIds[i];
                 emit TokenDeposit(msg.sender, _tokenIds[i], block.timestamp);
             }
             require(
                 tokenLastUseTimestamp[_tokenIds[i]].timestamp.add(
-                    getUsePeriod(_tokenIds[i])
+                    getCountdownPeriod(_tokenIds[i])
                 ) < block.timestamp,
                 "NFT tokens used too frequently"
             );
@@ -139,6 +153,7 @@ contract GameControl is
             //mark last time used
             tokenLastUseTimestamp[_tokenIds[i]].timestamp = block.timestamp;
             tokenLastUseTimestamp[_tokenIds[i]].user = msg.sender;
+            tokenLastUseTimestamp[_tokenIds[i]].tokenId = _tokenIds[i];
         }
 
         emit GameStart(
@@ -162,11 +177,6 @@ contract GameControl is
         bytes32 s,
         uint8 v
     ) external {
-        require(
-            cumulativeRewards[_recipient].add(_rewardAmount) <=
-                _cumulativeReward,
-            "reward exceed cumulative rewards"
-        );
         //verify signature
         bytes32 message = keccak256(
             abi.encode(_recipient, _rewardAmount, _cumulativeReward)
@@ -174,6 +184,19 @@ contract GameControl is
         address signer = recoverSigner(r, s, v, message);
         require(mappingApprover[signer], "distributeRewards::invalid operator");
 
+        _distribute(_recipient, _rewardAmount, _cumulativeReward);
+    }
+
+    function _distribute(
+        address _recipient,
+        uint256 _rewardAmount,
+        uint256 _cumulativeReward
+    ) internal {
+        require(
+            cumulativeRewards[_recipient].add(_rewardAmount) <=
+                _cumulativeReward,
+            "reward exceed cumulative rewards"
+        );
         cumulativeRewards[_recipient] = cumulativeRewards[_recipient].add(
             _rewardAmount
         );
@@ -192,20 +215,21 @@ contract GameControl is
         address from,
         uint256 tokenId,
         bytes calldata data
-    ) external returns (bytes4) {
+    ) external override returns (bytes4) {
         //do nothing
+        return bytes4("");
     }
 
-    INFTUsePeriod public tokenUsePeriodHook;
+    INFTCountdown public countdownPeriod;
 
-    function setTokenUsePeriodHook(address _addr) external onlyOwner {
-        tokenUsePeriodHook = INFTUsePeriod(_addr);
+    function setCountdownHook(address _addr) external onlyOwner {
+        countdownPeriod = INFTCountdown(_addr);
     }
 
     //each NFT has a period that it can only be used for playing if it was not used for playing more than period ago
-    function getUsePeriod(uint256 _tokenId) public view returns (uint256) {
+    function getCountdownPeriod(uint256 _tokenId) public view returns (uint256) {
         //the higher level the token id is, the shorter period => users can play more times
-        return tokenUsePeriodHook.getNFTUsePeriod(_tokenId, address(draceNFT));
+        return countdownPeriod.getCountdownPeriod(_tokenId, address(draceNFT));
     }
 
     function withdrawEther(address payable receiver, uint256 amount)

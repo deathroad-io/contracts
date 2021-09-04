@@ -59,20 +59,20 @@ module.exports = async (hre) => {
   log('  - Initializing  TokenVesting        ');
   await tokenVesting.initialize(draceAddress, 86400 * 2)
 
-  log('  Deploying NFTUsePeriod Contract...');
-  const NFTUsePeriod = await ethers.getContractFactory('NFTUsePeriod');
-  const nftUsePeriodInstance = await NFTUsePeriod.deploy()
-  const nftUsePeriod = await nftUsePeriodInstance.deployed()
-  log('  - NFTUsePeriod:         ', nftUsePeriod.address);
+  log('  Deploying NFTCountdown Contract...');
+  const NFTCountdown = await ethers.getContractFactory('NFTCountdown');
+  const nftCountdownInstance = await NFTCountdown.deploy()
+  const nftCountDown = await nftCountdownInstance.deployed()
+  log('  - NFTCountdown:         ', nftCountDown.address);
   
-  deployData['NFTUsePeriod'] = {
-    abi: getContractAbi('NFTUsePeriod'),
-    address: nftUsePeriod.address,
-    deployTransaction: nftUsePeriod.deployTransaction,
+  deployData['NFTCountdown'] = {
+    abi: getContractAbi('NFTCountdown'),
+    address: nftCountDown.address,
+    deployTransaction: nftCountDown.deployTransaction,
   }
 
   log('  - Initializing  GameControl        ');
-  await gameControl.initialize(draceAddress, DeathRoadNFTAddress, "0x0C78cbB95451F38e87436C002720F4DE95768441", tokenVesting.address, nftUsePeriod.address)
+  await gameControl.initialize(draceAddress, DeathRoadNFTAddress, "0x0C78cbB95451F38e87436C002720F4DE95768441", tokenVesting.address, nftCountDown.address)
 
   saveDeploymentData(chainId, deployData);
   log('\n  Contract Deployment Data saved to "deployments" directory.');
