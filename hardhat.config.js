@@ -47,7 +47,7 @@ module.exports = {
       url: `https://bsc-dataseed.binance.org/`,
       gasPrice: 6e9,
       blockGasLimit: 22400000,
-      accounts: [process.env.PRIVATE_KEY]
+      accounts: [process.env.PRIVATE_KEY_BSC]
     },
     local: {
       url: `http://localhost:8545/`,

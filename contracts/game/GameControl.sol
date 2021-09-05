@@ -33,6 +33,13 @@ contract GameControl is
         uint256 tokenId;
     }
 
+    struct GameIdInfo {
+        bool isRewardPaid;
+        address player;
+        uint256 gameId;
+        uint256 paidRewards;
+    }
+
     mapping(uint256 => TokenUse) public tokenLastUseTimestamp; //used for prevent from playing more than token frequency
     IDeathRoadNFT public draceNFT;
     IERC20 public drace;
@@ -46,7 +53,9 @@ contract GameControl is
     uint256 public gameCount;
     mapping(address => uint256) public cumulativeRewards;
     mapping(address => uint256[]) public gameIdList; //list of game id users play
+    mapping(uint256 => GameIdInfo) public gameIdToPlayer;
     mapping(address => uint256) public playerGameCounts; //game count for each user
+
 
     event TokenDeposit(address depositor, uint256 tokenId, uint256 timestamp);
     event TokenWithdraw(address withdrawer, uint256 tokenId, uint256 timestamp);
@@ -87,7 +96,7 @@ contract GameControl is
     }
 
     //withdraw is only available 10 minutes after start playing game
-    function withdrawNFTs(uint256[] memory _tokenIds) external {
+    function withdrawNFTs(uint256[] memory _tokenIds) public {
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             if (tokenDeposits[_tokenIds[i]].depositor == msg.sender) {
                 require(
@@ -96,11 +105,7 @@ contract GameControl is
                     "game is in play"
                 );
 
-                draceNFT.transferFrom(
-                    address(this),
-                    msg.sender,
-                    _tokenIds[i]
-                );
+                draceNFT.transferFrom(address(this), msg.sender, _tokenIds[i]);
                 delete tokenDeposits[_tokenIds[i]];
                 emit TokenWithdraw(msg.sender, _tokenIds[i], block.timestamp);
             }
@@ -133,11 +138,7 @@ contract GameControl is
             //check token deposited, if not, deposit it
             if (tokenDeposits[_tokenIds[i]].depositor != msg.sender) {
                 //not deposit yet
-                draceNFT.transferFrom(
-                    msg.sender,
-                    address(this),
-                    _tokenIds[i]
-                );
+                draceNFT.transferFrom(msg.sender, address(this), _tokenIds[i]);
                 tokenDeposits[_tokenIds[i]].depositor = msg.sender;
                 tokenDeposits[_tokenIds[i]].timestamp = block.timestamp;
                 tokenDeposits[_tokenIds[i]].tokenId = _tokenIds[i];
@@ -165,6 +166,12 @@ contract GameControl is
         );
 
         gameIdList[msg.sender].push(gameCount);
+        gameIdToPlayer[gameCount] = GameIdInfo( {
+            isRewardPaid: false,
+            player: msg.sender,
+            gameId: gameCount,
+            paidRewards: 0
+        });
         playerGameCounts[msg.sender]++;
         gameCount++;
     }
@@ -173,9 +180,11 @@ contract GameControl is
         address _recipient,
         uint256 _rewardAmount,
         uint256 _cumulativeReward,
+        uint256 _gameId,
         bytes32 r,
         bytes32 s,
-        uint8 v
+        uint8 v,
+        bool _withdrawNFTs
     ) external {
         //verify signature
         bytes32 message = keccak256(
@@ -184,14 +193,23 @@ contract GameControl is
         address signer = recoverSigner(r, s, v, message);
         require(mappingApprover[signer], "distributeRewards::invalid operator");
 
-        _distribute(_recipient, _rewardAmount, _cumulativeReward);
+        _distribute(_recipient, _rewardAmount, _cumulativeReward, _gameId);
+
+        if (_withdrawNFTs) {
+            //TODO
+            //withdrawNFTs(_tokenIds);
+        }
     }
 
     function _distribute(
         address _recipient,
         uint256 _rewardAmount,
-        uint256 _cumulativeReward
+        uint256 _cumulativeReward,
+        uint256 _gameId
     ) internal {
+        require(!gameIdToPlayer[_gameId].isRewardPaid, "rewards already paid");
+        gameIdToPlayer[_gameId].isRewardPaid = true;
+        gameIdToPlayer[_gameId].paidRewards = _rewardAmount;
         require(
             cumulativeRewards[_recipient].add(_rewardAmount) <=
                 _cumulativeReward,
@@ -227,7 +245,11 @@ contract GameControl is
     }
 
     //each NFT has a period that it can only be used for playing if it was not used for playing more than period ago
-    function getCountdownPeriod(uint256 _tokenId) public view returns (uint256) {
+    function getCountdownPeriod(uint256 _tokenId)
+        public
+        view
+        returns (uint256)
+    {
         //the higher level the token id is, the shorter period => users can play more times
         return countdownPeriod.getCountdownPeriod(_tokenId, address(draceNFT));
     }

@@ -255,6 +255,11 @@
         "type": "uint256"
       },
       {
+        "internalType": "uint256",
+        "name": "_gameId",
+        "type": "uint256"
+      },
+      {
         "internalType": "bytes32",
         "name": "r",
         "type": "bytes32"
@@ -268,6 +273,11 @@
         "internalType": "uint8",
         "name": "v",
         "type": "uint8"
+      },
+      {
+        "internalType": "bool",
+        "name": "_withdrawNFTs",
+        "type": "bool"
       }
     ],
     "name": "distributeRewards",
@@ -332,6 +342,40 @@
       {
         "internalType": "uint256",
         "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "gameIdToPlayer",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "isRewardPaid",
+        "type": "bool"
+      },
+      {
+        "internalType": "address",
+        "name": "player",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "gameId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "paidRewards",
         "type": "uint256"
       }
     ],
