@@ -188,7 +188,7 @@ contract GameControl is
     ) external {
         //verify signature
         bytes32 message = keccak256(
-            abi.encode(_recipient, _rewardAmount, _cumulativeReward)
+            abi.encode(_recipient, _rewardAmount, _cumulativeReward, _gameId)
         );
         address signer = recoverSigner(r, s, v, message);
         require(mappingApprover[signer], "distributeRewards::invalid operator");
