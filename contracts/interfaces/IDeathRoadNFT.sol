@@ -52,4 +52,6 @@ interface IDeathRoadNFT is IERC721 {
     function burn(uint256 tokenId) external;
     function decreaseCharm(address _addr) external;
     function latestTokenMinted(address _addr) external view returns (uint256);
+
+    function updateFeature(address _owner, uint256 tokenId, bytes memory featureName, bytes memory featureValue) external;
 }

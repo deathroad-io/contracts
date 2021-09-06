@@ -34,4 +34,6 @@ interface INFTFactory {
     function upgradesInfo(bytes32) external view returns (UpgradeInfo memory);
 
     function openBoxInfo(bytes32) external view returns (OpenBoxInfo memory);
+
+    function addBoxReward(address addr, uint256 reward) external;
 }

@@ -7,3 +7,4 @@ artifacts
 package-lock.json
 .env
 local
+.testlocal.js

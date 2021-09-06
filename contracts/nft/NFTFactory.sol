@@ -9,7 +9,6 @@ import "../interfaces/IDeathRoadNFT.sol";
 import "../interfaces/INFTFactory.sol";
 import "../lib/SignerRecover.sol";
 
-
 contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
     using SafeMath for uint256;
 
@@ -25,12 +24,16 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         bool useCharm,
         uint256 tokenId
     );
+    event BoxRewardUpdated(address addr, uint256 reward);
 
     //commit reveal needs 2 steps, the reveal step needs to pay fee by bot, this fee is to compensate for bots
     uint256 public SETTLE_FEE = 0.005 ether;
     address payable public SETTLE_FEE_RECEIVER;
+    address public masterChef;
+    uint256 public boxDiscountPercent = 70;
 
     mapping(address => bool) public mappingApprover;
+    mapping(address => uint256) public boxRewards;
 
     IDeathRoadNFT public nft;
 
@@ -40,12 +43,14 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         address _nft,
         address DRACE_token,
         address payable _feeTo,
-        address _notaryHook
+        address _notaryHook,
+        address _masterChef
     ) external initializer {
         nft = IDeathRoadNFT(_nft);
         DRACE = DRACE_token;
         feeTo = _feeTo;
         notaryHook = INotaryNFT(_notaryHook);
+        masterChef = _masterChef;
     }
 
     modifier onlyBoxOwner(uint256 boxId) {
@@ -93,7 +98,14 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         nft.addFeature(_box, _feature);
     }
 
-    function _buyBox(bytes memory _box, bytes memory _pack) internal returns (uint256) {
+    function setBoxDiscountPercent(uint256 _discount) external onlyOwner {
+        boxDiscountPercent = _discount;
+    }
+
+    function _buyBox(bytes memory _box, bytes memory _pack)
+        internal
+        returns (uint256)
+    {
         uint256 boxId = nft.buyBox(msg.sender, _box, _pack);
         emit NewBox(msg.sender, boxId);
         return boxId;
@@ -208,8 +220,50 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         emit CommitOpenBox(msg.sender, boxId, _commitment);
     }
 
-    function getLatestTokenMinted(address _addr) external view returns (uint256) {
+    function getLatestTokenMinted(address _addr)
+        external
+        view
+        returns (uint256)
+    {
         return nft.latestTokenMinted(_addr);
+    }
+
+    function updateFeature(
+        uint256 tokenId,
+        bytes memory featureName,
+        bytes memory featureValue,
+        uint256 _draceFee,
+        uint256 _expiryTime,
+        bytes32 r,
+        bytes32 s,
+        uint8 v
+    ) external {
+        require(
+            nft.ownerOf(tokenId) == msg.sender,
+            "updateFeature: only token owner"
+        );
+        require(block.timestamp <= _expiryTime, "buyAndCommitOpenBox:Expired");
+        IERC20 erc20 = IERC20(DRACE);
+        if (_draceFee > 0) {
+            erc20.transferFrom(msg.sender, feeTo, _draceFee);
+        }
+        bytes32 message = keccak256(
+            abi.encode(
+                "updateFeature",
+                msg.sender,
+                tokenId,
+                featureName,
+                featureValue,
+                _draceFee,
+                _expiryTime
+            )
+        );
+        require(
+            verifySignature(r, s, v, message),
+            "updateFeature: Signature invalid"
+        );
+
+        nft.updateFeature(msg.sender, tokenId, featureName, featureValue);
     }
 
     function buyAndCommitOpenBox(
@@ -218,6 +272,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         uint256 _price,
         bytes[] memory _featureNames, //all have same set of feature sames
         bytes[][] memory _featureValuesSet,
+        bool _useBoxReward,
         bytes32 _commitment,
         uint256 _expiryTime,
         bytes32 r,
@@ -230,11 +285,26 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         //verify signature
         require(block.timestamp <= _expiryTime, "buyAndCommitOpenBox:Expired");
         bytes32 message = keccak256(
-            abi.encode("buyAndCommitOpenBox", msg.sender, _box, _pack, _price, _featureNames, _featureValuesSet, _commitment, _expiryTime)
+            abi.encode(
+                "buyAndCommitOpenBox",
+                msg.sender,
+                _box,
+                _pack,
+                _price,
+                _featureNames,
+                _featureValuesSet,
+                _useBoxReward,
+                _commitment,
+                _expiryTime
+            )
         );
-        require(verifySignature(r, s, v, message), "buyAndCommitOpenBox: Signature invalid");
-        IERC20 erc20 = IERC20(DRACE);
-        erc20.transferFrom(msg.sender, feeTo, _price);
+        require(
+            verifySignature(r, s, v, message),
+            "buyAndCommitOpenBox: Signature invalid"
+        );
+        
+        transferBoxFee(_price, _useBoxReward);
+
         uint256 boxId = _buyBox(_box, _pack);
 
         //commit open box
@@ -260,6 +330,17 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         allOpenBoxes[msg.sender].push(_commitment);
 
         emit CommitOpenBox(msg.sender, boxId, _commitment);
+    }
+
+    function transferBoxFee(uint256 _price, bool _useBoxReward) internal {
+        IERC20 erc20 = IERC20(DRACE);
+        if (!_useBoxReward) {
+            erc20.transferFrom(msg.sender, feeTo, _price);
+        } else {
+            uint256 boxRewardSpent = _price.mul(boxDiscountPercent).div(100);
+            boxRewards[msg.sender] = boxRewards[msg.sender].sub(boxRewardSpent);
+            erc20.transferFrom(msg.sender, feeTo, _price.sub(boxRewardSpent));
+        }
     }
 
     //in case server lose secret, it basically revoke box for user to open again
@@ -334,7 +415,11 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
     bytes32[] public allUpgradeCommitments;
     event CommitUpgradeFeature(address owner, bytes32 commitment);
 
-    function getAllUpgradeCommitments() external view returns (bytes32[] memory) {
+    function getAllUpgradeCommitments()
+        external
+        view
+        returns (bytes32[] memory)
+    {
         return allUpgradeCommitments;
     }
 
@@ -366,7 +451,10 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         bytes32 s,
         uint8 v
     ) public payable {
-        require(msg.value == SETTLE_FEE, "commitUpgradeFeatures: must pay settle fee");
+        require(
+            msg.value == SETTLE_FEE,
+            "commitUpgradeFeatures: must pay settle fee"
+        );
         require(
             _featureNames.length == _featureValuesSet[0].length,
             "commitUpgradeFeatures:invalid input length"
@@ -438,7 +526,10 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
             "settleUpgradeFeatures: updated already settled"
         );
 
-        (bool success, uint256 resultIndex) = notaryHook.getUpgradeResult(secret, address(this));
+        (bool success, uint256 resultIndex) = notaryHook.getUpgradeResult(
+            secret,
+            address(this)
+        );
 
         UpgradeInfo storage u = _upgradesInfo[commitment];
 
@@ -477,12 +568,15 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         emit UpgradeToken(u.user, u.tokenIds, success, u.useCharm, tokenId);
     }
 
-    function settleAllRemainingCommitments(bytes32[] memory _boxCommitments, bytes32[] memory _upgradeCommitments) public {
-        for(uint256 i = 0; i < _boxCommitments.length; i++) {
+    function settleAllRemainingCommitments(
+        bytes32[] memory _boxCommitments,
+        bytes32[] memory _upgradeCommitments
+    ) public {
+        for (uint256 i = 0; i < _boxCommitments.length; i++) {
             settleOpenBox(_boxCommitments[i]);
         }
 
-        for(uint256 i = 0; i < _upgradeCommitments.length; i++) {
+        for (uint256 i = 0; i < _upgradeCommitments.length; i++) {
             settleUpgradeFeatures(_upgradeCommitments[i]);
         }
     }
@@ -491,5 +585,18 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
 
     function setNotaryHook(address _notaryHook) external onlyOwner {
         notaryHook = INotaryNFT(_notaryHook);
+    }
+
+    function setMasterChef(address _masterChef) external onlyOwner {
+        masterChef = _masterChef;
+    }
+
+    function addBoxReward(address addr, uint256 reward) external override {
+        require(
+            msg.sender == masterChef,
+            "only masterchef can update box reward"
+        );
+        boxRewards[addr] = boxRewards[addr].add(reward);
+        emit BoxRewardUpdated(addr, reward);
     }
 }

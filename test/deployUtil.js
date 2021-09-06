@@ -28,7 +28,7 @@ async function deploy(initialTokenReceiver) {
     await factory.setSettleFeeReceiver(owner.address)
     expect(await factory.mappingApprover(signer.signerAddress)).to.be.equal(true)
 
-    await factory.initialize(deathRoadNFT.address, drace.address, owner.address, notaryNFT.address)
+    await factory.initialize(deathRoadNFT.address, drace.address, owner.address, notaryNFT.address, ethers.constants.AddressZero)
 
     //mint 3 tokens to initialTokenReceiver
     featureNames = ["f0", "f1"]

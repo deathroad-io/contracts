@@ -57,7 +57,7 @@ const {
     await factory.setSettleFeeReceiver("0xD0e3376e1c3Af2C11730aA4E89BE839D4a1BD761")
 
     log('  - Initializing  NFTFactory        ');
-    await factory.initialize(deathRoadNFT.address, draceAddress, signers[0].address, notaryNFT.address)
+    await factory.initialize(deathRoadNFT.address, draceAddress, signers[0].address, notaryNFT.address, ethers.constants.AddressZero)
 
     deployData['DeathRoadNFT'] = {
       abi: getContractAbi('DeathRoadNFT'),

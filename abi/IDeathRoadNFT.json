@@ -592,5 +592,33 @@
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "featureName",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "featureValue",
+        "type": "bytes"
+      }
+    ],
+    "name": "updateFeature",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   }
 ]

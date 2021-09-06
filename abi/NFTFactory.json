@@ -10,6 +10,25 @@
       {
         "indexed": false,
         "internalType": "address",
+        "name": "addr",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "reward",
+        "type": "uint256"
+      }
+    ],
+    "name": "BoxRewardUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
         "name": "owner",
         "type": "address"
       },
@@ -291,6 +310,24 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "addr",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "reward",
+        "type": "uint256"
+      }
+    ],
+    "name": "addBoxReward",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "bytes",
         "name": "_box",
         "type": "bytes"
@@ -419,6 +456,38 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "boxDiscountPercent",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "boxRewards",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "bytes",
@@ -444,6 +513,11 @@
         "internalType": "bytes[][]",
         "name": "_featureValuesSet",
         "type": "bytes[][]"
+      },
+      {
+        "internalType": "bool",
+        "name": "_useBoxReward",
+        "type": "bool"
       },
       {
         "internalType": "bytes32",
@@ -825,6 +899,11 @@
         "internalType": "address",
         "name": "_notaryHook",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_masterChef",
+        "type": "address"
       }
     ],
     "name": "initialize",
@@ -846,6 +925,19 @@
         "internalType": "bool",
         "name": "",
         "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "masterChef",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -969,12 +1061,38 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "_discount",
+        "type": "uint256"
+      }
+    ],
+    "name": "setBoxDiscountPercent",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address payable",
         "name": "_feeTo",
         "type": "address"
       }
     ],
     "name": "setFeeTo",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_masterChef",
+        "type": "address"
+      }
+    ],
+    "name": "setMasterChef",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1071,6 +1189,54 @@
       }
     ],
     "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "featureName",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "featureValue",
+        "type": "bytes"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_draceFee",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_expiryTime",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "r",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "s",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint8",
+        "name": "v",
+        "type": "uint8"
+      }
+    ],
+    "name": "updateFeature",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

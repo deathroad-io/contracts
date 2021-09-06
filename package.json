@@ -44,6 +44,7 @@
     "hardhat-deploy-ethers": "*",
     "hardhat-gas-reporter": "^1.0.4",
     "sleep-promise": "^9.1.0",
-    "solidity-coverage": "^0.7.17"
+    "solidity-coverage": "^0.7.17",
+    "truffle-privatekey-provider": "^1.5.0"
   }
 }

@@ -149,6 +149,21 @@ contract DeathRoadNFT is ERC721Enumerable, IDeathRoadNFT, Ownable, SignerRecover
         mappingTokenFeatureValues[tokenId] = _featureValues;
     }
 
+    function updateFeature(address _owner, uint256 tokenId, bytes memory featureName, bytes memory featureValue) public override onlyFactory {
+        require(ownerOf(tokenId) == _owner, "updateFeature: tokenId is exist");
+        bytes[] memory _curerntFeatureNames = mappingTokenFeatureNames[tokenId];
+        for(uint256 i = 0; i < _curerntFeatureNames.length; i++) {
+            if (keccak256(_curerntFeatureNames[i]) == keccak256(featureName)) {
+                mappingTokenFeatureValues[tokenId][i] = featureValue;
+                return;
+            }
+        }
+
+        //not found
+        mappingTokenFeatureNames[tokenId].push(featureName);
+        mappingTokenFeatureValues[tokenId].push(featureValue);
+    }
+
     function getTokenFeatures(uint256 tokenId)
         public
         view
