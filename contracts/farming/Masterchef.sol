@@ -402,9 +402,7 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
                 1e12
             );
         } else {
-            user.rewardDebt = user.amount.mul(pool.accDRACEPerShare).div(
-                1e12
-            );
+            user.rewardDebt = user.amount.mul(pool.accDRACEPerShare).div(1e12);
         }
         emit ClaimRewards(msg.sender, _pid, pending);
     }
@@ -412,7 +410,10 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
     function claimRewardsNFTPool() external {
         require(nftPoolId != type(uint256).max, "NFT Pool not exist");
         UserInfo storage user = userInfo[nftPoolId][msg.sender];
-        require(user.lastNFTDepositTimestamp.add(12 hours) <= block.timestamp, "Can only claim rewards after 12hs of stake");
+        require(
+            user.lastNFTDepositTimestamp.add(12 hours) <= block.timestamp,
+            "Can only claim rewards after 12hs of stake"
+        );
         claimRewards(nftPoolId);
     }
 
@@ -479,5 +480,20 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
     // Safe DRACE transfer function, just in case if rounding error causes pool to not have enough DRACE.
     function addRecordedReward(address _to, uint256 _amount) internal {
         factory.addBoxReward(_to, _amount);
+    }
+
+    function getUserInfo(uint256 _pid, address _user)
+        external
+        view
+        returns (
+            uint256 amount, // How many LP tokens the user has provided.
+            uint256 rewardDebt, // Reward debt. See explanation below.
+            uint256 nftPoint,
+            uint256[] memory stakedNFTs,
+            uint256 lastNFTDepositTimestamp
+        )
+    {
+        UserInfo storage user = userInfo[_pid][_user];
+        return (user.amount, user.rewardDebt, user.nftPoint, user.stakedNFTs, user.lastNFTDepositTimestamp);
     }
 }
