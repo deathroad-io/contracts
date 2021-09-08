@@ -86,20 +86,28 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         feeTo = _feeTo;
     }
 
-    function addBoxes(bytes memory _box) public onlyOwner {
-        nft.addBoxes(_box);
+    function addBox(bytes memory _box) public onlyOwner {
+        nft.addBox(_box);
     }
 
-    function addPacks(bytes memory _pack) public onlyOwner {
-        nft.addPacks(_pack);
+    function addBoxes(bytes[] memory _boxes) public onlyOwner {
+        nft.addBoxes(_boxes);
     }
 
-    function addFeature(bytes memory _box, bytes memory _feature)
-        public
-        onlyOwner
-    {
-        nft.addFeature(_box, _feature);
+    function addPack(bytes memory _pack) public onlyOwner {
+        nft.addPack(_pack);
     }
+
+    function addPacks(bytes[] memory _packs) public onlyOwner {
+        nft.addPacks(_packs);
+    }
+
+//    function addFeature(bytes memory _box, bytes memory _feature)
+//        public
+//        onlyOwner
+//    {
+//        nft.addFeature(_box, _feature);
+//    }
 
     function setBoxDiscountPercent(uint256 _discount) external onlyOwner {
         boxDiscountPercent = _discount;
@@ -296,7 +304,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         for(uint256 i = 0; i < _featureValueIndexesSet.length; i++) {
             require(_featureValueIndexesSet[i] < nftStorageHook.getSetLength(), "buyAndCommitOpenBox: _featureValueIndexesSet out of rage");
         }
-        
+
         bytes32 message = keccak256(
             abi.encode(
                 "buyAndCommitOpenBox",

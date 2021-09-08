@@ -13,11 +13,13 @@ interface IDeathRoadNFT is IERC721 {
 
     function getPacks() external view returns (bytes[] memory);
 
-    function addBoxes(bytes memory _box) external;
+    function addBox(bytes memory _box) external;
+    function addBoxes(bytes[] memory _boxes) external;
 
-    function addPacks(bytes memory _pack) external;
+    function addPack(bytes memory _pack) external;
+    function addPacks(bytes[] memory _packs) external;
 
-    function addFeature(bytes memory _box, bytes memory _feature) external;
+//    function addFeature(bytes memory _box, bytes memory _feature) external;
 
     function buyBox(
         address _recipient,
