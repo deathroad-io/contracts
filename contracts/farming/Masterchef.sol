@@ -410,6 +410,9 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
     }
 
     function claimRewardsNFTPool() external {
+        require(nftPoolId != type(uint256).max, "NFT Pool not exist");
+        UserInfo storage user = userInfo[nftPoolId][msg.sender];
+        require(user.lastNFTDepositTimestamp.add(12 hours) <= block.timestamp, "Can only claim rewards after 12hs of stake");
         claimRewards(nftPoolId);
     }
 
