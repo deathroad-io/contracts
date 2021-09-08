@@ -332,6 +332,19 @@
   {
     "inputs": [
       {
+        "internalType": "bytes",
+        "name": "_box",
+        "type": "bytes"
+      }
+    ],
+    "name": "addBox",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "addr",
         "type": "address"
@@ -350,9 +363,9 @@
   {
     "inputs": [
       {
-        "internalType": "bytes",
-        "name": "_box",
-        "type": "bytes"
+        "internalType": "bytes[]",
+        "name": "_boxes",
+        "type": "bytes[]"
       }
     ],
     "name": "addBoxes",
@@ -364,16 +377,11 @@
     "inputs": [
       {
         "internalType": "bytes",
-        "name": "_box",
-        "type": "bytes"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_feature",
+        "name": "_pack",
         "type": "bytes"
       }
     ],
-    "name": "addFeature",
+    "name": "addPack",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -381,9 +389,9 @@
   {
     "inputs": [
       {
-        "internalType": "bytes",
-        "name": "_pack",
-        "type": "bytes"
+        "internalType": "bytes[]",
+        "name": "_packs",
+        "type": "bytes[]"
       }
     ],
     "name": "addPacks",

@@ -61,30 +61,46 @@ contract DeathRoadNFT is ERC721Enumerable, IDeathRoadNFT, Ownable, SignerRecover
         return Packs;
     }
 
-    function addBoxes(bytes memory _box) public override onlyFactory {
+    function addBox(bytes memory _box) public override onlyFactory {
         require(mappingBoxes[_box] != true);
         mappingBoxes[_box] = true;
         Boxes.push(_box);
     }
 
-    function addPacks(bytes memory _pack) public override onlyFactory {
+    function addBoxes(bytes[] memory _boxes) public override onlyFactory {
+        for (uint256 i = 0; i < _boxes.length; i++) {
+            require(mappingBoxes[_boxes[i]] != true);
+            mappingBoxes[_boxes[i]] = true;
+            Boxes.push(_boxes[i]);
+        }
+    }
+
+    function addPacks(bytes[] memory _packs) public override onlyFactory {
+        for (uint256 i = 0; i < _packs.length; i++) {
+            require(mappingPacks[_packs[i]] != true);
+            mappingPacks[_packs[i]] = true;
+            Packs.push(_packs[i]);
+        }
+    }
+
+    function addPack(bytes memory _pack) public override onlyFactory {
         require(mappingPacks[_pack] != true);
         mappingPacks[_pack] = true;
         Packs.push(_pack);
     }
 
-    function addFeature(bytes memory _box, bytes memory _feature)
-        public
-        override
-        onlyFactory
-    {
-        require(mappingBoxes[_box], "addFeature: invalid box type");
-        require(
-            !mappingFeatures[_box][_feature],
-            "addFeature: feature already exist"
-        );
-        mappingFeatures[_box][_feature] = true;
-    }
+//    function addFeature(bytes memory _box, bytes memory _feature)
+//        public
+//        override
+//        onlyFactory
+//    {
+//        require(mappingBoxes[_box], "addFeature: invalid box type");
+//        require(
+//            !mappingFeatures[_box][_feature],
+//            "addFeature: feature already exist"
+//        );
+//        mappingFeatures[_box][_feature] = true;
+//    }
 
     function buyBox(
         address _recipient,

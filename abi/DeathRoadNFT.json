@@ -144,7 +144,7 @@
         "type": "bytes"
       }
     ],
-    "name": "addBoxes",
+    "name": "addBox",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -152,17 +152,12 @@
   {
     "inputs": [
       {
-        "internalType": "bytes",
-        "name": "_box",
-        "type": "bytes"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_feature",
-        "type": "bytes"
+        "internalType": "bytes[]",
+        "name": "_boxes",
+        "type": "bytes[]"
       }
     ],
-    "name": "addFeature",
+    "name": "addBoxes",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -173,6 +168,19 @@
         "internalType": "bytes",
         "name": "_pack",
         "type": "bytes"
+      }
+    ],
+    "name": "addPack",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes[]",
+        "name": "_packs",
+        "type": "bytes[]"
       }
     ],
     "name": "addPacks",
