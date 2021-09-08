@@ -119,7 +119,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         bytes32 r,
         bytes32 s,
         uint8 v
-    ) public {
+    ) external {
         require(block.timestamp <= _expiryTime, "Expired");
         bytes32 message = keccak256(
             abi.encode("buyBox", msg.sender, _box, _pack, _price, _expiryTime)
@@ -166,59 +166,59 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         return _openBoxInfo[_comm];
     }
 
-    function commitOpenBox(
-        uint256 boxId,
-        bytes[] memory _featureNames, //all have same set of feature sames
-        bytes[][] memory _featureValuesSet,
-        bytes32 _commitment,
-        uint256 _expiryTime,
-        bytes32 r,
-        bytes32 s,
-        uint8 v
-    ) public payable onlyBoxOwner(boxId) boxNotOpen(boxId) {
-        require(msg.value == SETTLE_FEE, "commitOpenBox: must pay settle fee");
-        SETTLE_FEE_RECEIVER.transfer(msg.value);
-        require(!commitedBoxes[boxId], "commitOpenBox: box already commited");
-        commitedBoxes[boxId] = true;
-        allBoxCommitments.push(_commitment);
-        require(
-            block.timestamp <= _expiryTime,
-            "commitOpenBox: commitment expired"
-        );
-        require(
-            _openBoxInfo[_commitment].user == address(0),
-            "commitOpenBox:commitment overlap"
-        );
+    // function commitOpenBox(
+    //     uint256 boxId,
+    //     bytes[] memory _featureNames, //all have same set of feature sames
+    //     bytes[][] memory _featureValuesSet,
+    //     bytes32 _commitment,
+    //     uint256 _expiryTime,
+    //     bytes32 r,
+    //     bytes32 s,
+    //     uint8 v
+    // ) public payable onlyBoxOwner(boxId) boxNotOpen(boxId) {
+    //     require(msg.value == SETTLE_FEE, "commitOpenBox: must pay settle fee");
+    //     SETTLE_FEE_RECEIVER.transfer(msg.value);
+    //     require(!commitedBoxes[boxId], "commitOpenBox: box already commited");
+    //     commitedBoxes[boxId] = true;
+    //     allBoxCommitments.push(_commitment);
+    //     require(
+    //         block.timestamp <= _expiryTime,
+    //         "commitOpenBox: commitment expired"
+    //     );
+    //     require(
+    //         _openBoxInfo[_commitment].user == address(0),
+    //         "commitOpenBox:commitment overlap"
+    //     );
 
-        require(
-            _featureNames.length == _featureValuesSet[0].length,
-            "commitOpenBox:invalid input length"
-        );
+    //     require(
+    //         _featureNames.length == _featureValuesSet[0].length,
+    //         "commitOpenBox:invalid input length"
+    //     );
 
-        bytes32 message = keccak256(
-            abi.encode(
-                "commitOpenBox",
-                msg.sender,
-                boxId,
-                _featureNames,
-                _featureValuesSet,
-                _commitment,
-                _expiryTime
-            )
-        );
-        require(verifySignature(r, s, v, message), "Signature invalid");
+    //     bytes32 message = keccak256(
+    //         abi.encode(
+    //             "commitOpenBox",
+    //             msg.sender,
+    //             boxId,
+    //             _featureNames,
+    //             _featureValuesSet,
+    //             _commitment,
+    //             _expiryTime
+    //         )
+    //     );
+    //     require(verifySignature(r, s, v, message), "Signature invalid");
 
-        OpenBoxInfo storage info = _openBoxInfo[_commitment];
+    //     OpenBoxInfo storage info = _openBoxInfo[_commitment];
 
-        info.user = msg.sender;
-        info.boxId = boxId;
-        info.featureNames = _featureNames;
-        info.featureValuesSet = _featureValuesSet;
-        info.previousBlockHash = blockhash(block.number - 1);
-        allOpenBoxes[msg.sender].push(_commitment);
+    //     info.user = msg.sender;
+    //     info.boxId = boxId;
+    //     info.featureNames = _featureNames;
+    //     info.featureValuesSet = _featureValuesSet;
+    //     info.previousBlockHash = blockhash(block.number - 1);
+    //     allOpenBoxes[msg.sender].push(_commitment);
 
-        emit CommitOpenBox(msg.sender, boxId, _commitment);
-    }
+    //     emit CommitOpenBox(msg.sender, boxId, _commitment);
+    // }
 
     function getLatestTokenMinted(address _addr)
         external
@@ -359,13 +359,13 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         OpenBoxInfo storage info = _openBoxInfo[commitment];
         require(info.user != address(0), "settleOpenBox: commitment not exist");
         require(
-            commitedBoxes[info.boxId],
+            commitedBoxes[info.boxIdFrom],
             "settleOpenBox: box must be committed"
         );
         require(!info.settled, "settleOpenBox: already settled");
         info.settled = true;
         info.openBoxStatus = true;
-        uint256 resultIndex = notaryHook.getOpenBoxResult(
+        uint256[] memory resultIndex = notaryHook.getOpenBoxResult(
             secret,
             address(this)
         );

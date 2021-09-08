@@ -17,11 +17,12 @@ contract NotaryNFT is INotaryNFT {
         return (ret < info.targetFeatureValuesSet.length, ret);
     }
 
-    function getOpenBoxResult(bytes32 secret, address nftFactory) external override view returns (uint256) {
+    function getOpenBoxResult(bytes32 secret, address nftFactory) external override view returns (uint256[] memory) {
         INFTFactory factory = INFTFactory(nftFactory);
         bytes32 commitment = keccak256(abi.encode(secret));
         INFTFactory.OpenBoxInfo memory info = factory.openBoxInfo(commitment);
 
+        uint256[] memory randomResult = new uint256[](info.boxCount);
         bytes32 hash = keccak256(abi.encode(info.user, info.boxId, info.featureNames, info.featureValuesSet, info.previousBlockHash, secret));
         uint256 h = uint256(hash);
         uint256 randomResult = h.mod(info.featureValuesSet.length);
