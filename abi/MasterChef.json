@@ -277,34 +277,9 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "_tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_dracePoint",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_expiry",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "r",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "s",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "uint8",
-        "name": "v",
-        "type": "uint8"
+        "internalType": "uint256[]",
+        "name": "_tokenIds",
+        "type": "uint256[]"
       }
     ],
     "name": "depositNFT",
@@ -458,7 +433,7 @@
       },
       {
         "internalType": "address",
-        "name": "_oracle",
+        "name": "_nftStakingPointHook",
         "type": "address"
       },
       {
@@ -536,10 +511,10 @@
   },
   {
     "inputs": [],
-    "name": "oracle",
+    "name": "nftStakingPointHook",
     "outputs": [
       {
-        "internalType": "address",
+        "internalType": "contract INFTStakingPoint",
         "name": "",
         "type": "address"
       }
@@ -696,11 +671,11 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_oracle",
+        "name": "_nftStakingPointHook",
         "type": "address"
       }
     ],
-    "name": "setOracle",
+    "name": "setNFTStakingPointHook",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

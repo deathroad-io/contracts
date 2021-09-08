@@ -10,6 +10,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "../DRACE.sol";
 import "../lib/SignerRecover.sol";
 import "../interfaces/INFTFactory.sol";
+import "../interfaces/INFTStakingPoint.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
@@ -66,9 +67,9 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
     }
     // The DRACE TOKEN!
     DRACE public drace;
-    address public oracle;
     IERC721 public nft;
     INFTFactory public factory;
+    INFTStakingPoint public nftStakingPointHook;
 
     // the token rewards container
 
@@ -116,20 +117,23 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
         address _factory,
         address _draceNFT,
         DRACE _drace,
-        address _oracle,
+        address _nftStakingPointHook,
         uint256 _dracePerBlock,
         uint256 _startBlock,
         uint256 _howManyBlockForBonus
     ) external initializer onlyOwner {
         factory = INFTFactory(_factory);
         nft = IERC721(_draceNFT);
-        oracle = _oracle;
+        nftStakingPointHook = INFTStakingPoint(_nftStakingPointHook);
         drace = _drace;
         dracePerBlock = _dracePerBlock;
         startBlock = _startBlock > 0 ? _startBlock : block.number;
         bonusEndBlock = startBlock.add(_howManyBlockForBonus);
 
+        //add nft pool
         add(1000, address(0), false);
+        //DRACE staking pool
+        add(1000, address(drace), false);
     }
 
     function isNFTPool(uint256 pid) public view returns (bool) {
@@ -144,8 +148,11 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
         nft = IERC721(_nft);
     }
 
-    function setOracle(address _oracle) external onlyOwner {
-        oracle = _oracle;
+    function setNFTStakingPointHook(address _nftStakingPointHook)
+        external
+        onlyOwner
+    {
+        nftStakingPointHook = INFTStakingPoint(_nftStakingPointHook);
     }
 
     function setFactory(address _factory) external onlyOwner {
@@ -323,23 +330,8 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
         emit Deposit(msg.sender, _pid, _amount);
     }
 
-    function depositNFT(
-        uint256 _tokenId,
-        uint256 _dracePoint,
-        uint256 _expiry,
-        bytes32 r,
-        bytes32 s,
-        uint8 v
-    ) public {
+    function depositNFT(uint256[] memory _tokenIds) public {
         require(nftPoolId != type(uint256).max, "NFT Pool not exist");
-
-        bytes32 message = keccak256(
-            abi.encode("depositNFT", msg.sender, _tokenId, _dracePoint, _expiry)
-        );
-        require(
-            recoverSigner(r, s, v, message) == oracle,
-            "depositNFT:Signature invalid"
-        );
 
         PoolInfo storage pool = poolInfo[nftPoolId];
         UserInfo storage user = userInfo[nftPoolId][msg.sender];
@@ -353,15 +345,33 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
                 .sub(user.rewardDebt);
             addRecordedReward(msg.sender, pending);
         }
-        nft.transferFrom(msg.sender, address(this), _tokenId);
-        user.stakedNFTs.push(_tokenId);
-        user.nftPoint = user.nftPoint.add(_dracePoint);
-        user.rewardDebt = user.nftPoint.mul(pool.accDRACEPerShare).div(1e12);
-        pool.totalNFTPoint = pool.totalNFTPoint.add(_dracePoint);
-        user.nftDepositPoint[_tokenId] = _dracePoint;
-        user.lastNFTDepositTimestamp = block.timestamp;
 
-        emit NFTDeposit(msg.sender, nftPoolId, _tokenId, _dracePoint);
+        uint256 addedPoint = 0;
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            uint256 _tokenId = _tokenIds[i];
+
+            nft.transferFrom(msg.sender, address(this), _tokenId);
+            user.stakedNFTs.push(_tokenId);
+
+            uint256 stakingPoint = nftStakingPointHook.getStakingPoint(
+                _tokenId,
+                address(nft)
+            );
+            require(
+                stakingPoint > 0,
+                "depositNFT:NFT is not allocated for staking point"
+            );
+            user.nftDepositPoint[_tokenId] = stakingPoint;
+            addedPoint = addedPoint.add(stakingPoint);
+
+            emit NFTDeposit(msg.sender, nftPoolId, _tokenId, stakingPoint);
+        }
+
+        user.nftPoint = user.nftPoint.add(addedPoint);
+        user.rewardDebt = user.nftPoint.mul(pool.accDRACEPerShare).div(1e12);
+        pool.totalNFTPoint = pool.totalNFTPoint.add(addedPoint);
+
+        user.lastNFTDepositTimestamp = block.timestamp;
     }
 
     // Withdraw LP tokens from MasterChef.
@@ -382,6 +392,7 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
     }
 
     function claimRewards(uint256 _pid) public {
+        require(!isNFTPool(_pid), "claimRewards: must not be NFT pool");
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         updatePool(_pid);
@@ -424,16 +435,16 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
 
         PoolInfo storage pool = poolInfo[nftPoolId];
         UserInfo storage user = userInfo[nftPoolId][msg.sender];
-        require(user.stakedNFTs.length > 0, "withdraw: not good");
-
+        require(user.stakedNFTs.length > 0, "withdrawNFT: not good");
+        require(user.lastNFTDepositTimestamp.add(12 hours) <= block.timestamp, "withdrawNFT: NFTs only available for withdrawal 12 hours after deposit");
+        
         updatePool(nftPoolId);
-        uint256 pending = 0;
-        //only get rbox rewards if all nft staked >= 12hours ago
-        if (user.lastNFTDepositTimestamp.add(12 hours) <= block.timestamp) {
-            pending = user.nftPoint.mul(pool.accDRACEPerShare).div(1e12).sub(
-                user.rewardDebt
-            );
-        }
+        uint256 pending = user
+            .nftPoint
+            .mul(pool.accDRACEPerShare)
+            .div(1e12)
+            .sub(user.rewardDebt);
+
         //transfer nfts back
         for (uint256 i = 0; i < user.stakedNFTs.length; i++) {
             nft.transferFrom(address(this), msg.sender, user.stakedNFTs[i]);
@@ -494,6 +505,12 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
         )
     {
         UserInfo storage user = userInfo[_pid][_user];
-        return (user.amount, user.rewardDebt, user.nftPoint, user.stakedNFTs, user.lastNFTDepositTimestamp);
+        return (
+            user.amount,
+            user.rewardDebt,
+            user.nftPoint,
+            user.stakedNFTs,
+            user.lastNFTDepositTimestamp
+        );
     }
 }

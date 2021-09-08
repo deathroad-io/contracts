@@ -4,7 +4,7 @@ const signer = require('./signer')
 
 async function deploy(initialTokenReceiver) {
     const [owner] = await ethers.getSigners();
-    var drace, deathRoadNFT, factory, featureNames, featureValues, featureNamesEncode, featureValuesSetEncode, ufeatureValues, ufeatureNamesEncode, ufeatureValuesSetEncode
+    var drace, deathRoadNFT, factory, featureNames, featureValues, featureNamesEncode, featureValuesSetEncode, ufeatureValues, ufeatureNamesEncode, ufeatureValuesSetEncode, nftStorage
     let tokenIds
     const DRACE = await ethers.getContractFactory("DRACE");
     const draceInstance = await DRACE.deploy(owner.address);
@@ -24,15 +24,19 @@ async function deploy(initialTokenReceiver) {
     const notaryNFTInstance = await NotaryNFT.deploy()
     const notaryNFT = await notaryNFTInstance.deployed()
 
+    const NFTStorage = await ethers.getContractFactory('NFTStorage');
+    const NFTStorageInstance = await NFTStorage.deploy()
+    nftStorage = await NFTStorageInstance.deployed()
+
     await factory.addApprover(signer.signerAddress, true);
     await factory.setSettleFeeReceiver(owner.address)
     expect(await factory.mappingApprover(signer.signerAddress)).to.be.equal(true)
 
-    await factory.initialize(deathRoadNFT.address, drace.address, owner.address, notaryNFT.address, ethers.constants.AddressZero)
+    await factory.initialize(deathRoadNFT.address, drace.address, owner.address, notaryNFT.address, nftStorage.address, ethers.constants.AddressZero)
 
     //mint 3 tokens to initialTokenReceiver
-    featureNames = ["f0", "f1"]
-    featureValues = [["f00", "f01"], ["f10", "f11"], ["f20", "f21"]]
+    featureNames = ["pack", "type"]
+    featureValues = [["1star", "car"], ["2star", "car"], ["3star", "car"]]
     featureNamesEncode = [signer.encodeString(featureNames[0]), signer.encodeString(featureNames[1])]
     featureValuesSetEncode = [
         [signer.encodeString(featureValues[0][0]), signer.encodeString(featureValues[0][1])],
@@ -58,7 +62,7 @@ async function deploy(initialTokenReceiver) {
         [signer.encodeString(ufeatureValues[2][0]), signer.encodeString(ufeatureValues[2][1])]
     ]
 
-    return [drace, deathRoadNFT, factory, featureNames, featureValues, featureNamesEncode, featureValuesSetEncode, ufeatureValues, ufeatureNamesEncode, ufeatureValuesSetEncode, tokenIds]
+    return [drace, deathRoadNFT, factory, featureNames, featureValues, featureNamesEncode, featureValuesSetEncode, ufeatureValues, ufeatureNamesEncode, ufeatureValuesSetEncode, tokenIds, nftStorage]
 }
 
 module.exports = {

@@ -38,13 +38,24 @@ const {
       deployTransaction: masterChef.deployTransaction,
     }
 
+    log('  Deploying NFTStakingPoint Contract...');
+    const NFTStakingPoint = await ethers.getContractFactory('NFTStakingPoint');
+    const NFTStakingPointInstance = await NFTStakingPoint.deploy()
+    const nftStakingPoint = await NFTStakingPointInstance.deployed()
+    log('  - NFTStakingPoint:         ', nftStakingPoint.address);
+    deployData['NFTStakingPoint'] = {
+      abi: getContractAbi('NFTStakingPoint'),
+      address: nftStakingPoint.address,
+      deployTransaction: nftStakingPoint.deployTransaction,
+    }
+
     //initializing
     log('  Initializing Farming Contract...');
     const draceAddress = require(`../deployments/${chainId}/DRACE.json`).address
     const nftAddress = require(`../deployments/${chainId}/DeathRoadNFT.json`).address
     const factoryAddress = require(`../deployments/${chainId}/NFTFactory.json`).address
     await masterChef.initialize(factoryAddress, nftAddress, draceAddress,
-          "0x75785F9CE180C951c8178BABadFE904ec883D820",
+          nftStakingPoint.address,
           ethers.utils.parseEther('5'),
           0,
           100000)

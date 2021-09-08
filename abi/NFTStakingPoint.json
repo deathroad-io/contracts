@@ -1,5 +1,10 @@
 [
   {
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {
@@ -32,6 +37,49 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getSpecialTokenStakingPoint",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_nftContract",
+        "type": "address"
+      }
+    ],
+    "name": "getStakingPoint",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "owner",
     "outputs": [
@@ -39,6 +87,19 @@
         "internalType": "address",
         "name": "",
         "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "packAscii",
+    "outputs": [
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
       }
     ],
     "stateMutability": "view",
@@ -55,13 +116,49 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "_tokenId",
         "type": "uint256"
       },
       {
-        "internalType": "address",
+        "internalType": "uint256",
+        "name": "point",
+        "type": "uint256"
+      }
+    ],
+    "name": "setSpecialTokenStakingPoint",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "_pack",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_type",
+        "type": "bytes"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_point",
+        "type": "uint256"
+      }
+    ],
+    "name": "setTokenPackPoint",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
         "name": "",
-        "type": "address"
+        "type": "uint256"
       }
     ],
     "name": "specialTokenPoint",
@@ -77,6 +174,11 @@
   },
   {
     "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      },
       {
         "internalType": "bytes",
         "name": "",
@@ -105,6 +207,19 @@
     "name": "transferOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "typeAscii",
+    "outputs": [
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   }
 ]

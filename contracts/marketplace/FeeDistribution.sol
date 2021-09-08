@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "../lib/BlackholePrevention.sol";
 import "../interfaces/IPancakeRouter02.sol";
+import "../interfaces/IPancakePair.sol";
 
 contract FeeDistribution is Ownable, Initializable, BlackholePrevention {
     using SafeMath for uint256;
@@ -60,7 +61,9 @@ contract FeeDistribution is Ownable, Initializable, BlackholePrevention {
         require(totalPercent <= 1000, "percentage too high");
     }
 
-    function distribute() external onlyOwner {
+    function distribute(address _pair) external onlyOwner {
+        IPancakePair pancakePair = IPancakePair(_pair);
+        address otherTokenAddress = pancakePair.token0() == address(drace)? pancakePair.token1() : pancakePair.token0();
         uint256 length = distributions.length;
         uint256 balance = drace.balanceOf(address(this));
         for (uint256 i = 0; i < length; i++) {
@@ -82,8 +85,8 @@ contract FeeDistribution is Ownable, Initializable, BlackholePrevention {
 
             address[] memory path = new address[](2);
             path[0] = address(drace);
-            path[1] = routerV2.WETH();
-            IWETH weth = IWETH(routerV2.WETH());
+            path[1] = otherTokenAddress;
+            IERC20 otherToken = IERC20(otherTokenAddress);
 
             routerV2.swapExactTokensForTokens(
                 half,
@@ -94,13 +97,13 @@ contract FeeDistribution is Ownable, Initializable, BlackholePrevention {
             );
 
             rest = drace.balanceOf(address(this));
-            uint256 wethBalance = weth.balanceOf(address(this));
+            uint256 othreTokenBalance = otherToken.balanceOf(address(this));
 
             drace.approve(address(routerV2), rest);
-            weth.approve(address(routerV2), wethBalance);
+            otherToken.approve(address(routerV2), othreTokenBalance);
 
             address receiver = liquidityReceiver == address(0)? owner() : liquidityReceiver;
-            routerV2.addLiquidity(address(drace), address(weth), rest, wethBalance, 0, 0, receiver, block.timestamp + 100);
+            routerV2.addLiquidity(address(drace), otherTokenAddress, rest, othreTokenBalance, 0, 0, receiver, block.timestamp + 100);
         }
     }
 
