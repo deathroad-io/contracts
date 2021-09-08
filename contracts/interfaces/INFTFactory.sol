@@ -23,7 +23,8 @@ interface INFTFactory {
 
     struct OpenBoxInfo {
         address user;
-        uint256 boxId;
+        uint256 boxIdFrom;
+        uint256 boxIdCount;
         bool settled;
         bool openBoxStatus;
         bytes[] featureNames;

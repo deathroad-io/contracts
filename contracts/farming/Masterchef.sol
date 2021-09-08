@@ -354,7 +354,7 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
             addRecordedReward(msg.sender, pending);
         }
         nft.transferFrom(msg.sender, address(this), _tokenId);
-
+        
         user.nftPoint = user.nftPoint.add(_dracePoint);
         user.rewardDebt = user.nftPoint.mul(pool.accDRACEPerShare).div(1e12);
         pool.totalNFTPoint = pool.totalNFTPoint.add(_dracePoint);

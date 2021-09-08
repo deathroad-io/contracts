@@ -151,7 +151,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
     mapping(address => bytes32[]) public allOpenBoxes;
     mapping(uint256 => bool) public commitedBoxes;
     bytes32[] public allBoxCommitments;
-    event CommitOpenBox(address owner, uint256 boxId, bytes32 commitment);
+    event CommitOpenBox(address owner, uint256 boxCount, bytes32 commitment);
 
     function getAllBoxCommitments() external view returns (bytes32[] memory) {
         return allBoxCommitments;
@@ -269,6 +269,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
     function buyAndCommitOpenBox(
         bytes memory _box,
         bytes memory _pack,
+        uint256 _numBox,
         uint256 _price,
         bytes[] memory _featureNames, //all have same set of feature sames
         bytes[][] memory _featureValuesSet,
@@ -290,6 +291,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
                 msg.sender,
                 _box,
                 _pack,
+                _numBox,
                 _price,
                 _featureNames,
                 _featureValuesSet,
@@ -303,12 +305,14 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
             "buyAndCommitOpenBox: Signature invalid"
         );
         
-        transferBoxFee(_price, _useBoxReward);
-
-        uint256 boxId = _buyBox(_box, _pack);
+        transferBoxFee(_numBox.mul(_price), _useBoxReward);
+        uint256 boxId;
+        for(uint256 i = 0; i < _numBox; i++) {
+            boxId = _buyBox(_box, _pack);
+            commitedBoxes[boxId] = true;
+        }
 
         //commit open box
-        commitedBoxes[boxId] = true;
         allBoxCommitments.push(_commitment);
         require(
             _openBoxInfo[_commitment].user == address(0),
@@ -323,13 +327,14 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         OpenBoxInfo storage info = _openBoxInfo[_commitment];
 
         info.user = msg.sender;
-        info.boxId = boxId;
+        info.boxIdFrom = boxId.add(1).sub(_numBox);
+        info.boxIdCount = _numBox;
         info.featureNames = _featureNames;
         info.featureValuesSet = _featureValuesSet;
         info.previousBlockHash = blockhash(block.number - 1);
         allOpenBoxes[msg.sender].push(_commitment);
 
-        emit CommitOpenBox(msg.sender, boxId, _commitment);
+        emit CommitOpenBox(msg.sender, _numBox, _commitment);
     }
 
     function transferBoxFee(uint256 _price, bool _useBoxReward) internal {
