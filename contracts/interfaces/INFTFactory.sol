@@ -27,8 +27,7 @@ interface INFTFactory {
         uint256 boxCount;
         bool settled;
         bool openBoxStatus;
-        bytes[] featureNames;
-        bytes[][] featureValuesSet;
+        uint16[] featureValuesSet;
         bytes32 previousBlockHash;
         uint256 blockNumber;
     }

@@ -98,14 +98,9 @@
             "type": "bool"
           },
           {
-            "internalType": "bytes[]",
-            "name": "featureNames",
-            "type": "bytes[]"
-          },
-          {
-            "internalType": "bytes[][]",
+            "internalType": "uint16[]",
             "name": "featureValuesSet",
-            "type": "bytes[][]"
+            "type": "uint16[]"
           },
           {
             "internalType": "bytes32",

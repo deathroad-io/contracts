@@ -515,14 +515,9 @@
         "type": "uint256"
       },
       {
-        "internalType": "bytes[]",
-        "name": "_featureNames",
-        "type": "bytes[]"
-      },
-      {
-        "internalType": "bytes[][]",
-        "name": "_featureValuesSet",
-        "type": "bytes[][]"
+        "internalType": "uint16[]",
+        "name": "_featureValueIndexesSet",
+        "type": "uint16[]"
       },
       {
         "internalType": "bool",
@@ -558,49 +553,6 @@
     "name": "buyAndCommitOpenBox",
     "outputs": [],
     "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes",
-        "name": "_box",
-        "type": "bytes"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_pack",
-        "type": "bytes"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_price",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_expiryTime",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "r",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "s",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "uint8",
-        "name": "v",
-        "type": "uint8"
-      }
-    ],
-    "name": "buyBox",
-    "outputs": [],
-    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -864,6 +816,11 @@
       },
       {
         "internalType": "address",
+        "name": "_nftStorageHook",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
         "name": "_masterChef",
         "type": "address"
       }
@@ -956,6 +913,19 @@
   },
   {
     "inputs": [],
+    "name": "nftStorageHook",
+    "outputs": [
+      {
+        "internalType": "contract INFTStorage",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "notaryHook",
     "outputs": [
       {
@@ -1005,14 +975,9 @@
             "type": "bool"
           },
           {
-            "internalType": "bytes[]",
-            "name": "featureNames",
-            "type": "bytes[]"
-          },
-          {
-            "internalType": "bytes[][]",
+            "internalType": "uint16[]",
             "name": "featureValuesSet",
-            "type": "bytes[][]"
+            "type": "uint16[]"
           },
           {
             "internalType": "bytes32",
@@ -1101,6 +1066,19 @@
       }
     ],
     "name": "setMasterChef",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_storage",
+        "type": "address"
+      }
+    ],
+    "name": "setNFTStorage",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

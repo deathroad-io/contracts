@@ -50,7 +50,6 @@ contract NotaryNFT is INotaryNFT {
             abi.encode(
                 info.user,
                 info.boxIdFrom,
-                info.featureNames,
                 info.featureValuesSet,
                 info.previousBlockHash,
                 secret

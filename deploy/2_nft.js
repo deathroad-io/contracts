@@ -43,6 +43,12 @@ const {
     const notaryNFT = await notaryNFTInstance.deployed()
     log('  - NotaryNFT:         ', notaryNFT.address);
 
+    log('  Deploying NFT Storage Contract...');
+    const NFTStorage = await ethers.getContractFactory('NFTStorage');
+    const NFTStorageInstance = await NFTStorage.deploy()
+    const nftStorage = await NFTStorageInstance.deployed()
+    log('  - NFTStorage:         ', nftStorage.address);
+
     log('  Deploying NFT Factory Contract...');
     const NFTFactory = await ethers.getContractFactory('NFTFactory');
     const nftFactoryInstance = await NFTFactory.deploy()
@@ -57,7 +63,13 @@ const {
     await factory.setSettleFeeReceiver("0xD0e3376e1c3Af2C11730aA4E89BE839D4a1BD761")
 
     log('  - Initializing  NFTFactory        ');
-    await factory.initialize(deathRoadNFT.address, draceAddress, signers[0].address, notaryNFT.address, ethers.constants.AddressZero)
+    await factory.initialize(deathRoadNFT.address, draceAddress, signers[0].address, notaryNFT.address, nftStorage.address, ethers.constants.AddressZero)
+
+    deployData['NFTStorage'] = {
+      abi: getContractAbi('NFTStorage'),
+      address: nftStorage.address,
+      deployTransaction: nftStorage.deployTransaction,
+    }
 
     deployData['DeathRoadNFT'] = {
       abi: getContractAbi('DeathRoadNFT'),

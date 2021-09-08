@@ -1,7 +1,7 @@
 pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
-
-contract NFTStorage is Ownable {
+import "../interfaces/INFTStorage.sol";
+contract NFTStorage is Ownable, INFTStorage {
     struct StorageSet {
         bytes[][] values;
     }
@@ -11,7 +11,7 @@ contract NFTStorage is Ownable {
     function addFeatures(
         bytes[] memory _featureNames,
         bytes[] memory _featureValues
-    ) external onlyOwner {
+    ) external override onlyOwner {
         require(
             _featureNames.length == _featureValues.length,
             "Invalid length input"
@@ -23,7 +23,7 @@ contract NFTStorage is Ownable {
     function addFeaturesMany(
         bytes[][] memory _featureNamesSet,
         bytes[][] memory _featureValuesSet
-    ) external onlyOwner {
+    ) external override onlyOwner {
         require(
             _featureNamesSet.length == _featureValuesSet.length,
             "Invalid length input"
@@ -40,17 +40,17 @@ contract NFTStorage is Ownable {
 
     function getAllFeatures()
         external
-        view
+        view override 
         returns (bytes[][] memory _featureNames, bytes[][] memory _featureValues)
     {
         return (featureNamesSet.values, featureValuesSet.values);
     }
 
-    function getSetLength() external view returns (uint256) {
+    function getSetLength() external override  view returns (uint256) {
         return featureNamesSet.values.length;
     }
 
-    function getFeaturesByIndex(uint256 index) external view returns (bytes[] memory _featureNames, bytes[] memory _featureValues) {
+    function getFeaturesByIndex(uint256 index) external override view returns (bytes[] memory _featureNames, bytes[] memory _featureValues) {
         return (featureNamesSet.values[index], featureValuesSet.values[index]);
     }
 }

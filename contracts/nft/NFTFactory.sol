@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "../interfaces/INotaryNFT.sol";
 import "../interfaces/IDeathRoadNFT.sol";
 import "../interfaces/INFTFactory.sol";
+import "../interfaces/INFTStorage.sol";
 import "../lib/SignerRecover.sol";
 
 contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
@@ -44,6 +45,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         address DRACE_token,
         address payable _feeTo,
         address _notaryHook,
+        address _nftStorageHook,
         address _masterChef
     ) external initializer {
         nft = IDeathRoadNFT(_nft);
@@ -51,6 +53,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         feeTo = _feeTo;
         notaryHook = INotaryNFT(_notaryHook);
         masterChef = _masterChef;
+        nftStorageHook = INFTStorage(_nftStorageHook);
     }
 
     modifier onlyBoxOwner(uint256 boxId) {
@@ -111,24 +114,24 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         return boxId;
     }
 
-    function buyBox(
-        bytes memory _box,
-        bytes memory _pack,
-        uint256 _price,
-        uint256 _expiryTime,
-        bytes32 r,
-        bytes32 s,
-        uint8 v
-    ) external {
-        require(block.timestamp <= _expiryTime, "Expired");
-        bytes32 message = keccak256(
-            abi.encode("buyBox", msg.sender, _box, _pack, _price, _expiryTime)
-        );
-        require(verifySignature(r, s, v, message), "buyBox: Signature invalid");
-        IERC20 erc20 = IERC20(DRACE);
-        erc20.transferFrom(msg.sender, feeTo, _price);
-        _buyBox(_box, _pack);
-    }
+    // function buyBox(
+    //     bytes memory _box,
+    //     bytes memory _pack,
+    //     uint256 _price,
+    //     uint256 _expiryTime,
+    //     bytes32 r,
+    //     bytes32 s,
+    //     uint8 v
+    // ) external {
+    //     require(block.timestamp <= _expiryTime, "Expired");
+    //     bytes32 message = keccak256(
+    //         abi.encode("buyBox", msg.sender, _box, _pack, _price, _expiryTime)
+    //     );
+    //     require(verifySignature(r, s, v, message), "buyBox: Signature invalid");
+    //     IERC20 erc20 = IERC20(DRACE);
+    //     erc20.transferFrom(msg.sender, feeTo, _price);
+    //     _buyBox(_box, _pack);
+    // }
 
     function buyCharm(
         uint256 _price,
@@ -266,13 +269,18 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         nft.updateFeature(msg.sender, tokenId, featureName, featureValue);
     }
 
+    INFTStorage public nftStorageHook;
+
+    function setNFTStorage(address _storage) external onlyOwner {
+        nftStorageHook = INFTStorage(_storage);
+    }
+
     function buyAndCommitOpenBox(
         bytes memory _box,
         bytes memory _pack,
         uint256 _numBox,
         uint256 _price,
-        bytes[] memory _featureNames, //all have same set of feature sames
-        bytes[][] memory _featureValuesSet,
+        uint16[] memory _featureValueIndexesSet,
         bool _useBoxReward,
         bytes32 _commitment,
         uint256 _expiryTime,
@@ -285,6 +293,10 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
 
         //verify signature
         require(block.timestamp <= _expiryTime, "buyAndCommitOpenBox:Expired");
+        for(uint256 i = 0; i < _featureValueIndexesSet.length; i++) {
+            require(_featureValueIndexesSet[i] < nftStorageHook.getSetLength(), "buyAndCommitOpenBox: _featureValueIndexesSet out of rage");
+        }
+        
         bytes32 message = keccak256(
             abi.encode(
                 "buyAndCommitOpenBox",
@@ -293,8 +305,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
                 _pack,
                 _numBox,
                 _price,
-                _featureNames,
-                _featureValuesSet,
+                _featureValueIndexesSet,
                 _useBoxReward,
                 _commitment,
                 _expiryTime
@@ -319,18 +330,17 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
             "buyAndCommitOpenBox:commitment overlap"
         );
 
-        require(
-            _featureNames.length == _featureValuesSet[0].length,
-            "buyAndCommitOpenBox:invalid input length"
-        );
+        // require(
+        //     _featureNameIndex.length == _featureValueIndexesSet[0].length,
+        //     "buyAndCommitOpenBox:invalid input length"
+        // );
 
         OpenBoxInfo storage info = _openBoxInfo[_commitment];
 
         info.user = msg.sender;
         info.boxIdFrom = boxId.add(1).sub(_numBox);
         info.boxCount = _numBox;
-        info.featureNames = _featureNames;
-        info.featureValuesSet = _featureValuesSet;
+        info.featureValuesSet = _featureValueIndexesSet;
         info.previousBlockHash = blockhash(block.number - 1);
         allOpenBoxes[msg.sender].push(_commitment);
 
@@ -372,10 +382,11 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
 
         //mint
         for (uint256 i = 0; i < info.boxCount; i++) {
+            (bytes[] memory _featureNames, bytes[] memory _featureValues) = nftStorageHook.getFeaturesByIndex(resultIndexes[i]);
             uint256 tokenId = nft.mint(
                 info.user,
-                info.featureNames,
-                info.featureValuesSet[resultIndexes[i]]
+                _featureNames,
+                _featureValues
             );
 
             nft.setBoxOpen(info.boxIdFrom + i, true);

@@ -1,0 +1,93 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "bytes[]",
+        "name": "_featureNames",
+        "type": "bytes[]"
+      },
+      {
+        "internalType": "bytes[]",
+        "name": "_featureValues",
+        "type": "bytes[]"
+      }
+    ],
+    "name": "addFeatures",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes[][]",
+        "name": "_featureNamesSet",
+        "type": "bytes[][]"
+      },
+      {
+        "internalType": "bytes[][]",
+        "name": "_featureValuesSet",
+        "type": "bytes[][]"
+      }
+    ],
+    "name": "addFeaturesMany",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getAllFeatures",
+    "outputs": [
+      {
+        "internalType": "bytes[][]",
+        "name": "_featureNames",
+        "type": "bytes[][]"
+      },
+      {
+        "internalType": "bytes[][]",
+        "name": "_featureValues",
+        "type": "bytes[][]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "name": "getFeaturesByIndex",
+    "outputs": [
+      {
+        "internalType": "bytes[]",
+        "name": "_featureNames",
+        "type": "bytes[]"
+      },
+      {
+        "internalType": "bytes[]",
+        "name": "_featureValues",
+        "type": "bytes[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getSetLength",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
