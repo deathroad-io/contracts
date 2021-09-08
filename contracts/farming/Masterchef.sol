@@ -106,6 +106,11 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
         uint256 amount
     );
     event EmergencyWithdrawNFT(address indexed user, uint256 indexed pid);
+    event ClaimRewards(
+        address indexed user,
+        uint256 indexed pid,
+        uint256 amount
+    );
 
     function initialize(
         address _factory,
@@ -121,7 +126,7 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
         oracle = _oracle;
         drace = _drace;
         dracePerBlock = _dracePerBlock;
-        startBlock = _startBlock > 0? _startBlock : block.number;
+        startBlock = _startBlock > 0 ? _startBlock : block.number;
         bonusEndBlock = startBlock.add(_howManyBlockForBonus);
 
         add(1000, address(0), false);
@@ -329,13 +334,7 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
         require(nftPoolId != type(uint256).max, "NFT Pool not exist");
 
         bytes32 message = keccak256(
-            abi.encode(
-                "depositNFT",
-                msg.sender,
-                _tokenId,
-                _dracePoint,
-                _expiry
-            )
+            abi.encode("depositNFT", msg.sender, _tokenId, _dracePoint, _expiry)
         );
         require(
             recoverSigner(r, s, v, message) == oracle,
@@ -380,6 +379,38 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
         user.rewardDebt = user.amount.mul(pool.accDRACEPerShare).div(1e12);
         pool.lpToken.safeTransfer(address(msg.sender), _amount);
         emit Withdraw(msg.sender, _pid, _amount);
+    }
+
+    function claimRewards(uint256 _pid) public {
+        PoolInfo storage pool = poolInfo[_pid];
+        UserInfo storage user = userInfo[_pid][msg.sender];
+        updatePool(_pid);
+        uint256 pending;
+        if (_pid == nftPoolId) {
+            pending = user.nftPoint.mul(pool.accDRACEPerShare).div(1e12).sub(
+                user.rewardDebt
+            );
+        } else {
+            pending = user.amount.mul(pool.accDRACEPerShare).div(1e12).sub(
+                user.rewardDebt
+            );
+        }
+
+        addRecordedReward(msg.sender, pending);
+        if (_pid == nftPoolId) {
+            user.rewardDebt = user.nftPoint.mul(pool.accDRACEPerShare).div(
+                1e12
+            );
+        } else {
+            user.rewardDebt = user.amount.mul(pool.accDRACEPerShare).div(
+                1e12
+            );
+        }
+        emit ClaimRewards(msg.sender, _pid, pending);
+    }
+
+    function claimRewardsNFTPool() external {
+        claimRewards(nftPoolId);
     }
 
     //always withdraw all NFTs

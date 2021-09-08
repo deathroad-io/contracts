@@ -8,11 +8,10 @@ contract GameControlMock is GameControl {
     }
 
     function distributeRewardMock(
-        address _recipient,
         uint256 _rewardAmount,
         uint256 _cumulativeReward,
         uint256 _gameId
     ) external {
-        _distribute(_recipient, _rewardAmount, _cumulativeReward, _gameId);
+        _distribute(msg.sender, _rewardAmount, _cumulativeReward, _gameId);
     }
 }
