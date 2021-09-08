@@ -304,10 +304,10 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
             verifySignature(r, s, v, message),
             "buyAndCommitOpenBox: Signature invalid"
         );
-        
+
         transferBoxFee(_numBox.mul(_price), _useBoxReward);
         uint256 boxId;
-        for(uint256 i = 0; i < _numBox; i++) {
+        for (uint256 i = 0; i < _numBox; i++) {
             boxId = _buyBox(_box, _pack);
             commitedBoxes[boxId] = true;
         }
@@ -328,7 +328,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
 
         info.user = msg.sender;
         info.boxIdFrom = boxId.add(1).sub(_numBox);
-        info.boxIdCount = _numBox;
+        info.boxCount = _numBox;
         info.featureNames = _featureNames;
         info.featureValuesSet = _featureValuesSet;
         info.previousBlockHash = blockhash(block.number - 1);
@@ -365,21 +365,23 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         require(!info.settled, "settleOpenBox: already settled");
         info.settled = true;
         info.openBoxStatus = true;
-        uint256[] memory resultIndex = notaryHook.getOpenBoxResult(
+        uint256[] memory resultIndexes = notaryHook.getOpenBoxResult(
             secret,
             address(this)
         );
 
         //mint
-        uint256 tokenId = nft.mint(
-            info.user,
-            info.featureNames,
-            info.featureValuesSet[resultIndex]
-        );
+        for (uint256 i = 0; i < info.boxCount; i++) {
+            uint256 tokenId = nft.mint(
+                info.user,
+                info.featureNames,
+                info.featureValuesSet[resultIndexes[i]]
+            );
 
-        nft.setBoxOpen(info.boxId, true);
+            nft.setBoxOpen(info.boxIdFrom + i, true);
 
-        emit OpenBox(info.user, info.boxId, tokenId);
+            emit OpenBox(info.user, info.boxIdFrom + i, tokenId);
+        }
     }
 
     function addApprover(address _approver, bool _val) public onlyOwner {

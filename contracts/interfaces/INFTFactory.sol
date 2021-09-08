@@ -24,12 +24,13 @@ interface INFTFactory {
     struct OpenBoxInfo {
         address user;
         uint256 boxIdFrom;
-        uint256 boxIdCount;
+        uint256 boxCount;
         bool settled;
         bool openBoxStatus;
         bytes[] featureNames;
         bytes[][] featureValuesSet;
         bytes32 previousBlockHash;
+        uint256 blockNumber;
     }
 
     function upgradesInfo(bytes32) external view returns (UpgradeInfo memory);

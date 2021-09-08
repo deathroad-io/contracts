@@ -79,7 +79,12 @@
           },
           {
             "internalType": "uint256",
-            "name": "boxId",
+            "name": "boxIdFrom",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "boxCount",
             "type": "uint256"
           },
           {
@@ -106,6 +111,11 @@
             "internalType": "bytes32",
             "name": "previousBlockHash",
             "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "blockNumber",
+            "type": "uint256"
           }
         ],
         "internalType": "struct INFTFactory.OpenBoxInfo",

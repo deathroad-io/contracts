@@ -35,7 +35,7 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "boxId",
+        "name": "boxCount",
         "type": "uint256"
       },
       {
@@ -223,7 +223,12 @@
       },
       {
         "internalType": "uint256",
-        "name": "boxId",
+        "name": "boxIdFrom",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "boxCount",
         "type": "uint256"
       },
       {
@@ -240,6 +245,11 @@
         "internalType": "bytes32",
         "name": "previousBlockHash",
         "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "blockNumber",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -634,54 +644,6 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "boxId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes[]",
-        "name": "_featureNames",
-        "type": "bytes[]"
-      },
-      {
-        "internalType": "bytes[][]",
-        "name": "_featureValuesSet",
-        "type": "bytes[][]"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "_commitment",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_expiryTime",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "r",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "s",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "uint8",
-        "name": "v",
-        "type": "uint8"
-      }
-    ],
-    "name": "commitOpenBox",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "uint256[3]",
         "name": "_tokenIds",
         "type": "uint256[3]"
@@ -993,7 +955,12 @@
           },
           {
             "internalType": "uint256",
-            "name": "boxId",
+            "name": "boxIdFrom",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "boxCount",
             "type": "uint256"
           },
           {
@@ -1020,6 +987,11 @@
             "internalType": "bytes32",
             "name": "previousBlockHash",
             "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "blockNumber",
+            "type": "uint256"
           }
         ],
         "internalType": "struct INFTFactory.OpenBoxInfo",
