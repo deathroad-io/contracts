@@ -34,6 +34,18 @@
       },
       {
         "indexed": false,
+        "internalType": "bytes",
+        "name": "boxType",
+        "type": "bytes"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "packType",
+        "type": "bytes"
+      },
+      {
+        "indexed": false,
         "internalType": "uint256",
         "name": "boxCount",
         "type": "uint256"
@@ -659,7 +671,7 @@
         "type": "uint256"
       }
     ],
-    "name": "commitedBoxes",
+    "name": "committedBoxes",
     "outputs": [
       {
         "internalType": "bool",

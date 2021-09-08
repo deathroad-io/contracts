@@ -61,7 +61,7 @@ contract NotaryNFT is INotaryNFT {
             bytes32 hash = previousHash & initialHash;
             uint256 h = uint256(hash);
             randomResult[i] = h.mod(info.featureValuesSet.length);
-            previousHash = keccak256(abi.encode(previousHash));
+            previousHash = keccak256(abi.encode(previousHash, i));
         }
 
         return randomResult;

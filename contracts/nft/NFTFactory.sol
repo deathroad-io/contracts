@@ -152,9 +152,9 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
 
     mapping(bytes32 => OpenBoxInfo) public _openBoxInfo;
     mapping(address => bytes32[]) public allOpenBoxes;
-    mapping(uint256 => bool) public commitedBoxes;
+    mapping(uint256 => bool) public committedBoxes;
     bytes32[] public allBoxCommitments;
-    event CommitOpenBox(address owner, uint256 boxCount, bytes32 commitment);
+    event CommitOpenBox(address owner, bytes boxType, bytes packType, uint256 boxCount, bytes32 commitment);
 
     function getAllBoxCommitments() external view returns (bytes32[] memory) {
         return allBoxCommitments;
@@ -181,8 +181,8 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
     // ) public payable onlyBoxOwner(boxId) boxNotOpen(boxId) {
     //     require(msg.value == SETTLE_FEE, "commitOpenBox: must pay settle fee");
     //     SETTLE_FEE_RECEIVER.transfer(msg.value);
-    //     require(!commitedBoxes[boxId], "commitOpenBox: box already commited");
-    //     commitedBoxes[boxId] = true;
+    //     require(!committedBoxes[boxId], "commitOpenBox: box already commited");
+    //     committedBoxes[boxId] = true;
     //     allBoxCommitments.push(_commitment);
     //     require(
     //         block.timestamp <= _expiryTime,
@@ -320,7 +320,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         uint256 boxId;
         for (uint256 i = 0; i < _numBox; i++) {
             boxId = _buyBox(_box, _pack);
-            commitedBoxes[boxId] = true;
+            committedBoxes[boxId] = true;
         }
 
         //commit open box
@@ -344,7 +344,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         info.previousBlockHash = blockhash(block.number - 1);
         allOpenBoxes[msg.sender].push(_commitment);
 
-        emit CommitOpenBox(msg.sender, _numBox, _commitment);
+        emit CommitOpenBox(msg.sender, _box, _pack, _numBox, _commitment);
     }
 
     function transferBoxFee(uint256 _price, bool _useBoxReward) internal {
@@ -360,7 +360,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
 
     //in case server lose secret, it basically revoke box for user to open again
     function revokeBoxId(uint256 boxId) external onlyOwner {
-        commitedBoxes[boxId] = false;
+        committedBoxes[boxId] = false;
     }
 
     //client compute result index off-chain, the function will verify it
@@ -369,7 +369,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         OpenBoxInfo storage info = _openBoxInfo[commitment];
         require(info.user != address(0), "settleOpenBox: commitment not exist");
         require(
-            commitedBoxes[info.boxIdFrom],
+            committedBoxes[info.boxIdFrom],
             "settleOpenBox: box must be committed"
         );
         require(!info.settled, "settleOpenBox: already settled");
