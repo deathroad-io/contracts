@@ -4,6 +4,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "../interfaces/INotaryNFT.sol";
 import "../interfaces/IDeathRoadNFT.sol";
@@ -11,10 +12,14 @@ import "../lib/SignerRecover.sol";
 
 contract DeathRoadNFT is ERC721Enumerable, IDeathRoadNFT, Ownable, SignerRecover, Initializable {
     using SafeMath for uint256;
+    using Strings for uint256;
 
     address payable public feeTo;
     uint256 public currentId = 0;
     uint256 public currentBoxId = 0;
+
+    string public baseURI;
+    mapping(uint256 => string) public tokenURIs;
 
     bytes[] public Boxes; //encoded value of string
     bytes[] public Packs; //encoded value of string
@@ -42,6 +47,37 @@ contract DeathRoadNFT is ERC721Enumerable, IDeathRoadNFT, Ownable, SignerRecover
 
     function initialize(address _nftFactory) external initializer {
         factory = _nftFactory;
+    }
+
+    function setBaseURI(string memory _b) external onlyOwner {
+        baseURI = _b;
+    }
+
+    function setTokenURI(uint256 tokenId, string memory _tokenURI) external onlyOwner {
+        require(_exists(tokenId), "ERC721Metadata: URI set of nonexistent token");
+        tokenURIs[tokenId] = _tokenURI;
+    }
+
+    function _baseURI() internal view override returns (string memory) {
+        return baseURI;
+    }
+
+    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+        require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
+
+        string memory _tokenURI = tokenURIs[tokenId];
+        string memory base = _baseURI();
+
+        // If there is no base URI, return the token URI.
+        if (bytes(base).length == 0) {
+            return _tokenURI;
+        }
+        // If both are set, concatenate the baseURI and tokenURI (via abi.encodePacked).
+        if (bytes(_tokenURI).length > 0) {
+            return string(abi.encodePacked(base, _tokenURI));
+        }
+        // If there is a baseURI but no tokenURI, concatenate the tokenID to the baseURI.
+        return string(abi.encodePacked(base, tokenId.toString()));
     }
 
     function setFactory(address _factory) external onlyOwner {

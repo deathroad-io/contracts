@@ -1,6 +1,7 @@
 pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interfaces/INFTStorage.sol";
+
 contract NFTStorage is Ownable, INFTStorage {
     struct StorageSet {
         bytes[][] values;
@@ -40,17 +41,26 @@ contract NFTStorage is Ownable, INFTStorage {
 
     function getAllFeatures()
         external
-        view override 
-        returns (bytes[][] memory _featureNames, bytes[][] memory _featureValues)
+        view
+        override
+        returns (
+            bytes[][] memory _featureNames,
+            bytes[][] memory _featureValues
+        )
     {
         return (featureNamesSet.values, featureValuesSet.values);
     }
 
-    function getSetLength() external override  view returns (uint256) {
+    function getSetLength() external view override returns (uint256) {
         return featureNamesSet.values.length;
     }
 
-    function getFeaturesByIndex(uint256 index) external override view returns (bytes[] memory _featureNames, bytes[] memory _featureValues) {
+    function getFeaturesByIndex(uint256 index)
+        external
+        view
+        override
+        returns (bytes[] memory _featureNames, bytes[] memory _featureValues)
+    {
         return (featureNamesSet.values[index], featureValuesSet.values[index]);
     }
 }
