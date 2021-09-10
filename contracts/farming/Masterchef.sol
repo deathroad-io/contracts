@@ -136,6 +136,11 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
         add(1000, address(drace), false);
     }
 
+    function setNFTContract(address _factory, address _nft) external onlyOwner {
+        factory = INFTFactory(_factory);
+        nft = IERC721(_nft);
+    }
+
     function isNFTPool(uint256 pid) public view returns (bool) {
         return address(poolInfo[pid].lpToken) == address(0);
     }
