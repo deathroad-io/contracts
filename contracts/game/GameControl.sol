@@ -4,6 +4,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interfaces/IDeathRoadNFT.sol";
+import "../interfaces/INFTFactory.sol";
 import "../interfaces/INFTCountdown.sol";
 import "../lib/SignerRecover.sol";
 import "../farming/TokenVesting.sol";
@@ -39,6 +40,7 @@ contract GameControl is
         uint256 gameId;
         uint256 paidRewards;
     }
+    address public feeTo;
 
     mapping(uint256 => TokenUse) public tokenLastUseTimestamp; //used for prevent from playing more than token frequency
     IDeathRoadNFT public draceNFT;
@@ -56,6 +58,7 @@ contract GameControl is
     mapping(uint256 => GameIdInfo) public gameIdToPlayer;
     mapping(address => uint256) public playerGameCounts; //game count for each user
 
+    INFTFactory public factory;
 
     event TokenDeposit(address depositor, uint256 tokenId, uint256 timestamp);
     event TokenWithdraw(address withdrawer, uint256 tokenId, uint256 timestamp);
@@ -66,6 +69,8 @@ contract GameControl is
         uint256 playerGameCount,
         uint256 globalGameCount
     );
+
+    event TurnBuying(address payer, uint256 tokenId, uint256 price, uint256 timestamp);
 
     function initialize(
         address _drace,
@@ -79,6 +84,10 @@ contract GameControl is
         mappingApprover[_approver] = true;
         tokenVesting = TokenVesting(_tokenVesting);
         countdownPeriod = INFTCountdown(_countdownPeriod);
+    }
+
+    function setFeeTo(address _feeTo) external onlyOwner {
+        feeTo = _feeTo;
     }
 
     function addApprover(address _approver, bool _val) public onlyOwner {
@@ -166,7 +175,7 @@ contract GameControl is
         );
 
         gameIdList[msg.sender].push(gameCount);
-        gameIdToPlayer[gameCount] = GameIdInfo( {
+        gameIdToPlayer[gameCount] = GameIdInfo({
             isRewardPaid: false,
             player: msg.sender,
             gameId: gameCount,
@@ -242,6 +251,36 @@ contract GameControl is
 
     function setCountdownHook(address _addr) external onlyOwner {
         countdownPeriod = INFTCountdown(_addr);
+    }
+
+    function buyPlayingTurn(
+        uint256 _tokenId,
+        uint256 _price,
+        bool _useBoxRewards,
+        uint256 _expiry,
+        bytes32 r,
+        bytes32 s,
+        uint8 v
+    ) external {
+        if (_useBoxRewards) {
+            uint256 rb = factory.boxRewards(msg.sender);
+            uint256 rbSpent = _price.mul(70).div(100);
+            require(rbSpent <= rb, "buyPlayingTurn:not enough xDRACE to pay");
+
+            drace.safeTransferFrom(msg.sender, feeTo, _price.sub(rbSpent));
+            factory.decreaseBoxReward(msg.sender, rbSpent);
+        } else {
+            drace.safeTransferFrom(msg.sender, feeTo, _price);
+        }
+        bytes32 message = keccak256(
+            abi.encode("buyPlayingTurn", _tokenId, _price, _useBoxRewards, _expiry)
+        );
+        address signer = recoverSigner(r, s, v, message);
+        require(mappingApprover[signer], "buyPlayingTurn::invalid operator");
+
+        //reset timestamp
+        tokenLastUseTimestamp[_tokenId].timestamp = 0;
+        emit TurnBuying(msg.sender, _tokenId, _price, block.timestamp);
     }
 
     //each NFT has a period that it can only be used for playing if it was not used for playing more than period ago

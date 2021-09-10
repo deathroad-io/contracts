@@ -34,7 +34,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
     uint256 public boxDiscountPercent = 70;
 
     mapping(address => bool) public mappingApprover;
-    mapping(address => uint256) public boxRewards;
+    mapping(address => uint256) public override boxRewards;
 
     IDeathRoadNFT public nft;
 
@@ -102,12 +102,12 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         nft.addPacks(_packs);
     }
 
-//    function addFeature(bytes memory _box, bytes memory _feature)
-//        public
-//        onlyOwner
-//    {
-//        nft.addFeature(_box, _feature);
-//    }
+    //    function addFeature(bytes memory _box, bytes memory _feature)
+    //        public
+    //        onlyOwner
+    //    {
+    //        nft.addFeature(_box, _feature);
+    //    }
 
     function setBoxDiscountPercent(uint256 _discount) external onlyOwner {
         boxDiscountPercent = _discount;
@@ -162,7 +162,13 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
     mapping(address => bytes32[]) public allOpenBoxes;
     mapping(uint256 => bool) public committedBoxes;
     bytes32[] public allBoxCommitments;
-    event CommitOpenBox(address owner, bytes boxType, bytes packType, uint256 boxCount, bytes32 commitment);
+    event CommitOpenBox(
+        address owner,
+        bytes boxType,
+        bytes packType,
+        uint256 boxCount,
+        bytes32 commitment
+    );
 
     function getAllBoxCommitments() external view returns (bytes32[] memory) {
         return allBoxCommitments;
@@ -301,8 +307,11 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
 
         //verify signature
         require(block.timestamp <= _expiryTime, "buyAndCommitOpenBox:Expired");
-        for(uint256 i = 0; i < _featureValueIndexesSet.length; i++) {
-            require(_featureValueIndexesSet[i] < nftStorageHook.getSetLength(), "buyAndCommitOpenBox: _featureValueIndexesSet out of rage");
+        for (uint256 i = 0; i < _featureValueIndexesSet.length; i++) {
+            require(
+                _featureValueIndexesSet[i] < nftStorageHook.getSetLength(),
+                "buyAndCommitOpenBox: _featureValueIndexesSet out of rage"
+            );
         }
 
         bytes32 message = keccak256(
@@ -390,7 +399,10 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
 
         //mint
         for (uint256 i = 0; i < info.boxCount; i++) {
-            (bytes[] memory _featureNames, bytes[] memory _featureValues) = nftStorageHook.getFeaturesByIndex(resultIndexes[i]);
+            (
+                bytes[] memory _featureNames,
+                bytes[] memory _featureValues
+            ) = nftStorageHook.getFeaturesByIndex(resultIndexes[i]);
             uint256 tokenId = nft.mint(
                 info.user,
                 _featureNames,
@@ -623,6 +635,24 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
             "only masterchef can update box reward"
         );
         boxRewards[addr] = boxRewards[addr].add(reward);
-        emit BoxRewardUpdated(addr, reward);
+        emit BoxRewardUpdated(addr, boxRewards[addr]);
+    }
+
+    address public gameControl;
+
+    function setGameControl(address _gameControl) external onlyOwner {
+        gameControl = _gameControl;
+    }
+
+    function decreaseBoxReward(address addr, uint256 reduced)
+        external
+        override
+    {
+        require(
+            gameControl == msg.sender,
+            "Reward can only be reduced when users buy more turns for oplaying game"
+        );
+        boxRewards[addr] = boxRewards[addr].sub(reduced);
+        emit BoxRewardUpdated(addr, boxRewards[addr]);
     }
 }
