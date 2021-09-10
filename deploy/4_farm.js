@@ -63,7 +63,7 @@ const {
     //set masterchef in factory
     const NFTFactory = await ethers.getContractFactory('NFTFactory');
     const factoryContract = await NFTFactory.attach(factoryAddress)
-    await factoryAddress.setMasterChef(masterChef.address)
+    await factoryContract.setMasterChef(masterChef.address)
 
     saveDeploymentData(chainId, deployData);
     log('\n  Contract Deployment Data saved to "deployments" directory.');

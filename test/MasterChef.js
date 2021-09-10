@@ -113,9 +113,10 @@ describe('MasterChef', async function () {
     expect(await masterChef.pendingDRACE(0, nftStaker1.address)).to.not.equal(0)
     expect(await masterChef.pendingDRACE(0, nftStaker2.address)).to.not.equal(0)
 
+    await masterChef.setRewardPerBlock(ethers.utils.parseEther('50'), true)
     //increase 12h
     await ethers.provider.send('evm_increaseTime', [12 * 3600]);
-
+    
     await masterChef.connect(nftStaker1).withdrawNFT();
     await masterChef.connect(nftStaker2).withdrawNFT();
 
@@ -138,7 +139,10 @@ describe('MasterChef', async function () {
     await drace.connect(staker2).approve(masterChef.address, ethers.utils.parseEther('2000'))
 
     await masterChef.connect(staker1).deposit(1, ethers.utils.parseEther('1000'))
+    await masterChef.setRewardPerBlock(ethers.utils.parseEther('50'), true)
+
     await masterChef.connect(staker2).deposit(1, ethers.utils.parseEther('2000'))
+    await masterChef.setRewardPerBlock(ethers.utils.parseEther('100'), true)
 
     expect(await drace.balanceOf(staker1.address)).to.be.equal(0)
     expect(await drace.balanceOf(staker2.address)).to.be.equal(0)

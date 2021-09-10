@@ -28,7 +28,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
     event BoxRewardUpdated(address addr, uint256 reward);
 
     //commit reveal needs 2 steps, the reveal step needs to pay fee by bot, this fee is to compensate for bots
-    uint256 public SETTLE_FEE = 0.005 ether;
+    uint256 public SETTLE_FEE = 0.01 ether;
     address payable public SETTLE_FEE_RECEIVER;
     address public masterChef;
     uint256 public boxDiscountPercent = 70;
