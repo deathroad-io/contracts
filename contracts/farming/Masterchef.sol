@@ -344,7 +344,7 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
 
     function depositNFT(uint256[] memory _tokenIds) public {
         require(nftPoolId != type(uint256).max, "NFT Pool not exist");
-
+        require(_tokenIds.length > 0, "Empty token list");
         PoolInfo storage pool = poolInfo[nftPoolId];
         UserInfo storage user = userInfo[nftPoolId][msg.sender];
         updatePool(nftPoolId);

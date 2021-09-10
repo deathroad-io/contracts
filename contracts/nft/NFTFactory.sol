@@ -302,7 +302,7 @@ contract NFTFactory is Ownable, INFTFactory, SignerRecover, Initializable {
         bytes32 s,
         uint8 v
     ) external payable {
-        require(msg.value == SETTLE_FEE, "commitOpenBox: must pay settle fee");
+        require(msg.value == SETTLE_FEE * _numBox, "commitOpenBox: must pay settle fee");
         SETTLE_FEE_RECEIVER.transfer(msg.value);
 
         //verify signature
