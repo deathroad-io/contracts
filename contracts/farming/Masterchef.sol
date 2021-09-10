@@ -188,6 +188,13 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
         );
     }
 
+    function setRewardPerBlock(uint256 _r, bool _withUpdate) external onlyOwner {
+        if (_withUpdate) {
+            massUpdatePools();
+        }
+        dracePerBlock = _r;
+    }
+
     // Update the given pool's DRACE allocation point. Can only be called by the owner.
     function set(
         uint256 _pid,

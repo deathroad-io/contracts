@@ -18,7 +18,7 @@ const {
     const chainId = chainIdByName(network.name);
 
     log('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-    log('DeathRoad NFT Notary upgrade');
+    log('DeathRoad DRACE token deployment');
     log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n');
 
     log('  Using Network: ', chainNameById(chainId));
@@ -27,24 +27,15 @@ const {
     log('  - network id:          ', chainId);
     log(' ');
 
-    log('  Deploying NFT Notary upgrade...');
-
-    //reading DRACE token address
-    const FactoryAddress = require(`../deployments/${chainId}/NFTFactory.json`).address
-
-    log('  Deploying NFT Notary Contract...');
-    const NotaryNFT = await ethers.getContractFactory('NotaryNFT');
-    const notaryNFTInstance = await NotaryNFT.deploy()
-    const notaryNFT = await notaryNFTInstance.deployed()
-    log('  - NotaryNFT:         ', notaryNFT.address);
-
-    // log('  - Initializing  DeathRoadNFT        ');
-    // await deathRoadNFT.setNotaryHook(notaryNFT.address)
-
-    deployData['NotaryNFT'] = {
-      abi: getContractAbi('NotaryNFT'),
-      address: notaryNFT.address,
-      deployTransaction: notaryNFT.deployTransaction,
+    log('  Deploying DLP Token...');
+    const DLP = await ethers.getContractFactory('DLPMock');
+    const DLPInstance = await DLP.deploy(signers[0].address)
+    const dlp = await DLPInstance.deployed()
+    log('  - DLPMock:         ', dlp.address);
+    deployData['DLPMock'] = {
+      abi: getContractAbi('DLPMock'),
+      address: dlp.address,
+      deployTransaction: dlp.deployTransaction,
     }
 
     saveDeploymentData(chainId, deployData);
@@ -53,5 +44,5 @@ const {
     log('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n');
   };
   
-  module.exports.tags = ['notary_upgrade']
+  module.exports.tags = ['dlpmock']
   
