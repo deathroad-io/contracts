@@ -7,6 +7,7 @@ const {
 } = require("../js-helpers/deploy");
 
 const _ = require('lodash');
+const feeReceiver = "0xd91ce559ab85e32169462BB39739E4ED8babb6FE"
 
 module.exports = async (hre) => {
   const { ethers, getNamedAccounts } = hre;
@@ -45,7 +46,7 @@ module.exports = async (hre) => {
   }
 
   log('  - Initializing  MarketPlace        ');
-  await marketPlace.initialize(DeathRoadNFTAddress, draceAddress, signers[0].address)
+  await marketPlace.initialize(DeathRoadNFTAddress, draceAddress, feeReceiver)
 
   saveDeploymentData(chainId, deployData);
   log('\n  Contract Deployment Data saved to "deployments" directory.');

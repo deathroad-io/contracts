@@ -7,7 +7,8 @@ const {
   } = require("../js-helpers/deploy");
   
   const _ = require('lodash');
-  
+  const feeReceiver = "0xd91ce559ab85e32169462BB39739E4ED8babb6FE"
+
   module.exports = async (hre) => {
     const { ethers, getNamedAccounts } = hre;
     const { deployer } = await getNamedAccounts();
@@ -62,8 +63,10 @@ const {
     await factory.addApprover('0x75785F9CE180C951c8178BABadFE904ec883D820', true);
     await factory.setSettleFeeReceiver("0xD0e3376e1c3Af2C11730aA4E89BE839D4a1BD761")
 
+    //deploying fee distribution
+
     log('  - Initializing  NFTFactory        ');
-    await factory.initialize(deathRoadNFT.address, draceAddress, signers[0].address, notaryNFT.address, nftStorage.address, ethers.constants.AddressZero)
+    await factory.initialize(deathRoadNFT.address, draceAddress, feeReceiver, notaryNFT.address, nftStorage.address, ethers.constants.AddressZero)
 
     deployData['NFTStorage'] = {
       abi: getContractAbi('NFTStorage'),
