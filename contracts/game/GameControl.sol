@@ -46,6 +46,7 @@ contract GameControl is
     IDeathRoadNFT public draceNFT;
     IERC20 public drace;
     mapping(uint256 => DepositInfo) public tokenDeposits;
+    mapping(address => uint256[]) public depositTokenList;
 
     //approvers will verify whether:
     //1. Game is in maintenance or not
@@ -100,26 +101,27 @@ contract GameControl is
             tokenDeposits[_tokenIds[i]].depositor = msg.sender;
             tokenDeposits[_tokenIds[i]].timestamp = block.timestamp;
             tokenDeposits[_tokenIds[i]].tokenId = _tokenIds[i];
+            depositTokenList[msg.sender].push(_tokenIds[i]);
             emit TokenDeposit(msg.sender, _tokenIds[i], block.timestamp);
         }
     }
 
     //withdraw is only available 10 minutes after start playing game
-    function withdrawNFTs(uint256[] memory _tokenIds) public {
-        for (uint256 i = 0; i < _tokenIds.length; i++) {
-            if (tokenDeposits[_tokenIds[i]].depositor == msg.sender) {
-                require(
-                    tokenLastUseTimestamp[_tokenIds[i]].timestamp.add(600) <
-                        block.timestamp,
-                    "game is in play"
-                );
+    // function withdrawNFTs(uint256[] memory _tokenIds) public {
+    //     for (uint256 i = 0; i < _tokenIds.length; i++) {
+    //         if (tokenDeposits[_tokenIds[i]].depositor == msg.sender) {
+    //             require(
+    //                 tokenLastUseTimestamp[_tokenIds[i]].timestamp.add(600) <
+    //                     block.timestamp,
+    //                 "game is in play"
+    //             );
 
-                draceNFT.transferFrom(address(this), msg.sender, _tokenIds[i]);
-                delete tokenDeposits[_tokenIds[i]];
-                emit TokenWithdraw(msg.sender, _tokenIds[i], block.timestamp);
-            }
-        }
-    }
+    //             draceNFT.transferFrom(address(this), msg.sender, _tokenIds[i]);
+    //             delete tokenDeposits[_tokenIds[i]];
+    //             emit TokenWithdraw(msg.sender, _tokenIds[i], block.timestamp);
+    //         }
+    //     }
+    // }
 
     function startGame(
         uint256[] memory _tokenIds,
@@ -151,6 +153,7 @@ contract GameControl is
                 tokenDeposits[_tokenIds[i]].depositor = msg.sender;
                 tokenDeposits[_tokenIds[i]].timestamp = block.timestamp;
                 tokenDeposits[_tokenIds[i]].tokenId = _tokenIds[i];
+                depositTokenList[msg.sender].push(_tokenIds[i]);
                 emit TokenDeposit(msg.sender, _tokenIds[i], block.timestamp);
             }
             require(
@@ -205,9 +208,26 @@ contract GameControl is
         _distribute(_recipient, _rewardAmount, _cumulativeReward, _gameId);
 
         if (_withdrawNFTs) {
-            //TODO
-            //withdrawNFTs(_tokenIds);
+            withdrawAllNFTs();
         }
+    }
+
+    function withdrawAllNFTs() public {
+        uint256[] memory _tokenIds = depositTokenList[msg.sender];
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            if (tokenDeposits[_tokenIds[i]].depositor == msg.sender) {
+                require(
+                    tokenLastUseTimestamp[_tokenIds[i]].timestamp.add(600) <
+                        block.timestamp,
+                    "game is in play"
+                );
+
+                draceNFT.transferFrom(address(this), msg.sender, _tokenIds[i]);
+                delete tokenDeposits[_tokenIds[i]];
+                emit TokenWithdraw(msg.sender, _tokenIds[i], block.timestamp);
+            }
+        }
+        delete depositTokenList[msg.sender];
     }
 
     function _distribute(

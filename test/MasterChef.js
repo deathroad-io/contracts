@@ -107,8 +107,8 @@ describe('MasterChef', async function () {
     expect(await masterChef.pendingDRACE(0, nftStaker2.address)).to.not.equal(0)
 
     //withdraw early, rewards is reset
-    await expect(masterChef.connect(nftStaker1).withdrawNFT()).to.be.revertedWith('withdrawNFT: NFTs only available for withdrawal 12 hours after deposit')
-    await expect(masterChef.connect(nftStaker2).withdrawNFT()).to.be.revertedWith('withdrawNFT: NFTs only available for withdrawal 12 hours after deposit')
+    await expect(masterChef.connect(nftStaker1).withdrawNFT()).to.be.revertedWith('withdrawNFT: NFTs only available for withdrawal after deposit locked time')
+    await expect(masterChef.connect(nftStaker2).withdrawNFT()).to.be.revertedWith('withdrawNFT: NFTs only available for withdrawal after deposit locked time')
 
     expect(await masterChef.pendingDRACE(0, nftStaker1.address)).to.not.equal(0)
     expect(await masterChef.pendingDRACE(0, nftStaker2.address)).to.not.equal(0)
@@ -132,6 +132,11 @@ describe('MasterChef', async function () {
     await masterChef.connect(nftStaker1).depositNFT([tokenIds[0], tokenIds[1]])
     await masterChef.connect(nftStaker2).depositNFT([tokenIds[2]])
 
+    await masterChef.setLockedTime(0)
+    await masterChef.connect(nftStaker2).claimRewardsNFTPool()
+    await masterChef.setLockedTime(12 * 3600)
+
+    
     await drace.transfer(staker1.address, ethers.utils.parseEther('1000'))
     await drace.transfer(staker2.address, ethers.utils.parseEther('2000'))
 

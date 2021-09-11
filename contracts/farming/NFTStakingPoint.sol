@@ -16,9 +16,9 @@ contract NFTStakingPoint is Ownable, INFTStakingPoint {
         //1star => car => 100
         tokenPackPoint[hex"3173746172"][hex"636172"] = 100e18;
         //2star => car => 250
-        tokenPackPoint[hex"3273746172"][hex"636172"] = 100e18;
+        tokenPackPoint[hex"3273746172"][hex"636172"] = 300e18;
         //3star => car => 600
-        tokenPackPoint[hex"3373746172"][hex"636172"] = 100e18;
+        tokenPackPoint[hex"3373746172"][hex"636172"] = 900e18;
     }
     function getStakingPoint(uint256 _tokenId, address _nftContract)
         external

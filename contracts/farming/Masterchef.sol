@@ -70,6 +70,7 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
     IERC721 public nft;
     INFTFactory public factory;
     INFTStakingPoint public nftStakingPointHook;
+    uint256 public lockedTime = 12 hours;
 
     // the token rewards container
 
@@ -193,7 +194,10 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
         );
     }
 
-    function setRewardPerBlock(uint256 _r, bool _withUpdate) external onlyOwner {
+    function setRewardPerBlock(uint256 _r, bool _withUpdate)
+        external
+        onlyOwner
+    {
         if (_withUpdate) {
             massUpdatePools();
         }
@@ -434,10 +438,24 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
         require(nftPoolId != type(uint256).max, "NFT Pool not exist");
         UserInfo storage user = userInfo[nftPoolId][msg.sender];
         require(
-            user.lastNFTDepositTimestamp.add(12 hours) <= block.timestamp,
+            user.lastNFTDepositTimestamp.add(lockedTime) <= block.timestamp,
             "Can only claim rewards after 12hs of stake"
         );
-        claimRewards(nftPoolId);
+        uint256 _pid = nftPoolId;
+        PoolInfo storage pool = poolInfo[_pid];
+        updatePool(nftPoolId);
+        uint256 pending;
+        pending = user.nftPoint.mul(pool.accDRACEPerShare).div(1e12).sub(
+            user.rewardDebt
+        );
+
+        addRecordedReward(msg.sender, pending);
+        user.rewardDebt = user.nftPoint.mul(pool.accDRACEPerShare).div(1e12);
+        emit ClaimRewards(msg.sender, _pid, pending);
+    }
+
+    function setLockedTime(uint256 _lockedTime) external onlyOwner {
+        lockedTime = _lockedTime;
     }
 
     //always withdraw all NFTs
@@ -448,8 +466,11 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
         PoolInfo storage pool = poolInfo[nftPoolId];
         UserInfo storage user = userInfo[nftPoolId][msg.sender];
         require(user.stakedNFTs.length > 0, "withdrawNFT: not good");
-        require(user.lastNFTDepositTimestamp.add(12 hours) <= block.timestamp, "withdrawNFT: NFTs only available for withdrawal 12 hours after deposit");
-        
+        require(
+            user.lastNFTDepositTimestamp.add(lockedTime) <= block.timestamp,
+            "withdrawNFT: NFTs only available for withdrawal after deposit locked time"
+        );
+
         updatePool(nftPoolId);
         uint256 pending = user
             .nftPoint
