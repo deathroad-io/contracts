@@ -29,7 +29,7 @@ const {
 
     log('  Deploying xDRACE Token...');
     const xDRACE = await ethers.getContractFactory('xDRACE');
-    const xdraceInstance = await xDRACE.deploy(signers[0].address)
+    const xdraceInstance = await xDRACE.deploy()
     const xdrace = await xdraceInstance.deployed()
     log('  - xDRACE:         ', xdrace.address);
     deployData['xDRACE'] = {

@@ -35,7 +35,6 @@ contract NFTFactoryV2 is Ownable, INFTFactory, SignerRecover, Initializable {
     uint256 public boxDiscountPercent = 70;
 
     mapping(address => bool) public mappingApprover;
-    mapping(address => uint256) public override boxRewards;
 
     IDeathRoadNFT public nft;
 
@@ -144,6 +143,7 @@ contract NFTFactoryV2 is Ownable, INFTFactory, SignerRecover, Initializable {
 
     function buyCharm(
         uint256 _price,
+        bool _useXdrace,
         uint256 _expiryTime,
         bytes32 r,
         bytes32 s,
@@ -151,11 +151,10 @@ contract NFTFactoryV2 is Ownable, INFTFactory, SignerRecover, Initializable {
     ) public {
         require(block.timestamp <= _expiryTime, "Expired");
         bytes32 message = keccak256(
-            abi.encode("buyCharm", msg.sender, _price, _expiryTime)
+            abi.encode("buyCharm", msg.sender, _price, _useXdrace, _expiryTime)
         );
         require(verifySignature(r, s, v, message), "Signature invalid");
-        IERC20 erc20 = IERC20(DRACE);
-        erc20.transferFrom(msg.sender, feeTo, _price);
+        transferBoxFee(_price, _useXdrace);
         nft.buyCharm(msg.sender);
     }
 
@@ -249,7 +248,10 @@ contract NFTFactoryV2 is Ownable, INFTFactory, SignerRecover, Initializable {
         bytes32 s,
         uint8 v
     ) external payable {
-        require(msg.value == SETTLE_FEE * _numBox, "commitOpenBox: must pay settle fee");
+        require(
+            msg.value == SETTLE_FEE * _numBox,
+            "commitOpenBox: must pay settle fee"
+        );
         SETTLE_FEE_RECEIVER.transfer(msg.value);
 
         //verify signature
@@ -317,7 +319,11 @@ contract NFTFactoryV2 is Ownable, INFTFactory, SignerRecover, Initializable {
             erc20.transferFrom(msg.sender, feeTo, _price);
         } else {
             uint256 boxRewardSpent = _price.mul(boxDiscountPercent).div(100);
-            IERC20(address(xDrace)).transferFrom(msg.sender, feeTo, boxRewardSpent);
+            IERC20(address(xDrace)).transferFrom(
+                msg.sender,
+                feeTo,
+                boxRewardSpent
+            );
             erc20.transferFrom(msg.sender, feeTo, _price.sub(boxRewardSpent));
         }
     }
@@ -586,16 +592,20 @@ contract NFTFactoryV2 is Ownable, INFTFactory, SignerRecover, Initializable {
         masterChef = _masterChef;
     }
 
-    INFTFactory public oldFactory = INFTFactory(0x9accf295895595D694b5D9E781082686dfa2801A);
+    INFTFactory public oldFactory =
+        INFTFactory(0x9accf295895595D694b5D9E781082686dfa2801A);
     IMint public xDrace;
 
     function setOldFactory(address _old) external onlyOwner {
         oldFactory = INFTFactory(_old);
     }
+
     function setXDRACE(address _xdrace) external onlyOwner {
         xDrace = IMint(_xdrace);
     }
+
     mapping(address => bool) public alreadyMinted;
+
     function addBoxReward(address addr, uint256 reward) external override {
         require(
             msg.sender == masterChef,
@@ -606,8 +616,20 @@ contract NFTFactoryV2 is Ownable, INFTFactory, SignerRecover, Initializable {
             alreadyMinted[addr] = true;
             _toMint = _toMint.add(oldFactory.boxRewards(addr));
         }
-        
+
         xDrace.mint(addr, _toMint);
+    }
+
+    function boxRewards(address _addr)
+        external
+        view
+        override
+        returns (uint256)
+    {
+        if (!alreadyMinted[_addr]) {
+            return oldFactory.boxRewards(_addr);
+        }
+        return IERC20(address(xDrace)).balanceOf(_addr);
     }
 
     address public gameControl;
