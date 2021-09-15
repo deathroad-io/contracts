@@ -86,5 +86,5 @@ const {
     log('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n');
   };
   
-  module.exports.tags = ['nft']
+  module.exports.tags = ['factoryv2']
   
