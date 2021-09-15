@@ -314,6 +314,50 @@
   {
     "inputs": [
       {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "name": "_upgradesInfoV2",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "useCharm",
+        "type": "bool"
+      },
+      {
+        "internalType": "bool",
+        "name": "settled",
+        "type": "bool"
+      },
+      {
+        "internalType": "bool",
+        "name": "upgradeStatus",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "failureRate",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "previousBlockHash",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "_approver",
         "type": "address"
@@ -645,14 +689,9 @@
         "type": "uint256[3]"
       },
       {
-        "internalType": "bytes[]",
-        "name": "_featureNames",
-        "type": "bytes[]"
-      },
-      {
-        "internalType": "bytes[][]",
-        "name": "_featureValuesSet",
-        "type": "bytes[][]"
+        "internalType": "uint256[]",
+        "name": "_featureValueIndexesSet",
+        "type": "uint256[]"
       },
       {
         "internalType": "uint256",
@@ -685,14 +724,9 @@
         "type": "uint256"
       },
       {
-        "internalType": "bytes32",
-        "name": "r",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "s",
-        "type": "bytes32"
+        "internalType": "bytes32[2]",
+        "name": "rs",
+        "type": "bytes32[2]"
       },
       {
         "internalType": "uint8",
@@ -1057,7 +1091,7 @@
             "type": "uint256"
           }
         ],
-        "internalType": "struct INFTFactory.OpenBoxInfo",
+        "internalType": "struct INFTFactoryV2.OpenBoxInfo",
         "name": "",
         "type": "tuple"
       }
@@ -1391,7 +1425,68 @@
             "type": "bytes32"
           }
         ],
-        "internalType": "struct INFTFactory.UpgradeInfo",
+        "internalType": "struct INFTFactoryV2.UpgradeInfo",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "_comm",
+        "type": "bytes32"
+      }
+    ],
+    "name": "upgradesInfoV2",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "internalType": "bool",
+            "name": "useCharm",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "settled",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "upgradeStatus",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "failureRate",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256[3]",
+            "name": "tokenIds",
+            "type": "uint256[3]"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "featureValueIndexesSet",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "previousBlockHash",
+            "type": "bytes32"
+          }
+        ],
+        "internalType": "struct INFTFactoryV2.UpgradeInfoV2",
         "name": "",
         "type": "tuple"
       }

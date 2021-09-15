@@ -37,7 +37,6 @@ const {
     const NFTStorageAddress = require(`../deployments/${chainId}/NFTStorage.json`).address
     const MasterChefAddress = require(`../deployments/${chainId}/MasterChef.json`).address
     const oldFactory = require(`../deployments/${chainId}/NFTFactory.json`).address
-    const NotaryNFTAddress = require(`../deployments/${chainId}/NotaryNFT.json`).address
 
     const DeathRoadNFT = await ethers.getContractFactory('DeathRoadNFT');
     const deathRoadNFT = await DeathRoadNFT.attach(DeathRoadNFTAddress)
@@ -52,6 +51,12 @@ const {
     const nftFactoryV2Instance = await NFTFactoryV2.deploy()
     const factoryV2 = await nftFactoryV2Instance.deployed()
     log('  - NFTFactoryV2:         ', factoryV2.address);
+
+    log('  Deploying NFT Notary Contract...');
+    const NotaryNFT = await ethers.getContractFactory('NotaryNFT');
+    const notaryNFTInstance = await NotaryNFT.deploy()
+    const notaryNFT = await notaryNFTInstance.deployed()
+    log('  - NotaryNFT:         ', notaryNFT.address);
 
     const xDRACE = await ethers.getContractFactory('xDRACE');
     const xdrace = await xDRACE.attach(xdraceAddress)
@@ -72,7 +77,13 @@ const {
     //deploying fee distribution
 
     log('  - Initializing  NFTFactory        ');
-    await factoryV2.initialize(deathRoadNFT.address, draceAddress, feeReceiver, NotaryNFTAddress, NFTStorageAddress, masterchef.address)
+    await factoryV2.initialize(deathRoadNFT.address, draceAddress, feeReceiver, notaryNFT.address, NFTStorageAddress, masterchef.address)
+
+    deployData['NotaryNFT'] = {
+      abi: getContractAbi('NotaryNFT'),
+      address: notaryNFT.address,
+      deployTransaction: notaryNFT.deployTransaction,
+    }
 
     deployData['NFTFactoryV2'] = {
       abi: getContractAbi('NFTFactoryV2'),

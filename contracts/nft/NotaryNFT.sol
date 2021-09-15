@@ -1,6 +1,7 @@
 pragma solidity ^0.8.0;
 import "../interfaces/INotaryNFT.sol";
 import "../interfaces/INFTFactory.sol";
+import "../interfaces/INFTFactoryV2.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract NotaryNFT is INotaryNFT {
@@ -12,9 +13,9 @@ contract NotaryNFT is INotaryNFT {
         override
         returns (bool, uint256)
     {
-        INFTFactory factory = INFTFactory(nftFactory);
+        INFTFactoryV2 factory = INFTFactoryV2(nftFactory);
         bytes32 commitment = keccak256(abi.encode(secret));
-        INFTFactory.UpgradeInfo memory info = factory.upgradesInfo(commitment);
+        INFTFactoryV2.UpgradeInfoV2 memory info = factory.upgradesInfoV2(commitment);
 
         bytes32 hash = keccak256(
             abi.encode(
@@ -22,16 +23,16 @@ contract NotaryNFT is INotaryNFT {
                 info.useCharm,
                 info.failureRate,
                 info.tokenIds,
-                info.targetFeatureNames,
-                info.targetFeatureValuesSet,
+                info.featureValueIndexesSet,
                 info.previousBlockHash,
                 secret
             )
         );
         uint256 h = uint256(hash);
-        uint256 sum = info.targetFeatureValuesSet.length.add(info.failureRate);
+        uint256 sum = info.featureValueIndexesSet.length.add(info.failureRate);
         uint256 ret = h.mod(sum);
-        return (ret < info.targetFeatureValuesSet.length, ret);
+        
+        return (ret < info.featureValueIndexesSet.length, ret < info.featureValueIndexesSet.length ? info.featureValueIndexesSet[ret]:ret);
     }
 
     function getOpenBoxResult(bytes32 secret, address nftFactory)

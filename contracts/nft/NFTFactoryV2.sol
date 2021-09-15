@@ -6,12 +6,13 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "../interfaces/INotaryNFT.sol";
 import "../interfaces/IDeathRoadNFT.sol";
+import "../interfaces/INFTFactoryV2.sol";
 import "../interfaces/INFTFactory.sol";
 import "../interfaces/INFTStorage.sol";
 import "../interfaces/IMint.sol";
 import "../lib/SignerRecover.sol";
 
-contract NFTFactoryV2 is Ownable, INFTFactory, SignerRecover, Initializable {
+contract NFTFactoryV2 is Ownable, INFTFactoryV2, SignerRecover, Initializable {
     using SafeMath for uint256;
 
     address public DRACE;
@@ -402,6 +403,7 @@ contract NFTFactoryV2 is Ownable, INFTFactory, SignerRecover, Initializable {
     }
 
     mapping(bytes32 => UpgradeInfo) public _upgradesInfo;
+    mapping(bytes32 => UpgradeInfoV2) public _upgradesInfoV2;
     mapping(address => bytes32[]) public allUpgrades;
     bytes32[] public allUpgradeCommitments;
     event CommitUpgradeFeature(address owner, bytes32 commitment);
@@ -423,6 +425,15 @@ contract NFTFactoryV2 is Ownable, INFTFactory, SignerRecover, Initializable {
         return _upgradesInfo[_comm];
     }
 
+    function upgradesInfoV2(bytes32 _comm)
+        external
+        view
+        override
+        returns (UpgradeInfoV2 memory)
+    {
+        return _upgradesInfoV2[_comm];
+    }
+
     //upgrade consists of 2 steps following commit-reveal scheme to ensure transparency and security
     //1. commitment by sending hash of a secret value
     //2. reveal the secret and the upgrades randomly
@@ -432,35 +443,38 @@ contract NFTFactoryV2 is Ownable, INFTFactory, SignerRecover, Initializable {
     //_useCharm: burn the input tokens or not when failed
     function commitUpgradeFeatures(
         uint256[3] memory _tokenIds,
-        bytes[] memory _featureNames,
-        bytes[][] memory _featureValuesSet,
+        uint256[] memory _featureValueIndexesSet,
         uint256 _failureRate,
         bool _useCharm,
         uint256 _upgradeFee,
         bool _useXDrace,
         bytes32 _commitment,
         uint256 _expiryTime,
-        bytes32 r,
-        bytes32 s,
+        bytes32[2] memory rs,
         uint8 v
     ) public payable {
         require(
             msg.value == SETTLE_FEE,
             "commitUpgradeFeatures: must pay settle fee"
         );
-        require(
-            _featureNames.length == _featureValuesSet[0].length,
-            "commitUpgradeFeatures:invalid input length"
-        );
+
         SETTLE_FEE_RECEIVER.transfer(msg.value);
         require(
             block.timestamp <= _expiryTime,
             "commitUpgradeFeatures: commitment expired"
         );
         require(
-            _upgradesInfo[_commitment].user == address(0),
+            _upgradesInfoV2[_commitment].user == address(0),
             "commitment overlap"
         );
+
+        for (uint256 i = 0; i < _featureValueIndexesSet.length; i++) {
+            require(
+                _featureValueIndexesSet[i] < nftStorageHook.getSetLength(),
+                "buyAndCommitOpenBox: _featureValueIndexesSet out of rage"
+            );
+        }
+
         allUpgradeCommitments.push(_commitment);
         if (_useCharm) {
             require(
@@ -474,8 +488,7 @@ contract NFTFactoryV2 is Ownable, INFTFactory, SignerRecover, Initializable {
                 "commitUpgradeFeatures",
                 msg.sender,
                 _tokenIds,
-                _featureNames,
-                _featureValuesSet,
+                _featureValueIndexesSet,
                 _failureRate,
                 _useCharm,
                 _upgradeFee,
@@ -485,7 +498,7 @@ contract NFTFactoryV2 is Ownable, INFTFactory, SignerRecover, Initializable {
             )
         );
         require(
-            verifySignature(r, s, v, message),
+            verifySignature(rs[0], rs[1], v, message),
             "commitUpgradeFeatures:Signature invalid"
         );
 
@@ -494,17 +507,32 @@ contract NFTFactoryV2 is Ownable, INFTFactory, SignerRecover, Initializable {
         //need to lock token Ids here
         transferTokensIn(_tokenIds);
 
-        allUpgrades[msg.sender].push(_commitment);
+        pushUpgradeInfo(
+            _commitment,
+            _useCharm,
+            _failureRate,
+            _tokenIds,
+            _featureValueIndexesSet
+        );
 
-        _upgradesInfo[_commitment] = UpgradeInfo({
+        allUpgrades[msg.sender].push(_commitment);
+    }
+
+    function pushUpgradeInfo(
+        bytes32 _commitment,
+        bool _useCharm,
+        uint256 _failureRate,
+        uint256[3] memory _tokenIds,
+        uint256[] memory _featureValueIndexesSet
+    ) internal {
+        _upgradesInfoV2[_commitment] = UpgradeInfoV2({
             user: msg.sender,
             useCharm: _useCharm,
             failureRate: _failureRate,
             upgradeStatus: false,
             settled: false,
             tokenIds: _tokenIds,
-            targetFeatureNames: _featureNames,
-            targetFeatureValuesSet: _featureValuesSet,
+            featureValueIndexesSet: _featureValueIndexesSet,
             previousBlockHash: blockhash(block.number - 1)
         });
         emit CommitUpgradeFeature(msg.sender, _commitment);
@@ -519,11 +547,11 @@ contract NFTFactoryV2 is Ownable, INFTFactory, SignerRecover, Initializable {
     function settleUpgradeFeatures(bytes32 secret) public {
         bytes32 commitment = keccak256(abi.encode(secret));
         require(
-            _upgradesInfo[commitment].user != address(0),
+            _upgradesInfoV2[commitment].user != address(0),
             "settleUpgradeFeatures: commitment not exist"
         );
         require(
-            !_upgradesInfo[commitment].settled,
+            !_upgradesInfoV2[commitment].settled,
             "settleUpgradeFeatures: updated already settled"
         );
 
@@ -532,7 +560,7 @@ contract NFTFactoryV2 is Ownable, INFTFactory, SignerRecover, Initializable {
             address(this)
         );
 
-        UpgradeInfo storage u = _upgradesInfo[commitment];
+        UpgradeInfoV2 storage u = _upgradesInfoV2[commitment];
 
         bool shouldBurn = true;
 
@@ -557,11 +585,12 @@ contract NFTFactoryV2 is Ownable, INFTFactory, SignerRecover, Initializable {
 
         uint256 tokenId = 0;
         if (success) {
-            tokenId = nft.mint(
-                u.user,
-                u.targetFeatureNames,
-                u.targetFeatureValuesSet[resultIndex]
-            );
+            (
+                bytes[] memory _featureNames,
+                bytes[] memory _featureValues
+            ) = nftStorageHook.getFeaturesByIndex(resultIndex);
+
+            tokenId = nft.mint(u.user, _featureNames, _featureValues);
         }
         u.upgradeStatus = success;
         u.settled = true;
