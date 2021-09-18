@@ -551,6 +551,11 @@
         "internalType": "address",
         "name": "_countdownPeriod",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_factory",
+        "type": "address"
       }
     ],
     "name": "initialize",
@@ -659,6 +664,19 @@
       }
     ],
     "name": "setCountdownHook",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_factory",
+        "type": "address"
+      }
+    ],
+    "name": "setFactory",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

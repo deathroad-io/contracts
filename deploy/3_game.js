@@ -32,6 +32,7 @@ module.exports = async (hre) => {
   //reading DRACE token address
   const draceAddress = require(`../deployments/${chainId}/DRACE.json`).address
   const DeathRoadNFTAddress = require(`../deployments/${chainId}/DeathRoadNFT.json`).address
+  const NFTFactoryV2 = require(`../deployments/${chainId}/NFTFactoryV2.json`).address
 
   const GameControl = await ethers.getContractFactory('GameControl');
   const gameControlInstance = await GameControl.deploy()
@@ -64,7 +65,7 @@ module.exports = async (hre) => {
   const nftCountdownInstance = await NFTCountdown.deploy()
   const nftCountDown = await nftCountdownInstance.deployed()
   log('  - NFTCountdown:         ', nftCountDown.address);
-  
+
   deployData['NFTCountdown'] = {
     abi: getContractAbi('NFTCountdown'),
     address: nftCountDown.address,
@@ -72,7 +73,7 @@ module.exports = async (hre) => {
   }
 
   log('  - Initializing  GameControl        ');
-  await gameControl.initialize(draceAddress, DeathRoadNFTAddress, "0x0C78cbB95451F38e87436C002720F4DE95768441", tokenVesting.address, nftCountDown.address)
+  await gameControl.initialize(draceAddress, DeathRoadNFTAddress, "0x0C78cbB95451F38e87436C002720F4DE95768441", tokenVesting.address, nftCountDown.address, NFTFactoryV2)
 
   saveDeploymentData(chainId, deployData);
   log('\n  Contract Deployment Data saved to "deployments" directory.');

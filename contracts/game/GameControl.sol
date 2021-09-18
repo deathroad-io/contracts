@@ -78,17 +78,23 @@ contract GameControl is
         address _draceNFT,
         address _approver,
         address _tokenVesting,
-        address _countdownPeriod
+        address _countdownPeriod,
+        address _factory
     ) external initializer {
         drace = IERC20(_drace);
         draceNFT = IDeathRoadNFT(_draceNFT);
         mappingApprover[_approver] = true;
         tokenVesting = TokenVesting(_tokenVesting);
         countdownPeriod = INFTCountdown(_countdownPeriod);
+        factory = INFTFactory(_factory);
     }
 
     function setFeeTo(address _feeTo) external onlyOwner {
         feeTo = _feeTo;
+    }
+
+    function setFactory(address _factory) external onlyOwner {
+        factory = INFTFactory(_factory);
     }
 
     function addApprover(address _approver, bool _val) public onlyOwner {
