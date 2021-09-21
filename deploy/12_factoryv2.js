@@ -29,7 +29,7 @@ const {
     log(' ');
 
     log('  Deploying NFT FactoryV2 Contract...');
-
+    if (parseInt(chainId) == 31337) return;
     //reading DRACE token address
     const draceAddress = require(`../deployments/${chainId}/DRACE.json`).address
     const xdraceAddress = require(`../deployments/${chainId}/xDRACE.json`).address
@@ -64,10 +64,12 @@ const {
 
     log('  - Initializing  DeathRoadNFT        ');
     await deathRoadNFT.setFactory(factoryV2.address)
+    log('  - masterchef  setFactory        ');
     await masterchef.setFactory(factoryV2.address)
 
     await factoryV2.setOldFactory(oldFactory)
     await factoryV2.setXDRACE(xdraceAddress)
+    log('  - setMinter        ');
     await xdrace.setMinter(factoryV2.address, true)
 
     log('  - Adding approver ');

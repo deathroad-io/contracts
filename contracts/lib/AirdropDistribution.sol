@@ -5,7 +5,13 @@ import "./BlackholePrevention.sol";
 import "./SignerRecover.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-contract AirdropDistribution is Ownable, BlackholePrevention, Initializable, SignerRecover {
+
+contract AirdropDistribution is
+    Ownable,
+    BlackholePrevention,
+    Initializable,
+    SignerRecover
+{
     using SafeERC20 for IERC20;
     uint256 public claimCount;
     address public validator;
@@ -23,23 +29,40 @@ contract AirdropDistribution is Ownable, BlackholePrevention, Initializable, Sig
         drace = IERC20(_drace);
     }
 
+    function changeValidator(address _newValidator) public onlyOwner {
+        validator = _newValidator;
+    }
+
     function setClaimCount(uint256 _claimCount) external onlyOwner {
         claimCount = _claimCount;
     }
 
-    function claim(uint256 _total, uint256 _toClaim, bytes32 r, bytes32 s, uint8 v) external {
+    function claim(
+        uint256 _total,
+        uint256 _toClaim,
+        bytes32 r,
+        bytes32 s,
+        uint8 v
+    ) external {
+        bytes32 message = keccak256(
+            abi.encode(msg.sender, _total, _toClaim, claimCount)
+        );
+
+        require(
+            validator == recoverSigner(r, s, v, message),
+            "Invalid validator"
+        );
+
+        _claim(_total, _toClaim);
+    }
+
+    function _claim(uint256 _total, uint256 _toClaim) internal {
         UserInfo storage _user = userInfo[msg.sender];
 
-        bytes32 message = keccak256(abi.encode(
-            msg.sender, 
-            _total,
-            _toClaim,
-            claimCount
-        ));
-
-        require(validator == recoverSigner(r, s, v, message), "Invalid validator");
-
-        require(claimCount == _user.claimCount + 1, "Your airdrop was burnt as you did not claim last time");
+        require(
+            claimCount == _user.claimCount + 1,
+            "Your airdrop was burnt as you did not claim last time"
+        );
 
         if (_user.claimCount > 0) {
             //claim second, third, ford times

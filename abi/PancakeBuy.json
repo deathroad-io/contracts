@@ -88,96 +88,6 @@
     "type": "event"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_newValidator",
-        "type": "address"
-      }
-    ],
-    "name": "changeValidator",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_total",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_toClaim",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "r",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "s",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "uint8",
-        "name": "v",
-        "type": "uint8"
-      }
-    ],
-    "name": "claim",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "claimCount",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "drace",
-    "outputs": [
-      {
-        "internalType": "contract IERC20",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_drace",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_validator",
-        "type": "address"
-      }
-    ],
-    "name": "initialize",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "owner",
     "outputs": [
@@ -200,12 +110,22 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "_claimCount",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "_routerV2",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_tokenIn",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_tokenOut",
+        "type": "address"
       }
     ],
-    "name": "setClaimCount",
+    "name": "swapWithToken",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -226,48 +146,6 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "userInfo",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "total",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "claimed",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "claimCount",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "validator",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "address payable",
         "name": "receiver",
         "type": "address"
@@ -283,7 +161,7 @@
         "type": "uint256"
       }
     ],
-    "name": "withdrawERC20",
+    "name": "withdrawERC201",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -306,7 +184,7 @@
         "type": "uint256"
       }
     ],
-    "name": "withdrawERC721",
+    "name": "withdrawERC7211",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -324,7 +202,7 @@
         "type": "uint256"
       }
     ],
-    "name": "withdrawEther",
+    "name": "withdrawEther1",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
