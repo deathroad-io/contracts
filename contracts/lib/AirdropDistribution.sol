@@ -29,7 +29,6 @@ contract AirdropDistribution is Ownable, BlackholePrevention, Initializable, Sig
 
     function claim(uint256 _total, uint256 _toClaim, bytes32 r, bytes32 s, uint8 v) external {
         UserInfo storage _user = userInfo[msg.sender];
-        require(claimCount == _user.claimCount + 1, "Your airdrop was burnt as you did not claim last time");
 
         bytes32 message = keccak256(abi.encode(
             msg.sender, 
@@ -39,6 +38,8 @@ contract AirdropDistribution is Ownable, BlackholePrevention, Initializable, Sig
         ));
 
         require(validator == recoverSigner(r, s, v, message), "Invalid validator");
+
+        require(claimCount == _user.claimCount + 1, "Your airdrop was burnt as you did not claim last time");
 
         if (_user.claimCount > 0) {
             //claim second, third, ford times
