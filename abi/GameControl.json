@@ -61,6 +61,43 @@
       {
         "indexed": false,
         "internalType": "address",
+        "name": "player",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "gameIds",
+        "type": "bytes"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "draceReward",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "xdraceReward",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
+      }
+    ],
+    "name": "RewardDistribution",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
         "name": "depositor",
         "type": "address"
       },
@@ -206,6 +243,19 @@
     "type": "event"
   },
   {
+    "inputs": [],
+    "name": "FREE_PLAYING_TURNS",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -236,8 +286,13 @@
         "type": "uint256"
       },
       {
+        "internalType": "uint256",
+        "name": "_turnCount",
+        "type": "uint256"
+      },
+      {
         "internalType": "bool",
-        "name": "_useBoxRewards",
+        "name": "_usexDrace",
         "type": "bool"
       },
       {
@@ -358,9 +413,9 @@
         "type": "uint256"
       },
       {
-        "internalType": "uint256",
-        "name": "_gameId",
-        "type": "uint256"
+        "internalType": "uint256[]",
+        "name": "_gameIds",
+        "type": "uint256[]"
       },
       {
         "internalType": "bytes32",
@@ -501,11 +556,6 @@
         "internalType": "uint256",
         "name": "gameId",
         "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "paidRewards",
-        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -571,6 +621,25 @@
     "name": "initialize",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "isFreePlayingTurnsAdded",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -707,6 +776,32 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "_vesting",
+        "type": "address"
+      }
+    ],
+    "name": "setTokenVesting",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_p",
+        "type": "uint256"
+      }
+    ],
+    "name": "setXDracePercent",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256[]",
         "name": "_tokenIds",
         "type": "uint256[]"
@@ -796,11 +891,30 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "tokenPlayingTurns",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "tokenVesting",
     "outputs": [
       {
-        "internalType": "contract TokenVesting",
+        "internalType": "contract ITokenVesting",
         "name": "",
         "type": "address"
       }
@@ -890,6 +1004,32 @@
     "name": "withdrawEther",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "withdrawNFT",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "xDracePercent",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
