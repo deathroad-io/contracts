@@ -7,6 +7,7 @@ const {
 } = require("../js-helpers/deploy");
 
 const _ = require('lodash');
+const feeReceiver = "0xd91ce559ab85e32169462BB39739E4ED8babb6FE"
 
 module.exports = async (hre) => {
   const { ethers, getNamedAccounts } = hre;
@@ -32,6 +33,7 @@ module.exports = async (hre) => {
 
   //reading DRACE token address
   const draceAddress = require(`../deployments/${chainId}/DRACE.json`).address
+  const xdraceAddress = require(`../deployments/${chainId}/xDRACE.json`).address
   const DeathRoadNFTAddress = require(`../deployments/${chainId}/DeathRoadNFT.json`).address
   const NFTFactoryV2 = require(`../deployments/${chainId}/NFTFactoryV2.json`).address
 
@@ -59,7 +61,7 @@ module.exports = async (hre) => {
   }
 
   log('  - Initializing  TokenVesting        ');
-  await tokenVesting.initialize(draceAddress, 86400 * 2)
+  await tokenVesting.initialize(draceAddress, 0)
 
   log('  Deploying NFTCountdown Contract...');
   const NFTCountdown = await ethers.getContractFactory('NFTCountdown');
@@ -74,7 +76,13 @@ module.exports = async (hre) => {
   }
 
   log('  - Initializing  GameControl        ');
-  await gameControl.initialize(draceAddress, DeathRoadNFTAddress, "0x0C78cbB95451F38e87436C002720F4DE95768441", tokenVesting.address, nftCountDown.address, NFTFactoryV2)
+  await gameControl.initialize(draceAddress, DeathRoadNFTAddress, "0x0C78cbB95451F38e87436C002720F4DE95768441", tokenVesting.address, nftCountDown.address, NFTFactoryV2, xdraceAddress, feeReceiver)
+
+  //settings
+  const xDRACE = await ethers.getContractFactory('xDRACE');
+  const xdraceContract = await xDRACE.attach(xdraceAddress)
+  await xdraceContract.setMinter(gameControl.address, true)
+  await tokenVesting.setLockers([gameControl.address], true)
 
   saveDeploymentData(chainId, deployData);
   log('\n  Contract Deployment Data saved to "deployments" directory.');

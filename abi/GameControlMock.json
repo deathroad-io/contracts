@@ -322,6 +322,34 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_price",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_turnCount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "_usexDrace",
+        "type": "bool"
+      }
+    ],
+    "name": "buyPlayingTurnMock",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "countdownPeriod",
     "outputs": [
@@ -411,6 +439,11 @@
         "internalType": "uint256[]",
         "name": "_gameIds",
         "type": "uint256[]"
+      },
+      {
+        "internalType": "bool",
+        "name": "_withdrawNFT",
+        "type": "bool"
       }
     ],
     "name": "distributeRewardMock",
@@ -612,6 +645,25 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "_addr",
+        "type": "address"
+      }
+    ],
+    "name": "getDepositTokenList",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "_drace",
         "type": "address"
       },
@@ -643,6 +695,11 @@
       {
         "internalType": "address",
         "name": "_xdrace",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_feeTo",
         "type": "address"
       }
     ],

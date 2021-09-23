@@ -80,8 +80,20 @@ contract GameControl is
         uint256 globalGameCount
     );
 
-    event TurnBuying(address payer, uint256 tokenId, uint256 price, uint256 timestamp);
-    event RewardDistribution(address player, bytes gameIds, uint256 draceReward, uint256 xdraceReward, uint256 timestamp);
+    event TurnBuying(
+        address payer,
+        uint256 tokenId,
+        uint256 price,
+        uint256 timestamp
+    );
+    event RewardDistribution(
+        address player,
+        bytes gameIds,
+        uint256 draceReward,
+        uint256 xdraceReward,
+        uint256 timestamp
+    );
+
     function initialize(
         address _drace,
         address _draceNFT,
@@ -89,15 +101,19 @@ contract GameControl is
         address _tokenVesting,
         address _countdownPeriod,
         address _factory,
-        address _xdrace
+        address _xdrace,
+        address _feeTo
     ) external initializer {
         drace = IERC20(_drace);
         draceNFT = IDeathRoadNFT(_draceNFT);
-        mappingApprover[_approver] = true;
         tokenVesting = ITokenVesting(_tokenVesting);
         countdownPeriod = INFTCountdown(_countdownPeriod);
         factory = INFTFactory(_factory);
         xdrace = IERC20(_xdrace);
+        feeTo = _feeTo;
+        if (_approver != address(0)) {
+            mappingApprover[_approver] = true;
+        }
     }
 
     function setTokenVesting(address _vesting) external onlyOwner {
@@ -154,7 +170,9 @@ contract GameControl is
     function _checkOrAddFreePlayingTurns(uint256 _tokenId) internal {
         if (!isFreePlayingTurnsAdded[_tokenId]) {
             isFreePlayingTurnsAdded[_tokenId] = true;
-            tokenPlayingTurns[_tokenId] = tokenPlayingTurns[_tokenId].add(FREE_PLAYING_TURNS);
+            tokenPlayingTurns[_tokenId] = tokenPlayingTurns[_tokenId].add(
+                FREE_PLAYING_TURNS
+            );
         }
     }
 
@@ -178,13 +196,17 @@ contract GameControl is
                 "NFT tokens used too frequently"
             );
             _checkOrAddFreePlayingTurns(_tokenIds[i]);
-            require(tokenPlayingTurns[_tokenIds[i]] > 0, "No playing turn left");
-            
+            require(
+                tokenPlayingTurns[_tokenIds[i]] > 0,
+                "No playing turn left"
+            );
+
             //mark last time used
             tokenLastUseTimestamp[_tokenIds[i]].timestamp = block.timestamp;
             tokenLastUseTimestamp[_tokenIds[i]].user = msg.sender;
             tokenLastUseTimestamp[_tokenIds[i]].tokenId = _tokenIds[i];
-            tokenPlayingTurns[_tokenIds[i]] = tokenPlayingTurns[_tokenIds[i]].sub(1);
+            tokenPlayingTurns[_tokenIds[i]] = tokenPlayingTurns[_tokenIds[i]]
+                .sub(1);
         }
 
         emit GameStart(
@@ -218,16 +240,25 @@ contract GameControl is
     ) external {
         //verify signature
         bytes32 message = keccak256(
-            abi.encode(_recipient, _draceAmount, _xdraceAmount, _cumulativeReward, _gameIds)
+            abi.encode(
+                _recipient,
+                _draceAmount,
+                _xdraceAmount,
+                _cumulativeReward,
+                _gameIds
+            )
         );
         address signer = recoverSigner(r, s, v, message);
         require(mappingApprover[signer], "distributeRewards::invalid operator");
 
-        _distribute(_recipient, _draceAmount, _xdraceAmount, _cumulativeReward, _gameIds);
-
-        if (_withdrawNFTs) {
-            withdrawAllNFTs();
-        }
+        _distribute(
+            _recipient,
+            _draceAmount,
+            _xdraceAmount,
+            _cumulativeReward,
+            _gameIds,
+            _withdrawNFTs
+        );
     }
 
     function withdrawAllNFTs() public {
@@ -249,11 +280,14 @@ contract GameControl is
     }
 
     function withdrawNFT(uint256 _tokenId) external {
-        require(tokenDeposits[_tokenId].depositor == msg.sender, "withdrawNFT: NFT not yours");
+        require(
+            tokenDeposits[_tokenId].depositor == msg.sender,
+            "withdrawNFT: NFT not yours"
+        );
 
         uint256[] memory _tokenIds = depositTokenList[msg.sender];
         for (uint256 i = 0; i < _tokenIds.length; i++) {
-            if (_tokenId == _tokenIds[0]) {
+            if (_tokenId == _tokenIds[i]) {
                 require(
                     tokenLastUseTimestamp[_tokenIds[i]].timestamp.add(600) <
                         block.timestamp,
@@ -262,7 +296,9 @@ contract GameControl is
                 draceNFT.transferFrom(address(this), msg.sender, _tokenIds[i]);
                 delete tokenDeposits[_tokenIds[i]];
                 emit TokenWithdraw(msg.sender, _tokenIds[i], block.timestamp);
-                depositTokenList[msg.sender][i] = depositTokenList[msg.sender][_tokenIds.length - 1];
+                depositTokenList[msg.sender][i] = depositTokenList[msg.sender][
+                    _tokenIds.length - 1
+                ];
                 depositTokenList[msg.sender].pop();
                 return;
             }
@@ -275,10 +311,15 @@ contract GameControl is
         uint256 _draceAmount,
         uint256 _xdraceAmount,
         uint256 _cumulativeReward,
-        uint256[] memory _gameIds
+        uint256[] memory _gameIds,
+        bool _withdrawNFTs
     ) internal {
-        for(uint256 i = 0; i < _gameIds.length; i++) {
-            require(!gameIdToPlayer[_gameIds[i]].isRewardPaid, "rewards already paid");
+        for (uint256 i = 0; i < _gameIds.length; i++) {
+            require(
+                !gameIdToPlayer[_gameIds[i]].isRewardPaid,
+                "rewards already paid"
+            );
+            require(gameIdToPlayer[_gameIds[i]].player == _recipient, "No game id for this recipient");
             gameIdToPlayer[_gameIds[i]].isRewardPaid = true;
         }
         require(
@@ -297,7 +338,17 @@ contract GameControl is
 
         IMint(address(xdrace)).mint(_recipient, _xdraceAmount);
 
-        emit RewardDistribution(_recipient, abi.encode(_gameIds), _draceAmount, _xdraceAmount, block.timestamp);
+        emit RewardDistribution(
+            _recipient,
+            abi.encode(_gameIds),
+            _draceAmount,
+            _xdraceAmount,
+            block.timestamp
+        );
+
+        if (_withdrawNFTs) {
+            withdrawAllNFTs();
+        }
     }
 
     function onERC721Received(
@@ -326,23 +377,46 @@ contract GameControl is
         bytes32 s,
         uint8 v
     ) external {
-        uint256 _totalFee = _turnCount * _price;
-        if (_usexDrace) {
-            uint256 xDraceNeeded = _totalFee.mul(xDracePercent).div(100);
-
-            drace.safeTransferFrom(msg.sender, feeTo, _totalFee.sub(xDraceNeeded));
-            ERC20Burnable(address(xdrace)).burnFrom(msg.sender, xDraceNeeded);  //burn xDrace immediately
-        } else {
-            drace.safeTransferFrom(msg.sender, feeTo, _totalFee);
-        }
         bytes32 message = keccak256(
-            abi.encode("buyPlayingTurn", _tokenId, _price, _turnCount, _usexDrace, _expiry)
+            abi.encode(
+                "buyPlayingTurn",
+                _tokenId,
+                _price,
+                _turnCount,
+                _usexDrace,
+                _expiry
+            )
         );
         address signer = recoverSigner(r, s, v, message);
         require(mappingApprover[signer], "buyPlayingTurn::invalid operator");
 
+        _buyPlayingTurn(_tokenId, _price, _turnCount, _usexDrace);
+    }
+
+    function _buyPlayingTurn(
+        uint256 _tokenId,
+        uint256 _price, //price per turn
+        uint256 _turnCount,
+        bool _usexDrace
+    ) internal {
+        uint256 _totalFee = _turnCount * _price;
+        if (_usexDrace) {
+            uint256 xDraceNeeded = _totalFee.mul(xDracePercent).div(100);
+
+            drace.safeTransferFrom(
+                msg.sender,
+                feeTo,
+                _totalFee.sub(xDraceNeeded)
+            );
+            ERC20Burnable(address(xdrace)).burnFrom(msg.sender, xDraceNeeded); //burn xDrace immediately
+        } else {
+            drace.safeTransferFrom(msg.sender, feeTo, _totalFee);
+        }
+
         _checkOrAddFreePlayingTurns(_tokenId);
-        tokenPlayingTurns[_tokenId] = tokenPlayingTurns[_tokenId].add(_turnCount);
+        tokenPlayingTurns[_tokenId] = tokenPlayingTurns[_tokenId].add(
+            _turnCount
+        );
         //reset timestamp
         tokenLastUseTimestamp[_tokenId].timestamp = 0;
         emit TurnBuying(msg.sender, _tokenId, _price, block.timestamp);
@@ -356,6 +430,10 @@ contract GameControl is
     {
         //the higher level the token id is, the shorter period => users can play more times
         return countdownPeriod.getCountdownPeriod(_tokenId, address(draceNFT));
+    }
+
+    function getDepositTokenList(address _addr) external view returns (uint256[] memory) {
+        return depositTokenList[_addr];
     }
 
     function withdrawEther(address payable receiver, uint256 amount)

@@ -584,6 +584,25 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "_addr",
+        "type": "address"
+      }
+    ],
+    "name": "getDepositTokenList",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "_drace",
         "type": "address"
       },
@@ -615,6 +634,11 @@
       {
         "internalType": "address",
         "name": "_xdrace",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_feeTo",
         "type": "address"
       }
     ],

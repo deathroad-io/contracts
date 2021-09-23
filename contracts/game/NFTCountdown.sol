@@ -12,7 +12,7 @@ contract NFTCountdown is INFTCountdown, Ownable  {
         return defaultCountdown;
     } 
 
-    function setDefaultCountDown(uint256 _x) external onlyOwner {
+    function setDefaultCountdown(uint256 _x) external onlyOwner {
         defaultCountdown = _x;
     }
 }
