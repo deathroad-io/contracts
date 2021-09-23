@@ -344,7 +344,12 @@
       },
       {
         "internalType": "uint256",
-        "name": "_rewardAmount",
+        "name": "_draceAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_xdraceAmount",
         "type": "uint256"
       },
       {
@@ -555,6 +560,11 @@
       {
         "internalType": "address",
         "name": "_factory",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_xdrace",
         "type": "address"
       }
     ],
@@ -880,6 +890,19 @@
     "name": "withdrawEther",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "xdrace",
+    "outputs": [
+      {
+        "internalType": "contract IERC20",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   }
 ]

@@ -204,6 +204,10 @@ contract LinearAirdrop is
         }
     }
 
+    function didYouMakeInitialClaim(address _addr) external view returns (bool) {
+        return vestings[_addr].length > 0;
+    }
+
     function withdrawEther(address payable receiver, uint256 amount)
         external
         virtual
