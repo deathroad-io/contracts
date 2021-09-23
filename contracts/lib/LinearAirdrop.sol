@@ -20,7 +20,6 @@ contract LinearAirdrop is
     address public validator;
     IERC20 public drace;
     uint256 public startClaimTimestamp;
-    uint256 public vestingPeriod;
     uint256 public constant VESTING_INIT_PERIOD = 2 days;
     uint256 public constant VESTING_PERIOD = 30 days;
     struct Vesting {
@@ -35,12 +34,10 @@ contract LinearAirdrop is
 
     function initialize(
         address _drace,
-        address _validator,
-        uint256 _vestingPeriod
+        address _validator
     ) public initializer {
         validator = _validator;
         drace = IERC20(_drace);
-        vestingPeriod = _vestingPeriod;
     }
 
     function setStartClaimTimestamp(uint256 _t) external onlyOwner {
@@ -111,13 +108,13 @@ contract LinearAirdrop is
         }
     }
 
-    function getUserStatus()
+    function getUserStatus(address _user)
         external
         view
-        returns (uint256 _claimable, uint256 _lock)
+        returns (uint256 _claimable, uint256 _lock, uint256 _total)
     {
-        Vesting[] storage _vestings = vestings[msg.sender];
-        if (_vestings.length == 0) return (0, 0);
+        Vesting[] storage _vestings = vestings[_user];
+        if (_vestings.length == 0) return (0, 0, 0);
 
         for (uint256 i = 0; i < _vestings.length; i++) {
             Vesting storage _vesting = _vestings[i];
@@ -138,7 +135,9 @@ contract LinearAirdrop is
             }
 
             _claimable = _claimable.add(claimableTilNow.sub(_vesting.claimed));
+            _lock = _lock.add(_vesting.amount.sub(claimableTilNow));
         }
+        _total = _claimable + _lock;
     }
 
     function _initVesting(uint256 _total) private {
