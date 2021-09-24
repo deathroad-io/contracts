@@ -100,6 +100,7 @@ module.exports = async (hre) => {
     NFTFactoryV2,
     xdraceAddress,
     feeReceiver,
+    xdraceDistributor.address
   )
 
   //settings
