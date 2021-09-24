@@ -1,6 +1,7 @@
 pragma solidity ^0.8.0;
 import "./BlackholePreventionOwnable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "../interfaces/IPancakeRouter02.sol";
 import "../interfaces/IPancakePair.sol";
@@ -8,20 +9,35 @@ import "../interfaces/IPancakePair.sol";
 contract LiquidityAdder is BlackholePreventionOwnable, Initializable {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
+    using Address for address;
 
     IERC20 public drace;
     IPancakePair public pancakePair;
     uint256 public liquidityAddAmount = 1000e18;
     uint256 public liquidityPeriod = 12 hours;
+    uint256 public lastUpdated;
     bool public allowAnyOneToCall = false;
     address public otherTokenAddress;
     IPancakeRouter02 public routerV2;
     address public liquidityReceiver;
+    mapping(address => bool) public whitelistedContracts;
 
     function initialize(address _drace, address _pair) external initializer {
         drace = IERC20(_drace);
         pancakePair = IPancakePair(_pair);
         liquidityReceiver = owner();
+
+        otherTokenAddress = pancakePair.token0() == address(drace)
+            ? pancakePair.token1()
+            : pancakePair.token0();
+    }
+
+    function setLiquidityReceiver(address _r) external onlyOwner {
+        liquidityReceiver = _r;
+    }
+
+    function setWhitelistedContract(address _addr, bool val) external onlyOwner {
+        whitelistedContracts[_addr] = val;
     }
 
     function setRouter(address _router) external onlyOwner {
@@ -47,16 +63,22 @@ contract LiquidityAdder is BlackholePreventionOwnable, Initializable {
         liquidityPeriod = _liquidityPeriod;
     }
 
+    function setAllowAnyOneToCall(bool val) external onlyOwner {
+        allowAnyOneToCall = val;
+    }
+
     function addLiquidity() external {
-        require(address(routerV2) != address(0), "liquidity router not set");
+        if (lastUpdated.add(liquidityPeriod) > block.timestamp) return;
+        if (address(routerV2) == address(0)) return;
         if (!allowAnyOneToCall) {
-            require(msg.sender == owner(), "Only owner can call");
+            if (msg.sender != owner()) return;
+        } else {
+            if (msg.sender.isContract()) {
+                if (!whitelistedContracts[msg.sender]) return;
+            }
         }
 
-        require(
-            drace.balanceOf(address(this)) >= liquidityAddAmount,
-            "Not enough token to add liquidity"
-        );
+        if (drace.balanceOf(address(this)) < liquidityAddAmount) return;
 
         //sell half and add liquidity
         uint256 half = liquidityAddAmount.div(2);
@@ -96,5 +118,6 @@ contract LiquidityAdder is BlackholePreventionOwnable, Initializable {
             receiver,
             block.timestamp + 100
         );
+        lastUpdated = block.timestamp;
     }
 }
