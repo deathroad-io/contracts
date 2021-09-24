@@ -76,10 +76,22 @@ const {
     await factoryV2.addApprover('0x75785F9CE180C951c8178BABadFE904ec883D820', true);
     await factoryV2.setSettleFeeReceiver("0xD0e3376e1c3Af2C11730aA4E89BE839D4a1BD761")
 
+    const xDraceDistributor = await ethers.getContractFactory('xDraceDistributor');
+    const xDraceDistributorInstance = await xDraceDistributor.deploy()
+    const xdraceDistributor = await xDraceDistributorInstance.deployed()
+    log('  - xDraceDistributor:         ', xdraceDistributor.address);
+    //30 days vesting for coverted xdrace
+    await xdraceDistributor.initialize(xdraceAddress, 30 * 86400)
     //deploying fee distribution
 
     log('  - Initializing  NFTFactory        ');
-    await factoryV2.initialize(deathRoadNFT.address, draceAddress, feeReceiver, notaryNFT.address, NFTStorageAddress, masterchef.address)
+    await factoryV2.initialize(deathRoadNFT.address, draceAddress, feeReceiver, notaryNFT.address, NFTStorageAddress, masterchef.address, xdraceDistributor.address, xdraceAddress)
+
+    deployData['xDraceDistributor'] = {
+      abi: getContractAbi('xDraceDistributor'),
+      address: xdraceDistributor.address,
+      deployTransaction: xdraceDistributor.deployTransaction,
+    }
 
     deployData['NotaryNFT'] = {
       abi: getContractAbi('NotaryNFT'),

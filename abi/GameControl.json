@@ -640,6 +640,11 @@
         "internalType": "address",
         "name": "_feeTo",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_xDraceVesting",
+        "type": "address"
       }
     ],
     "name": "initialize",
@@ -819,6 +824,19 @@
       }
     ],
     "name": "setXDracePercent",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_vesting",
+        "type": "address"
+      }
+    ],
+    "name": "setXDraceVesting",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1051,6 +1069,19 @@
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "xDraceVesting",
+    "outputs": [
+      {
+        "internalType": "contract IxDraceDistributor",
+        "name": "",
+        "type": "address"
       }
     ],
     "stateMutability": "view",

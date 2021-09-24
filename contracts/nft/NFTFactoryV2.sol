@@ -4,7 +4,9 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "../interfaces/INotaryNFT.sol";
+import "../interfaces/IxDraceDistributor.sol";
 import "../interfaces/IDeathRoadNFT.sol";
 import "../interfaces/INFTFactoryV2.sol";
 import "../interfaces/INFTFactory.sol";
@@ -47,7 +49,9 @@ contract NFTFactoryV2 is Ownable, INFTFactoryV2, SignerRecover, Initializable {
         address payable _feeTo,
         address _notaryHook,
         address _nftStorageHook,
-        address _masterChef
+        address _masterChef,
+        address _v,
+        address _xDrace
     ) external initializer {
         nft = IDeathRoadNFT(_nft);
         DRACE = DRACE_token;
@@ -55,6 +59,8 @@ contract NFTFactoryV2 is Ownable, INFTFactoryV2, SignerRecover, Initializable {
         notaryHook = INotaryNFT(_notaryHook);
         masterChef = _masterChef;
         nftStorageHook = INFTStorage(_nftStorageHook);
+        xDraceVesting = IxDraceDistributor(_v);
+        xDrace = IMint(_xDrace);
     }
 
     modifier onlyBoxOwner(uint256 boxId) {
@@ -320,11 +326,7 @@ contract NFTFactoryV2 is Ownable, INFTFactoryV2, SignerRecover, Initializable {
             erc20.transferFrom(msg.sender, feeTo, _price);
         } else {
             uint256 boxRewardSpent = _price.mul(boxDiscountPercent).div(100);
-            IERC20(address(xDrace)).transferFrom(
-                msg.sender,
-                feeTo,
-                boxRewardSpent
-            );
+            ERC20Burnable(address(xDrace)).burnFrom(msg.sender, boxRewardSpent);
             erc20.transferFrom(msg.sender, feeTo, _price.sub(boxRewardSpent));
         }
     }
@@ -632,20 +634,31 @@ contract NFTFactoryV2 is Ownable, INFTFactoryV2, SignerRecover, Initializable {
     function setXDRACE(address _xdrace) external onlyOwner {
         xDrace = IMint(_xdrace);
     }
+    function setXDraceVesting(address _v) external onlyOwner {
+        xDraceVesting = IxDraceDistributor(_v);
+    }
 
     mapping(address => bool) public alreadyMinted;
+    IxDraceDistributor public xDraceVesting;
 
     function addBoxReward(address addr, uint256 reward) external override {
         require(
             msg.sender == masterChef,
             "only masterchef can update box reward"
         );
+
         uint256 _toMint = reward;
         if (!alreadyMinted[addr]) {
             alreadyMinted[addr] = true;
-            _toMint = _toMint.add(oldFactory.boxRewards(addr));
+            uint256 _toLock = oldFactory.boxRewards(addr);
+
+            //mint & lock for _addr
+            xDrace.mint(address(this), _toLock);
+            IERC20(address(xDrace)).approve(address(xDraceVesting), _toLock);
+            xDraceVesting.lock(addr, _toLock);
         }
 
+        //mint immediately
         xDrace.mint(addr, _toMint);
     }
 
@@ -661,10 +674,12 @@ contract NFTFactoryV2 is Ownable, INFTFactoryV2, SignerRecover, Initializable {
         return IERC20(address(xDrace)).balanceOf(_addr);
     }
 
-    address public gameControl;
-
-    function setGameControl(address _gameControl) external onlyOwner {
-        gameControl = _gameControl;
+    function getXDraceLockInfo(address _addr)
+        external
+        view
+        returns (uint256, uint256)
+    {
+        return xDraceVesting.getLockedInfo(_addr);
     }
 
     function decreaseBoxReward(address addr, uint256 reduced)

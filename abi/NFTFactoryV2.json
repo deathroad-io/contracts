@@ -810,19 +810,6 @@
   },
   {
     "inputs": [],
-    "name": "gameControl",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "getAllBoxCommitments",
     "outputs": [
       {
@@ -920,6 +907,30 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "_addr",
+        "type": "address"
+      }
+    ],
+    "name": "getXDraceLockInfo",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "_nft",
         "type": "address"
       },
@@ -946,6 +957,16 @@
       {
         "internalType": "address",
         "name": "_masterChef",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_v",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_xDrace",
         "type": "address"
       }
     ],
@@ -1162,19 +1183,6 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_gameControl",
-        "type": "address"
-      }
-    ],
-    "name": "setGameControl",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
         "name": "_masterChef",
         "type": "address"
       }
@@ -1258,6 +1266,19 @@
       }
     ],
     "name": "setXDRACE",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_v",
+        "type": "address"
+      }
+    ],
+    "name": "setXDraceVesting",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1500,6 +1521,19 @@
     "outputs": [
       {
         "internalType": "contract IMint",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "xDraceVesting",
+    "outputs": [
+      {
+        "internalType": "contract IxDraceDistributor",
         "name": "",
         "type": "address"
       }

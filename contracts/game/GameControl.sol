@@ -9,6 +9,7 @@ import "../interfaces/IMint.sol";
 import "../interfaces/INFTCountdown.sol";
 import "../lib/SignerRecover.sol";
 import "../interfaces/ITokenVesting.sol";
+import "../interfaces/IxDraceDistributor.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "../lib/BlackholePrevention.sol";
@@ -55,6 +56,7 @@ contract GameControl is
     //2. Users are using at least one car and one gun in the token id list
     mapping(address => bool) public mappingApprover;
     ITokenVesting public tokenVesting;
+    IxDraceDistributor public xDraceVesting;
     uint256 public gameCount;
     mapping(address => uint256) public cumulativeRewards;
     mapping(address => uint256[]) public gameIdList; //list of game id users play
@@ -102,7 +104,8 @@ contract GameControl is
         address _countdownPeriod,
         address _factory,
         address _xdrace,
-        address _feeTo
+        address _feeTo,
+        address _xDraceVesting
     ) external initializer {
         drace = IERC20(_drace);
         draceNFT = IDeathRoadNFT(_draceNFT);
@@ -114,10 +117,15 @@ contract GameControl is
         if (_approver != address(0)) {
             mappingApprover[_approver] = true;
         }
+        xDraceVesting = IxDraceDistributor(_xDraceVesting);
     }
 
     function setTokenVesting(address _vesting) external onlyOwner {
         tokenVesting = ITokenVesting(_vesting);
+    }
+
+    function setXDraceVesting(address _vesting) external onlyOwner {
+        xDraceVesting = IxDraceDistributor(_vesting);
     }
 
     function setFeeTo(address _feeTo) external onlyOwner {
@@ -336,7 +344,9 @@ contract GameControl is
         drace.safeApprove(address(tokenVesting), _draceAmount);
         tokenVesting.lock(_recipient, _draceAmount);
 
-        IMint(address(xdrace)).mint(_recipient, _xdraceAmount);
+        IMint(address(xdrace)).mint(address(this), _xdraceAmount);
+        IERC20(address(xdrace)).approve(address(xDraceVesting), _xdraceAmount);
+        xDraceVesting.lock(_recipient, _xdraceAmount);
 
         emit RewardDistribution(
             _recipient,
