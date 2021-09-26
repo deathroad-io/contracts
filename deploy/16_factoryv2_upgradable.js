@@ -48,14 +48,14 @@ const {
 
     log('  Deploying NFT Factoryv2 Contract...');
     const NFTFactoryV2 = await ethers.getContractFactory('NFTFactoryV2');
-    const nftFactoryV2Instance = await NFTFactoryV2.deploy()
-    const factoryV2 = await nftFactoryV2Instance.deployed()
+    const mc = await upgrades.deployProxy(NFTFactoryV2);
+    //const nftFactoryV2Instance = await NFTFactoryV2.deploy()
+    const factoryV2 = await mc.deployed()
     log('  - NFTFactoryV2:         ', factoryV2.address);
 
     log('  Deploying NFT Notary Contract...');
     const NotaryNFT = await ethers.getContractFactory('NotaryNFT');
-    const mc = await upgrades.deployProxy(NotaryNFT);
-    const notaryNFTInstance = await mc.deploy()
+    const notaryNFTInstance = await NotaryNFT.deploy()
     const notaryNFT = await notaryNFTInstance.deployed()
     log('  - NotaryNFT:         ', notaryNFT.address);
 
