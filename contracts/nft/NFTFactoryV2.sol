@@ -656,10 +656,11 @@ contract NFTFactoryV2 is Ownable, INFTFactoryV2, SignerRecover, Initializable {
             xDrace.mint(address(this), _toLock);
             IERC20(address(xDrace)).approve(address(xDraceVesting), _toLock);
             xDraceVesting.lock(addr, _toLock);
-        }
+        } else {
 
-        //mint immediately
-        xDrace.mint(addr, _toMint);
+            //mint immediately
+            xDrace.mint(addr, _toMint);
+        }
     }
 
     function boxRewards(address _addr)

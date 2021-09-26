@@ -45,7 +45,7 @@ const {
     }
   
     log('  - Initializing  LinearAirdrop        ');
-    await airdrop.initialize(draceAddress, signers[0].address)
+    await airdrop.initialize(draceAddress, "0x75785f9ce180c951c8178babadfe904ec883d820")
   
     saveDeploymentData(chainId, deployData);
     log('\n  Contract Deployment Data saved to "deployments" directory.');

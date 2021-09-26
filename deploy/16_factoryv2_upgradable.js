@@ -10,7 +10,7 @@ const {
   const feeReceiver = "0xd91ce559ab85e32169462BB39739E4ED8babb6FE"
 
   module.exports = async (hre) => {
-    const { ethers, getNamedAccounts } = hre;
+    const { ethers, getNamedAccounts, upgrades } = hre;
     const { deployer } = await getNamedAccounts();
     const network = await hre.network;
     const deployData = {};
@@ -54,7 +54,8 @@ const {
 
     log('  Deploying NFT Notary Contract...');
     const NotaryNFT = await ethers.getContractFactory('NotaryNFT');
-    const notaryNFTInstance = await NotaryNFT.deploy()
+    const mc = await upgrades.deployProxy(NotaryNFT);
+    const notaryNFTInstance = await mc.deploy()
     const notaryNFT = await notaryNFTInstance.deployed()
     log('  - NotaryNFT:         ', notaryNFT.address);
 
@@ -112,5 +113,5 @@ const {
     log('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n');
   };
   
-  module.exports.tags = ['factoryv2']
+  module.exports.tags = ['factoryv2upgradable']
   

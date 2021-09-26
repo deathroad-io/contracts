@@ -103,6 +103,8 @@ module.exports = async (hre) => {
     xdraceDistributor.address
   )
 
+  await gameControl.addApprover("0x75785f9ce180c951c8178babadfe904ec883d820", true)
+
   //settings
   const xDRACE = await ethers.getContractFactory('xDRACE')
   const xdraceContract = await xDRACE.attach(xdraceAddress)
