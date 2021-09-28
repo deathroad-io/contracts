@@ -8,7 +8,7 @@ const {
 
 const _ = require('lodash')
 const feeReceiver = '0xd91ce559ab85e32169462BB39739E4ED8babb6FE'
-
+const constants = require('./constants')
 module.exports = async (hre) => {
   const { ethers, getNamedAccounts } = hre
   const { deployer } = await getNamedAccounts()
@@ -94,7 +94,7 @@ module.exports = async (hre) => {
   await gameControl.initialize(
     draceAddress,
     DeathRoadNFTAddress,
-    '0x0C78cbB95451F38e87436C002720F4DE95768441',
+    constants.getApprover(chainId),
     tokenVesting.address,
     nftCountDown.address,
     NFTFactoryV2,
@@ -103,7 +103,7 @@ module.exports = async (hre) => {
     xdraceDistributor.address
   )
 
-  await gameControl.addApprover("0x75785f9ce180c951c8178babadfe904ec883d820", true)
+  await gameControl.addApprover(constants.getApprover(chainId), true)
 
   //settings
   const xDRACE = await ethers.getContractFactory('xDRACE')

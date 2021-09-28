@@ -8,6 +8,7 @@ const {
   
   const _ = require('lodash');
   const feeReceiver = "0xd91ce559ab85e32169462BB39739E4ED8babb6FE"
+  const constants = require('./constants')
 
   module.exports = async (hre) => {
     const { ethers, getNamedAccounts } = hre;
@@ -60,8 +61,8 @@ const {
     await deathRoadNFT.initialize(factory.address)
 
     log('  - Adding approver ');
-    await factory.addApprover('0x75785F9CE180C951c8178BABadFE904ec883D820', true);
-    await factory.setSettleFeeReceiver("0xD0e3376e1c3Af2C11730aA4E89BE839D4a1BD761")
+    await factory.addApprover(constants.getApprover(chainId), true);
+    await factory.setSettleFeeReceiver(constants.getSettler(chainId))
 
     //deploying fee distribution
 

@@ -7,7 +7,7 @@ const {
   } = require("../js-helpers/deploy");
   
   const _ = require('lodash');
-  
+  const constants = require('./constants')
   module.exports = async (hre) => {
     const { ethers, getNamedAccounts } = hre;
     const { deployer } = await getNamedAccounts();
@@ -45,7 +45,7 @@ const {
     }
   
     log('  - Initializing  LinearAirdrop        ');
-    await airdrop.initialize(draceAddress, "0x75785f9ce180c951c8178babadfe904ec883d820")
+    await airdrop.initialize(draceAddress, constants.getApprover(chainId))
   
     saveDeploymentData(chainId, deployData);
     log('\n  Contract Deployment Data saved to "deployments" directory.');

@@ -30,11 +30,12 @@ contract NFTFactoryV2 is Ownable, INFTFactoryV2, SignerRecover, Initializable {
         uint256 tokenId
     );
     event BoxRewardUpdated(address addr, uint256 reward);
+    event SetMasterChef(address addr, bool val);
 
     //commit reveal needs 2 steps, the reveal step needs to pay fee by bot, this fee is to compensate for bots
     uint256 public SETTLE_FEE = 0.01 ether;
     address payable public SETTLE_FEE_RECEIVER;
-    address public masterChef;
+    mapping(address => bool) public masterChefs;
     uint256 public boxDiscountPercent = 70;
 
     mapping(address => bool) public mappingApprover;
@@ -57,7 +58,7 @@ contract NFTFactoryV2 is Ownable, INFTFactoryV2, SignerRecover, Initializable {
         DRACE = DRACE_token;
         feeTo = _feeTo;
         notaryHook = INotaryNFT(_notaryHook);
-        masterChef = _masterChef;
+        masterChefs[_masterChef] = true;
         nftStorageHook = INFTStorage(_nftStorageHook);
         xDraceVesting = IxDraceDistributor(_v);
         xDrace = IMint(_xDrace);
@@ -620,7 +621,13 @@ contract NFTFactoryV2 is Ownable, INFTFactoryV2, SignerRecover, Initializable {
     }
 
     function setMasterChef(address _masterChef) external onlyOwner {
-        masterChef = _masterChef;
+        masterChefs[_masterChef] = true;
+        emit SetMasterChef(_masterChef, true);
+    }
+
+    function removeMasterChef(address _masterChef) external onlyOwner {
+        masterChefs[_masterChef] = false;
+        emit SetMasterChef(_masterChef, false);
     }
 
     INFTFactory public oldFactory =
@@ -643,22 +650,28 @@ contract NFTFactoryV2 is Ownable, INFTFactoryV2, SignerRecover, Initializable {
 
     function addBoxReward(address addr, uint256 reward) external override {
         require(
-            msg.sender == masterChef,
+            masterChefs[msg.sender],
             "only masterchef can update box reward"
         );
 
         uint256 _toMint = reward;
         if (!alreadyMinted[addr]) {
             alreadyMinted[addr] = true;
-            uint256 _toLock = oldFactory.boxRewards(addr);
+            uint256 _totalRewards = oldFactory.boxRewards(addr).add(_toMint);
+
+            //unlock 5%, remaining vesting over 30 days
+            uint256 _toLock = _totalRewards.mul(5).div(100);
 
             //mint & lock for _addr
             xDrace.mint(address(this), _toLock);
             IERC20(address(xDrace)).approve(address(xDraceVesting), _toLock);
             xDraceVesting.lock(addr, _toLock);
-        } else {
 
-            //mint immediately
+            //mint 5% immediately
+            xDrace.mint(addr, _totalRewards.mul(95).div(100));
+        } else {
+            //new xdrace rewards
+            //mint immediately, no lock
             xDrace.mint(addr, _toMint);
         }
     }

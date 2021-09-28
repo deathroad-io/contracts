@@ -7,7 +7,7 @@ const {
   } = require("../js-helpers/deploy");
   
   const _ = require('lodash');
-  
+  const constants = require('./constants')
   module.exports = async (hre) => {
     const { ethers, getNamedAccounts } = hre;
     const { deployer } = await getNamedAccounts();
@@ -53,8 +53,8 @@ const {
     await deathRoadNFT.setFactory(factory.address)
 
     log('  - Adding approver ');
-    await factory.addApprover('0x75785F9CE180C951c8178BABadFE904ec883D820', true);
-    await factory.setSettleFeeReceiver("0xD0e3376e1c3Af2C11730aA4E89BE839D4a1BD761")
+    await factory.addApprover(constants.getApprover(chainId), true);
+    await factory.setSettleFeeReceiver(constants.getSettler(chainId))
 
     log('  - Initializing  NFTFactory        ');
     await factory.initialize(deathRoadNFT.address, draceAddress, signers[0].address, notaryNFT.address, ethers.constants.AddressZero, ethers.constants.AddressZero)

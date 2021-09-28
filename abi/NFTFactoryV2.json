@@ -148,6 +148,25 @@
       {
         "indexed": false,
         "internalType": "address",
+        "name": "addr",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "val",
+        "type": "bool"
+      }
+    ],
+    "name": "SetMasterChef",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
         "name": "owner",
         "type": "address"
       },
@@ -995,13 +1014,19 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "masterChef",
-    "outputs": [
+    "inputs": [
       {
         "internalType": "address",
         "name": "",
         "type": "address"
+      }
+    ],
+    "name": "masterChefs",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -1131,6 +1156,19 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_masterChef",
+        "type": "address"
+      }
+    ],
+    "name": "removeMasterChef",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
