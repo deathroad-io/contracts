@@ -32,8 +32,8 @@ module.exports = async (hre) => {
   const MasterChefV2Instance = await MasterChefV2.deploy()
   const masterChef = await MasterChefV2Instance.deployed()
   log('  - MasterChef:         ', masterChef.address)
-  deployData['MasterChef'] = {
-    abi: getContractAbi('MasterChef'),
+  deployData['MasterChefV2'] = {
+    abi: getContractAbi('MasterChefV2'),
     address: masterChef.address,
     deployTransaction: masterChef.deployTransaction,
   }
