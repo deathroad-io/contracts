@@ -650,6 +650,35 @@
   {
     "inputs": [
       {
+        "internalType": "uint64[]",
+        "name": "_tokenIds",
+        "type": "uint64[]"
+      }
+    ],
+    "name": "getGameTokenInfo",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "turns",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "countdowns",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "lastUsed",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "_drace",
         "type": "address"

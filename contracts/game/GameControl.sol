@@ -325,7 +325,10 @@ contract GameControl is
                 !gameIdToPlayer[_gameIds[i]].isRewardPaid,
                 "rewards already paid"
             );
-            require(gameIdToPlayer[_gameIds[i]].player == _recipient, "No game id for this recipient");
+            require(
+                gameIdToPlayer[_gameIds[i]].player == _recipient,
+                "No game id for this recipient"
+            );
             gameIdToPlayer[_gameIds[i]].isRewardPaid = true;
         }
         require(
@@ -440,8 +443,37 @@ contract GameControl is
         return countdownPeriod.getCountdownPeriod(_tokenId, address(draceNFT));
     }
 
-    function getDepositTokenList(address _addr) external view returns (uint256[] memory) {
+    function getDepositTokenList(address _addr)
+        external
+        view
+        returns (uint256[] memory)
+    {
         return depositTokenList[_addr];
+    }
+
+    function getGameTokenInfo(uint64[] calldata _tokenIds)
+        external
+        view
+        returns (
+            uint256[] memory turns,
+            uint256[] memory countdowns,
+            uint256[] memory lastUsed
+        )
+    {
+        turns = new uint256[](_tokenIds.length);
+        countdowns = new uint256[](_tokenIds.length);
+        lastUsed = new uint256[](_tokenIds.length);
+        uint256 len = _tokenIds.length;
+        for (uint256 i = 0; i < len; i++) {
+            if (!isFreePlayingTurnsAdded[_tokenIds[i]]) {
+                turns[i] = countdownPeriod.getFreePlayingTurn(_tokenIds[i]);
+            } else {
+                turns[i] = tokenPlayingTurns[_tokenIds[i]];
+            }
+
+            countdowns[_tokenIds[i]] = countdownPeriod.getCountdownPeriod(_tokenIds[i], address(factory));
+            lastUsed[i] = tokenLastUseTimestamp[_tokenIds[i]].timestamp;
+        }
     }
 
     function withdrawEther(address payable receiver, uint256 amount)
