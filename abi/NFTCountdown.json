@@ -19,8 +19,46 @@
     "type": "event"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint64",
+        "name": "",
+        "type": "uint64"
+      }
+    ],
+    "name": "countdowns",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "defaultCountdown",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint64",
+        "name": "",
+        "type": "uint64"
+      }
+    ],
+    "name": "freePlayTurns",
     "outputs": [
       {
         "internalType": "uint256",
@@ -56,6 +94,25 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getFreePlayingTurn",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "owner",
     "outputs": [
@@ -78,12 +135,71 @@
   {
     "inputs": [
       {
+        "internalType": "uint64[]",
+        "name": "_tokenIds",
+        "type": "uint64[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "countdown",
+        "type": "uint256"
+      }
+    ],
+    "name": "setCountdown",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "_x",
         "type": "uint256"
       }
     ],
     "name": "setDefaultCountdown",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint64[]",
+        "name": "_tokenIds",
+        "type": "uint64[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "turnCount",
+        "type": "uint256"
+      }
+    ],
+    "name": "setFreePlayingTurns",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint64[]",
+        "name": "_tokenIds",
+        "type": "uint64[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "turnCount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "countdown",
+        "type": "uint256"
+      }
+    ],
+    "name": "setFreePlayingTurnsAndCountdowns",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

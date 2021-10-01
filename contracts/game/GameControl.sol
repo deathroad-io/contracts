@@ -66,8 +66,6 @@ contract GameControl is
     mapping(uint256 => uint256) public tokenPlayingTurns;
     mapping(uint256 => bool) public isFreePlayingTurnsAdded;
 
-    uint256 public constant FREE_PLAYING_TURNS = 20;
-
     uint256 public xDracePercent = 70;
 
     INFTFactory public factory;
@@ -179,7 +177,7 @@ contract GameControl is
         if (!isFreePlayingTurnsAdded[_tokenId]) {
             isFreePlayingTurnsAdded[_tokenId] = true;
             tokenPlayingTurns[_tokenId] = tokenPlayingTurns[_tokenId].add(
-                FREE_PLAYING_TURNS
+                countdownPeriod.getFreePlayingTurn(_tokenId)
             );
         }
     }
