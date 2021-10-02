@@ -17,8 +17,8 @@ contract TokenVesting is Initializable, Ownable {
         uint256 totalAmount;
         uint256 groupPeriod;
     }
-    uint256 public cliffPeriod = 30 days;
-    uint256 public vestingPeriod = 180 days;
+    uint256 public cliffPeriod = 1 days;
+    uint256 public vestingPeriod = 30 days;
     IERC20 public token;
     mapping(address => VestingInfo[]) public vestings;
     mapping(address => bool) public lockers;
@@ -37,6 +37,10 @@ contract TokenVesting is Initializable, Ownable {
     {
         token = IERC20(_token);
         vestingPeriod = _vestingPeriod > 0 ? _vestingPeriod : vestingPeriod;
+    }
+
+    function changeVestingPeriod(uint256 _vestingPeriod) external onlyOwner {
+        vestingPeriod = _vestingPeriod;
     }
 
     function setLockers(address[] memory _lockers, bool val) external onlyOwner {

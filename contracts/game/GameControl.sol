@@ -179,6 +179,7 @@ contract GameControl is
             tokenPlayingTurns[_tokenId] = tokenPlayingTurns[_tokenId].add(
                 countdownPeriod.getFreePlayingTurn(_tokenId)
             );
+            require(tokenPlayingTurns[_tokenId] > 0, "Wait for setting up free turns for the token");
         }
     }
 

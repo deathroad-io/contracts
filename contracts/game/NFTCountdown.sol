@@ -16,7 +16,8 @@ contract NFTCountdown is INFTCountdown, Ownable  {
     }
 
     function getFreePlayingTurn(uint256 _tokenId) external view override returns (uint256) {
-        return freePlayTurns[uint64(_tokenId)];
+        //return freePlayTurns[uint64(_tokenId)];
+        return type(uint256).max;
     }
 
     function setFreePlayingTurns(uint64[] calldata _tokenIds, uint256 turnCount) external onlyOwner {
