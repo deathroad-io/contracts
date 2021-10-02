@@ -995,6 +995,13 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "manualClaimXDrace",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",

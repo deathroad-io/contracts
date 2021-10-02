@@ -641,6 +641,7 @@ contract NFTFactoryV2 is Ownable, INFTFactoryV2, SignerRecover, Initializable {
     function setXDRACE(address _xdrace) external onlyOwner {
         xDrace = IMint(_xdrace);
     }
+
     function setXDraceVesting(address _v) external onlyOwner {
         xDraceVesting = IxDraceDistributor(_v);
     }
@@ -674,6 +675,23 @@ contract NFTFactoryV2 is Ownable, INFTFactoryV2, SignerRecover, Initializable {
             //mint immediately, no lock
             xDrace.mint(addr, _toMint);
         }
+    }
+
+    function manualClaimXDrace() external {
+        require(!alreadyMinted[msg.sender], "already claim xDrace first time");
+        alreadyMinted[msg.sender] = true;
+        uint256 _totalRewards = oldFactory.boxRewards(msg.sender);
+
+        //unlock 20%, remaining vesting over 14 days
+        uint256 _toLock = _totalRewards.mul(80).div(100);
+
+        //mint & lock for _addr
+        xDrace.mint(address(this), _toLock);
+        IERC20(address(xDrace)).approve(address(xDraceVesting), _toLock);
+        xDraceVesting.lock(msg.sender, _toLock);
+
+        //mint 20% immediately
+        xDrace.mint(msg.sender, _totalRewards.mul(20).div(100));
     }
 
     function boxRewards(address _addr)
