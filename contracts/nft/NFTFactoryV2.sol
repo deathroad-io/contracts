@@ -658,6 +658,11 @@ contract NFTFactoryV2 is Ownable, INFTFactoryV2, SignerRecover, Initializable {
         uint256 _toMint = reward;
         if (!alreadyMinted[addr]) {
             alreadyMinted[addr] = true;
+            if (oldFactory.boxRewards(addr) == 0) {
+                //initially, so dont lock here
+                xDrace.mint(addr, _toMint);
+                return;
+            }
             uint256 _totalRewards = oldFactory.boxRewards(addr).add(_toMint);
 
             //unlock 20%, remaining vesting over 14 days
