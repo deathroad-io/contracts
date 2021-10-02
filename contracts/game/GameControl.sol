@@ -472,7 +472,7 @@ contract GameControl is
                 turns[i] = tokenPlayingTurns[_tokenIds[i]];
             }
 
-            countdowns[_tokenIds[i]] = countdownPeriod.getCountdownPeriod(_tokenIds[i], address(factory));
+            countdowns[i] = countdownPeriod.getCountdownPeriod(_tokenIds[i], address(factory));
             lastUsed[i] = tokenLastUseTimestamp[_tokenIds[i]].timestamp;
         }
     }
