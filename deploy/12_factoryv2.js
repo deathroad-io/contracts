@@ -42,8 +42,8 @@ module.exports = async (hre) => {
   const oldFactory = require(`../deployments/${chainId}/NFTFactory.json`)
     .address
 
-  const GameControlAddress = require(`../deployments/${chainId}/GameControl.json`)
-    .address
+  // const GameControlAddress = require(`../deployments/${chainId}/GameControl.json`)
+  //   .address
 
   const DeathRoadNFT = await ethers.getContractFactory('DeathRoadNFT')
   const deathRoadNFT = await DeathRoadNFT.attach(DeathRoadNFTAddress)
@@ -74,9 +74,9 @@ module.exports = async (hre) => {
   log('  - masterchef  setFactory        ')
   await masterchef.setFactory(factoryV2.address)
 
-  const GameControl = await ethers.getContractFactory('GameControl')
-  const gameControlContract = await GameControl.attach(GameControlAddress)
-  await gameControlContract.setFactory(factoryV2.address)
+  // const GameControl = await ethers.getContractFactory('GameControl')
+  // const gameControlContract = await GameControl.attach(GameControlAddress)
+  // await gameControlContract.setFactory(factoryV2.address)
 
   await factoryV2.setOldFactory(oldFactory)
   await factoryV2.setXDRACE(xdraceAddress)
