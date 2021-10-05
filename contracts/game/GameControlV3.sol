@@ -480,8 +480,6 @@ contract GameControlV3 is
         uint256 _xdraceAmount,
         bytes32 _withdrawId
     ) internal {
-        UserInfo storage _userInfo = userInfo[_recipient];
-
         //distribute rewards
         //xDRACE% released immediately, drace vested
         drace.safeApprove(address(tokenVesting), _draceAmount);
