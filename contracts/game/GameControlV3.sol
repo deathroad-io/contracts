@@ -34,7 +34,6 @@ contract GameControlV3 is
 
     struct UserInfo {
         uint256[] depositTokenList;
-        uint256 cumulativeReward;
         uint256 xdraceDeposited;
         uint256 draceDeposited;
     }
@@ -62,10 +61,26 @@ contract GameControlV3 is
     uint256 public xDracePercent;
 
     event NFTDeposit(address depositor, uint256 tokenId, uint256 timestamp);
-    event NFTWithdraw(bytes32 withdrawId, address withdrawer, uint256 tokenId, uint256 timestamp);
+    event NFTWithdraw(
+        bytes32 withdrawId,
+        address withdrawer,
+        uint256 tokenId,
+        uint256 timestamp
+    );
 
-    event DraceDeposit(address depositor, uint256 draceAmount, uint256 xdraceAmount, uint256 timestamp);
-    event DraceWithdraw(bytes32 withdrawId, address withdrawer, uint256 draceAmount, uint256 xdraceAmount, uint256 timestamp);
+    event DraceDeposit(
+        address depositor,
+        uint256 draceAmount,
+        uint256 xdraceAmount,
+        uint256 timestamp
+    );
+    event DraceWithdraw(
+        bytes32 withdrawId,
+        address withdrawer,
+        uint256 draceAmount,
+        uint256 xdraceAmount,
+        uint256 timestamp
+    );
 
     event TurnBuying(
         address payer,
@@ -83,6 +98,11 @@ contract GameControlV3 is
 
     modifier notWithdrawYet(bytes32 _withdrawId) {
         require(!withdrawIdSet[_withdrawId], "Already withdraw");
+        _;
+    }
+
+    modifier timeNotExpired(uint256 _expiryTime) {
+        require(_expiryTime <= block.timestamp, "Time expired");
         _;
     }
 
@@ -138,7 +158,7 @@ contract GameControlV3 is
         bytes32 r,
         bytes32 s,
         uint8 v
-    ) external {
+    ) external timeNotExpired(_expiryTime) {
         bytes32 message = keccak256(
             abi.encode(msg.sender, _tokenIds, _freeTurns, _expiryTime)
         );
@@ -163,7 +183,9 @@ contract GameControlV3 is
         }
     }
 
-    function depositTokens(uint256 _draceAmount, uint256 _xdraceAmount) external {
+    function depositTokens(uint256 _draceAmount, uint256 _xdraceAmount)
+        external
+    {
         drace.safeTransferFrom(msg.sender, address(this), _draceAmount);
         xdrace.safeTransferFrom(msg.sender, address(this), _xdraceAmount);
 
@@ -171,14 +193,46 @@ contract GameControlV3 is
         _userInfo.draceDeposited = _userInfo.draceDeposited + _draceAmount;
         _userInfo.xdraceDeposited = _userInfo.xdraceDeposited + _xdraceAmount;
 
-        emit DraceDeposit(msg.sender, _draceAmount, _xdraceAmount, block.timestamp);
+        emit DraceDeposit(
+            msg.sender,
+            _draceAmount,
+            _xdraceAmount,
+            block.timestamp
+        );
     }
 
-    function withdrawTokens(uint256 _pendingToSpendDrace, uint256 _pendingToSpendxDrace, bytes32 _withdrawId, bytes32 r, bytes32 s, uint8 v) external notWithdrawYet(_withdrawId) {
+    function withdrawTokens(
+        uint256 _pendingToSpendDrace,
+        uint256 _pendingToSpendxDrace,
+        uint256 _expiryTime,
+        bytes32 _withdrawId,
+        bytes32 r,
+        bytes32 s,
+        uint8 v
+    ) external notWithdrawYet(_withdrawId) timeNotExpired(_expiryTime) {
         withdrawIdSet[_withdrawId] = true;
+
+        bytes32 message = keccak256(
+            abi.encode(
+                msg.sender,
+                _pendingToSpendDrace,
+                _pendingToSpendxDrace,
+                _expiryTime,
+                _withdrawId
+            )
+        );
+
+        require(
+            verifySigner(message, r, s, v),
+            "distributeRewards::invalid operator"
+        );
+
         UserInfo storage _userInfo = userInfo[msg.sender];
         if (_userInfo.draceDeposited >= _pendingToSpendDrace) {
-            drace.safeTransfer(msg.sender, _userInfo.draceDeposited.sub(_pendingToSpendDrace));
+            drace.safeTransfer(
+                msg.sender,
+                _userInfo.draceDeposited.sub(_pendingToSpendDrace)
+            );
             //burn the pending
             ERC20Burnable(address(drace)).burn(_pendingToSpendDrace);
         } else {
@@ -186,16 +240,25 @@ contract GameControlV3 is
         }
 
         if (_userInfo.xdraceDeposited >= _pendingToSpendxDrace) {
-            xdrace.safeTransfer(msg.sender, _userInfo.xdraceDeposited.sub(_pendingToSpendxDrace));
+            xdrace.safeTransfer(
+                msg.sender,
+                _userInfo.xdraceDeposited.sub(_pendingToSpendxDrace)
+            );
             ERC20Burnable(address(xdrace)).burn(_pendingToSpendxDrace);
         } else {
-            ERC20Burnable(address(xdrace)).burn(_userInfo.xdraceDeposited);  
+            ERC20Burnable(address(xdrace)).burn(_userInfo.xdraceDeposited);
         }
 
         _userInfo.draceDeposited = 0;
         _userInfo.xdraceDeposited = 0;
 
-        emit DraceWithdraw(_withdrawId, msg.sender, _pendingToSpendDrace, _pendingToSpendxDrace, block.timestamp);
+        emit DraceWithdraw(
+            _withdrawId,
+            msg.sender,
+            _pendingToSpendDrace,
+            _pendingToSpendxDrace,
+            block.timestamp
+        );
     }
 
     function _checkOrAddFreePlayingTurns(uint256 _tokenId, uint256 _freeTurn)
@@ -217,12 +280,12 @@ contract GameControlV3 is
         address _recipient,
         uint256 _draceAmount,
         uint256 _xdraceAmount,
-        uint256 _cumulativeReward,
         bytes32 _withdrawId,
+        uint256 _expiryTime,
         bytes32 r,
         bytes32 s,
         uint8 v
-    ) external notWithdrawYet(_withdrawId) {
+    ) external notWithdrawYet(_withdrawId) timeNotExpired(_expiryTime) {
         withdrawIdSet[_withdrawId] = true;
         //verify signature
         bytes32 message = keccak256(
@@ -230,7 +293,8 @@ contract GameControlV3 is
                 _recipient,
                 _draceAmount,
                 _xdraceAmount,
-                _cumulativeReward
+                _withdrawId,
+                _expiryTime
             )
         );
 
@@ -239,7 +303,7 @@ contract GameControlV3 is
             "distributeRewards::invalid operator"
         );
 
-        _distribute(_recipient, _draceAmount, _xdraceAmount, _cumulativeReward, _withdrawId);
+        _distribute(_recipient, _draceAmount, _xdraceAmount, _withdrawId);
     }
 
     function verifySigner(
@@ -254,23 +318,28 @@ contract GameControlV3 is
 
     function withdrawAllNFTs(
         uint64[] memory _spentPlayTurns,
-        uint256 _expiryTime,
         bytes32 _withdrawId,
+        uint256 _expiryTime,
         bytes32 r,
         bytes32 s,
         uint8 v
-    ) public notWithdrawYet(_withdrawId) {
+    ) public notWithdrawYet(_withdrawId) timeNotExpired(_expiryTime) {
         withdrawIdSet[_withdrawId] = true;
+        UserInfo storage _userInfo = userInfo[msg.sender];
         bytes32 message = keccak256(
-            abi.encode(msg.sender, _spentPlayTurns, _expiryTime)
+            abi.encode(
+                msg.sender,
+                _userInfo.depositTokenList,
+                _spentPlayTurns,
+                _withdrawId,
+                _expiryTime
+            )
         );
 
         require(
             verifySigner(message, r, s, v),
             "withdrawAllNFTs: invalid operator"
         );
-
-        UserInfo storage _userInfo = userInfo[msg.sender];
 
         uint256[] memory _tokenIds = _userInfo.depositTokenList;
         require(
@@ -289,7 +358,12 @@ contract GameControlV3 is
                     tokenPlayingTurns[_tokenIds[i]] = 0;
                 }
                 delete tokenDeposits[_tokenIds[i]];
-                emit NFTWithdraw(_withdrawId, msg.sender, _tokenIds[i], block.timestamp);
+                emit NFTWithdraw(
+                    _withdrawId,
+                    msg.sender,
+                    _tokenIds[i],
+                    block.timestamp
+                );
             }
         }
         delete _userInfo.depositTokenList;
@@ -303,7 +377,12 @@ contract GameControlV3 is
                 draceNFT.transferFrom(address(this), msg.sender, _tokenIds[i]);
                 tokenPlayingTurns[_tokenIds[i]] = 0;
                 delete tokenDeposits[_tokenIds[i]];
-                emit NFTWithdraw(bytes32(0), msg.sender, _tokenIds[i], block.timestamp);
+                emit NFTWithdraw(
+                    bytes32(0),
+                    msg.sender,
+                    _tokenIds[i],
+                    block.timestamp
+                );
             }
         }
         delete _userInfo.depositTokenList;
@@ -312,12 +391,12 @@ contract GameControlV3 is
     function withdrawNFT(
         uint256 _tokenId,
         uint256 _spentPlayTurn,
-        uint256 _expiryTime,
         bytes32 _withdrawId,
+        uint256 _expiryTime,
         bytes32 r,
         bytes32 s,
         uint8 v
-    ) external notWithdrawYet(_withdrawId) {
+    ) external notWithdrawYet(_withdrawId) timeNotExpired(_expiryTime) {
         withdrawIdSet[_withdrawId] = true;
         require(
             tokenDeposits[_tokenId].depositor == msg.sender,
@@ -325,7 +404,13 @@ contract GameControlV3 is
         );
 
         bytes32 message = keccak256(
-            abi.encode(msg.sender, _spentPlayTurn, _expiryTime)
+            abi.encode(
+                msg.sender,
+                _tokenId,
+                _spentPlayTurn,
+                _withdrawId,
+                _expiryTime
+            )
         );
 
         require(
@@ -338,15 +423,19 @@ contract GameControlV3 is
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             if (_tokenId == _tokenIds[i]) {
                 if (tokenPlayingTurns[_tokenId] >= _spentPlayTurn) {
-                    tokenPlayingTurns[_tokenId] = tokenPlayingTurns[_tokenId]
-                        .sub(_spentPlayTurn);
+                    tokenPlayingTurns[_tokenId] = tokenPlayingTurns[_tokenId] - _spentPlayTurn;
                 } else {
                     tokenPlayingTurns[_tokenId] = 0;
                 }
 
                 draceNFT.transferFrom(address(this), msg.sender, _tokenIds[i]);
                 delete tokenDeposits[_tokenIds[i]];
-                emit NFTWithdraw(_withdrawId, msg.sender, _tokenIds[i], block.timestamp);
+                emit NFTWithdraw(
+                    _withdrawId,
+                    msg.sender,
+                    _tokenIds[i],
+                    block.timestamp
+                );
                 _userInfo.depositTokenList[i] = _userInfo.depositTokenList[
                     _tokenIds.length - 1
                 ];
@@ -369,7 +458,12 @@ contract GameControlV3 is
 
                 draceNFT.transferFrom(address(this), msg.sender, _tokenIds[i]);
                 delete tokenDeposits[_tokenIds[i]];
-                emit NFTWithdraw(bytes32(0), msg.sender, _tokenIds[i], block.timestamp);
+                emit NFTWithdraw(
+                    bytes32(0),
+                    msg.sender,
+                    _tokenIds[i],
+                    block.timestamp
+                );
                 _userInfo.depositTokenList[i] = _userInfo.depositTokenList[
                     _tokenIds.length - 1
                 ];
@@ -384,18 +478,9 @@ contract GameControlV3 is
         address _recipient,
         uint256 _draceAmount,
         uint256 _xdraceAmount,
-        uint256 _cumulativeReward,
         bytes32 _withdrawId
     ) internal {
         UserInfo storage _userInfo = userInfo[_recipient];
-        require(
-            _userInfo.cumulativeReward.add(_draceAmount) <=
-                _cumulativeReward,
-            "reward exceed cumulative rewards"
-        );
-        _userInfo.cumulativeReward = _userInfo.cumulativeReward.add(
-            _draceAmount
-        );
 
         //distribute rewards
         //xDRACE% released immediately, drace vested
@@ -434,7 +519,7 @@ contract GameControlV3 is
         bytes32 r,
         bytes32 s,
         uint8 v
-    ) external {
+    ) external timeNotExpired(_expiry) {
         bytes32 message = keccak256(
             abi.encode(
                 "buyPlayingTurn",
@@ -496,7 +581,6 @@ contract GameControlV3 is
         view
         returns (
             uint256[] memory depositTokenList,
-            uint256 cumulativeReward,
             uint256 xDraceDeposited,
             uint256 draceDeposited
         )
@@ -504,7 +588,6 @@ contract GameControlV3 is
         UserInfo memory info = userInfo[_addr];
         return (
             info.depositTokenList,
-            info.cumulativeReward,
             info.xdraceDeposited,
             info.draceDeposited
         );

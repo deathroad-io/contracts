@@ -419,14 +419,14 @@
         "type": "uint256"
       },
       {
-        "internalType": "uint256",
-        "name": "_cumulativeReward",
-        "type": "uint256"
-      },
-      {
         "internalType": "bytes32",
         "name": "_withdrawId",
         "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_expiryTime",
+        "type": "uint256"
       },
       {
         "internalType": "bytes32",
@@ -565,11 +565,6 @@
         "internalType": "uint256[]",
         "name": "depositTokenList",
         "type": "uint256[]"
-      },
-      {
-        "internalType": "uint256",
-        "name": "cumulativeReward",
-        "type": "uint256"
       },
       {
         "internalType": "uint256",
@@ -877,11 +872,6 @@
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "cumulativeReward",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
         "name": "xdraceDeposited",
         "type": "uint256"
       },
@@ -902,14 +892,14 @@
         "type": "uint64[]"
       },
       {
-        "internalType": "uint256",
-        "name": "_expiryTime",
-        "type": "uint256"
-      },
-      {
         "internalType": "bytes32",
         "name": "_withdrawId",
         "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_expiryTime",
+        "type": "uint256"
       },
       {
         "internalType": "bytes32",
@@ -1028,14 +1018,14 @@
         "type": "uint256"
       },
       {
-        "internalType": "uint256",
-        "name": "_expiryTime",
-        "type": "uint256"
-      },
-      {
         "internalType": "bytes32",
         "name": "_withdrawId",
         "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_expiryTime",
+        "type": "uint256"
       },
       {
         "internalType": "bytes32",
@@ -1068,6 +1058,11 @@
       {
         "internalType": "uint256",
         "name": "_pendingToSpendxDrace",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_expiryTime",
         "type": "uint256"
       },
       {
