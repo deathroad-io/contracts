@@ -11,6 +11,7 @@ contract NFTStakingPoint is Ownable, INFTStakingPoint {
 
     bytes public packAscii = hex"7061636b";
     bytes public typeAscii = hex"74797065";
+    bytes public partnerAscii = hex"706172746e6572";
 
     constructor() {
         //1star => car => 100
@@ -35,6 +36,8 @@ contract NFTStakingPoint is Ownable, INFTStakingPoint {
         tokenPackPoint[hex"3273746172"][hex"726f636b6574"] = 300e18;
         //3star => car => 600
         tokenPackPoint[hex"3373746172"][hex"726f636b6574"] = 900e18;
+
+
     }
     function getStakingPoint(uint256 _tokenId, address _nftContract)
         external
@@ -52,6 +55,7 @@ contract NFTStakingPoint is Ownable, INFTStakingPoint {
 
         uint256 packIndex = MAX_UINT;
         uint256 typeIndex = MAX_UINT;
+        uint256 partnerIndex = MAX_UINT;
         for(uint256 i = 0; i < _featureNames.length; i++) {
             if (packIndex == MAX_UINT) {
                 if (keccak256(_featureNames[i]) == keccak256(packAscii)) {
@@ -64,12 +68,22 @@ contract NFTStakingPoint is Ownable, INFTStakingPoint {
                     typeIndex = i;
                 }
             }
-            if (packIndex != MAX_UINT && typeIndex != MAX_UINT) break;
+
+            if (partnerIndex == MAX_UINT) {
+                if (keccak256(_featureNames[i]) == keccak256(partnerAscii)) {
+                    partnerIndex = i;
+                }
+            }
+            if (packIndex != MAX_UINT && typeIndex != MAX_UINT && partnerIndex != MAX_UINT) break;
         }
 
         if (packIndex == MAX_UINT && typeIndex == MAX_UINT) {
             //dont find pack and type in feature names
             return 0;
+        }
+
+        if (partnerIndex != MAX_UINT) {
+            return tokenPackPoint[_featureValues[packIndex]][_featureValues[typeIndex]] * 2;
         }
 
         return tokenPackPoint[_featureValues[packIndex]][_featureValues[typeIndex]];
