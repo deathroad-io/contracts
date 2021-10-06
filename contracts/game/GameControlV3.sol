@@ -217,8 +217,8 @@ contract GameControlV3 is
                 msg.sender,
                 _pendingToSpendDrace,
                 _pendingToSpendxDrace,
-                _expiryTime,
-                _withdrawId
+                _withdrawId,
+                _expiryTime
             )
         );
 
@@ -520,7 +520,7 @@ contract GameControlV3 is
     ) external timeNotExpired(_expiry) {
         bytes32 message = keccak256(
             abi.encode(
-                "buyPlayingTurn",
+                msg.sender,
                 _tokenId,
                 _price,
                 _turnCount,
