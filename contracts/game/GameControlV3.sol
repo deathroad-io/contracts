@@ -65,6 +65,7 @@ contract GameControlV3 is
         bytes32 withdrawId,
         address withdrawer,
         uint256 tokenId,
+        uint256 spentTurns,
         uint256 timestamp
     );
 
@@ -362,6 +363,7 @@ contract GameControlV3 is
                     _withdrawId,
                     msg.sender,
                     _tokenIds[i],
+                    _spentPlayTurns[i],
                     block.timestamp
                 );
             }
@@ -375,14 +377,15 @@ contract GameControlV3 is
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             if (tokenDeposits[_tokenIds[i]].depositor == msg.sender) {
                 draceNFT.transferFrom(address(this), msg.sender, _tokenIds[i]);
-                tokenPlayingTurns[_tokenIds[i]] = 0;
-                delete tokenDeposits[_tokenIds[i]];
                 emit NFTWithdraw(
                     bytes32(0),
                     msg.sender,
                     _tokenIds[i],
+                    tokenPlayingTurns[_tokenIds[i]],
                     block.timestamp
                 );
+                tokenPlayingTurns[_tokenIds[i]] = 0;
+                delete tokenDeposits[_tokenIds[i]];
             }
         }
         delete _userInfo.depositTokenList;
@@ -434,6 +437,7 @@ contract GameControlV3 is
                     _withdrawId,
                     msg.sender,
                     _tokenIds[i],
+                    _spentPlayTurn,
                     block.timestamp
                 );
                 _userInfo.depositTokenList[i] = _userInfo.depositTokenList[
@@ -454,16 +458,18 @@ contract GameControlV3 is
         uint256[] memory _tokenIds = _userInfo.depositTokenList;
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             if (_tokenId == _tokenIds[i]) {
-                tokenPlayingTurns[_tokenId] = 0;
-
-                draceNFT.transferFrom(address(this), msg.sender, _tokenIds[i]);
-                delete tokenDeposits[_tokenIds[i]];
                 emit NFTWithdraw(
                     bytes32(0),
                     msg.sender,
                     _tokenIds[i],
+                    tokenPlayingTurns[_tokenId],
                     block.timestamp
                 );
+
+                tokenPlayingTurns[_tokenId] = 0;
+
+                draceNFT.transferFrom(address(this), msg.sender, _tokenIds[i]);
+                delete tokenDeposits[_tokenIds[i]];
                 _userInfo.depositTokenList[i] = _userInfo.depositTokenList[
                     _tokenIds.length - 1
                 ];
