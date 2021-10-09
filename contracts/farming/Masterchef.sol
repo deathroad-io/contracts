@@ -121,7 +121,7 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
         address _nftStakingPointHook,
         uint256 _dracePerBlock,
         uint256 _startBlock,
-        uint256 _howManyBlockForBonus
+        address _tokenLock
     ) external initializer onlyOwner {
         factory = INFTFactory(_factory);
         nft = IERC721(_draceNFT);
@@ -129,7 +129,7 @@ contract MasterChef is Ownable, SignerRecover, Initializable {
         drace = _drace;
         dracePerBlock = _dracePerBlock;
         startBlock = _startBlock > 0 ? _startBlock : block.number;
-        bonusEndBlock = startBlock.add(_howManyBlockForBonus);
+        bonusEndBlock = startBlock.add(50000);
 
         //add nft pool
         add(1000, address(0), false);

@@ -43,6 +43,18 @@ module.exports = async (hre) => {
     .address
   log('  - NFTStakingPoint:         ', NFTStakingPointAddress)
 
+  const TokenLock = await ethers.getContractFactory('TokenLock')
+  const TokenLockInstance = await TokenLock.deploy()
+  const tokenLock = await TokenLockInstance.deployed()
+  log('  - TokenLock:         ', tokenLock.address)
+  log('  Initializing TokenLock Contract...')
+  await tokenLock.initialize(masterChef.address)
+  deployData['TokenLock'] = {
+    abi: getContractAbi('TokenLock'),
+    address: tokenLock.address,
+    deployTransaction: tokenLock.deployTransaction,
+  }
+
   //initializing
   log('  Initializing Farming Contract...')
   const draceAddress = require(`../deployments/${chainId}/DRACE.json`).address
@@ -55,9 +67,9 @@ module.exports = async (hre) => {
     nftAddress,
     draceAddress,
     NFTStakingPointAddress,
-    ethers.utils.parseEther('5'),
+    ethers.utils.parseEther('1'),
     0,
-    100000,
+    tokenLock.address,
   )
 
   //set masterchef in factory
@@ -71,4 +83,4 @@ module.exports = async (hre) => {
   log('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 }
 
-module.exports.tags = ['farmnft']
+module.exports.tags = ['masterchefv2']

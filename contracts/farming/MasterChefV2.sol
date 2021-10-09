@@ -10,6 +10,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "../DRACE.sol";
 import "../lib/SignerRecover.sol";
 import "../interfaces/INFTFactory.sol";
+import "../interfaces/ITokenLock.sol";
 import "../interfaces/INFTStakingPoint.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
@@ -71,6 +72,7 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
     INFTFactory public factory;
     INFTStakingPoint public nftStakingPointHook;
     uint256 public lockedTime = 12 hours;
+    uint256 public poolLockedTime = 2 days;
 
     // the token rewards container
 
@@ -92,6 +94,8 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
     // The block number when DRACE mining starts.
     uint256 public startBlock;
     uint256 public nftPoolId = type(uint256).max;
+    ITokenLock public tokenLock;
+    bool public allowEmergencyWithdraw;
 
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
     event NFTDeposit(
@@ -121,7 +125,7 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
         address _nftStakingPointHook,
         uint256 _dracePerBlock,
         uint256 _startBlock,
-        uint256 _howManyBlockForBonus
+        address _tokenLock
     ) external initializer onlyOwner {
         factory = INFTFactory(_factory);
         nft = IERC721(_draceNFT);
@@ -129,12 +133,25 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
         drace = _drace;
         dracePerBlock = _dracePerBlock;
         startBlock = _startBlock > 0 ? _startBlock : block.number;
-        bonusEndBlock = startBlock.add(_howManyBlockForBonus);
-
+        bonusEndBlock = startBlock.add(50000);
+        tokenLock = ITokenLock(_tokenLock);
+        allowEmergencyWithdraw = false;
         //add nft pool
         add(1000, address(0), false);
         //DRACE staking pool
-        //add(1000, address(drace), false);
+        add(1000, address(drace), false);
+    }
+
+    function setAllowEmergencyWithdraw(bool _allowEmergencyWithdraw) external onlyOwner {
+        allowEmergencyWithdraw = _allowEmergencyWithdraw;
+    }
+
+    function changeTokenLock(address _tokenLock) external onlyOwner {
+        tokenLock = ITokenLock(_tokenLock);
+    }
+
+    function changePoolLockedTime(uint256 _lockedTime) external onlyOwner {
+        poolLockedTime = _lockedTime;
     }
 
     function setNFTContract(address _factory, address _nft) external onlyOwner {
@@ -403,7 +420,11 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
         addRecordedReward(msg.sender, pending);
         user.amount = user.amount.sub(_amount);
         user.rewardDebt = user.amount.mul(pool.accDRACEPerShare).div(1e12);
-        pool.lpToken.safeTransfer(address(msg.sender), _amount);
+
+        //lock in tokenLock
+        pool.lpToken.safeApprove(address(tokenLock), _amount);
+        tokenLock.lock(address(pool.lpToken), msg.sender, _amount, poolLockedTime);
+        
         emit Withdraw(msg.sender, _pid, _amount);
     }
 
@@ -537,6 +558,7 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
 
     // Withdraw without caring about rewards. EMERGENCY ONLY.
     function emergencyWithdraw(uint256 _pid) public {
+        require(allowEmergencyWithdraw, "!allowEmergencyWithdraw");
         require(!isNFTPool(_pid), "Pool ID must not be NFT pool");
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
@@ -547,6 +569,7 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
     }
 
     function emergencyWithdrawNFT() public {
+        require(allowEmergencyWithdraw, "!allowEmergencyWithdraw");
         PoolInfo storage pool = poolInfo[nftPoolId];
         UserInfo storage user = userInfo[nftPoolId][msg.sender];
 
@@ -590,4 +613,42 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
             user.lastNFTDepositTimestamp
         );
     }
+
+    function unlock(address _addr, uint256 index) public {
+        tokenLock.unlock(_addr, index);
+    }
+
+    function getLockInfo(address _user)
+        external
+        view
+        returns (
+            bool[] memory isWithdrawns,
+            address[] memory tokens,
+            uint256[] memory unlockableAts,
+            uint256[] memory amounts
+        )
+    {
+        return tokenLock.getLockInfo(_user);
+    }
+
+    function getLockInfoByIndexes(address _addr, uint256[] memory _indexes)
+        external
+        view
+        returns (
+            bool[] memory isWithdrawns,
+            address[] memory tokens,
+            uint256[] memory unlockableAts,
+            uint256[] memory amounts
+        )
+    {
+        return tokenLock.getLockInfoByIndexes(_addr, _indexes);
+    }
+
+    function getLockInfoLength(address _addr)
+        external
+        view
+        returns (uint256)
+    {
+        return tokenLock.getLockInfoLength(_addr);
+    }    
 }

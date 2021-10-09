@@ -447,9 +447,9 @@
         "type": "uint256"
       },
       {
-        "internalType": "uint256",
-        "name": "_howManyBlockForBonus",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "_tokenLock",
+        "type": "address"
       }
     ],
     "name": "initialize",

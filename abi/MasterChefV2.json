@@ -225,6 +225,19 @@
   },
   {
     "inputs": [],
+    "name": "allowEmergencyWithdraw",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "bonusEndBlock",
     "outputs": [
       {
@@ -234,6 +247,32 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_lockedTime",
+        "type": "uint256"
+      }
+    ],
+    "name": "changePoolLockedTime",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_tokenLock",
+        "type": "address"
+      }
+    ],
+    "name": "changeTokenLock",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -349,6 +388,98 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "_user",
+        "type": "address"
+      }
+    ],
+    "name": "getLockInfo",
+    "outputs": [
+      {
+        "internalType": "bool[]",
+        "name": "isWithdrawns",
+        "type": "bool[]"
+      },
+      {
+        "internalType": "address[]",
+        "name": "tokens",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "unlockableAts",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "amounts",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_addr",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "_indexes",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "getLockInfoByIndexes",
+    "outputs": [
+      {
+        "internalType": "bool[]",
+        "name": "isWithdrawns",
+        "type": "bool[]"
+      },
+      {
+        "internalType": "address[]",
+        "name": "tokens",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "unlockableAts",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "amounts",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_addr",
+        "type": "address"
+      }
+    ],
+    "name": "getLockInfoLength",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "_from",
         "type": "uint256"
@@ -447,9 +578,9 @@
         "type": "uint256"
       },
       {
-        "internalType": "uint256",
-        "name": "_howManyBlockForBonus",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "_tokenLock",
+        "type": "address"
       }
     ],
     "name": "initialize",
@@ -626,6 +757,19 @@
   },
   {
     "inputs": [],
+    "name": "poolLockedTime",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "renounceOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -650,6 +794,19 @@
       }
     ],
     "name": "set",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "_allowEmergencyWithdraw",
+        "type": "bool"
+      }
+    ],
+    "name": "setAllowEmergencyWithdraw",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -757,6 +914,19 @@
   },
   {
     "inputs": [],
+    "name": "tokenLock",
+    "outputs": [
+      {
+        "internalType": "contract ITokenLock",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "totalAllocPoint",
     "outputs": [
       {
@@ -777,6 +947,24 @@
       }
     ],
     "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_addr",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "name": "unlock",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

@@ -59,6 +59,7 @@ contract GameControlV3 is
     mapping(bytes32 => bool) public withdrawIdSet;
 
     uint256 public xDracePercent;
+    bool public allowEmergencyWithdrawNFT;
 
     event NFTDeposit(address depositor, uint256 tokenId, uint256 timestamp);
     event NFTWithdraw(
@@ -107,6 +108,11 @@ contract GameControlV3 is
         _;
     }
 
+    modifier onlyAllowEmergencyWithdraw() {
+        require(allowEmergencyWithdrawNFT, "not allowed emergency withdraw");
+        _;
+    }
+
     function initialize(
         address _drace,
         address _draceNFT,
@@ -130,6 +136,10 @@ contract GameControlV3 is
             mappingApprover[_approver] = true;
         }
         xDraceVesting = IxDraceDistributor(_xDraceVesting);
+    }
+
+    function setAllowEmergencyWithdrawNFT(bool _val) external onlyOwner {
+        allowEmergencyWithdrawNFT = _val;
     }
 
     function setTokenVesting(address _vesting) external onlyOwner {
@@ -371,7 +381,7 @@ contract GameControlV3 is
         );
     }
 
-    function emergencyWithdrawAllNFTs() public {
+    function emergencyWithdrawAllNFTs() public onlyAllowEmergencyWithdraw {
         UserInfo storage _userInfo = userInfo[msg.sender];
         uint256[] memory _tokenIds = _userInfo.depositTokenList;
         uint64[] memory _tempSpentTurns = new uint64[](_tokenIds.length);
@@ -460,7 +470,7 @@ contract GameControlV3 is
         }
     }
 
-    function emergecyWithdrawNFT(uint256 _tokenId) external {
+    function emergencyWithdrawNFT(uint256 _tokenId) external onlyAllowEmergencyWithdraw {
         require(
             tokenDeposits[_tokenId].depositor == msg.sender,
             "withdrawNFT: NFT not yours"
