@@ -182,6 +182,14 @@ contract GameControlV3 is
             _tokenIds.length == _freeTurns.length,
             "depositNFTsToPlay: Invalid input length"
         );
+
+        _depositNFTsToPlay(_tokenIds, _freeTurns);
+    }
+
+    function _depositNFTsToPlay(
+        uint256[] memory _tokenIds,
+        uint64[] memory _freeTurns
+    ) internal {
         UserInfo storage _userInfo = userInfo[msg.sender];
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             draceNFT.transferFrom(msg.sender, address(this), _tokenIds[i]);
@@ -221,8 +229,6 @@ contract GameControlV3 is
         bytes32 s,
         uint8 v
     ) external notWithdrawYet(_withdrawId) timeNotExpired(_expiryTime) {
-        withdrawIdSet[_withdrawId] = true;
-
         bytes32 message = keccak256(
             abi.encode(
                 msg.sender,
@@ -237,6 +243,20 @@ contract GameControlV3 is
             verifySigner(message, r, s, v),
             "distributeRewards::invalid operator"
         );
+
+        _withdrawTokens(
+            _pendingToSpendDrace,
+            _pendingToSpendxDrace,
+            _withdrawId
+        );
+    }
+
+    function _withdrawTokens(
+        uint256 _pendingToSpendDrace,
+        uint256 _pendingToSpendxDrace,
+        bytes32 _withdrawId
+    ) internal {
+        withdrawIdSet[_withdrawId] = true;
 
         UserInfo storage _userInfo = userInfo[msg.sender];
         if (_userInfo.draceDeposited >= _pendingToSpendDrace) {
@@ -297,7 +317,6 @@ contract GameControlV3 is
         bytes32 s,
         uint8 v
     ) external notWithdrawYet(_withdrawId) timeNotExpired(_expiryTime) {
-        withdrawIdSet[_withdrawId] = true;
         //verify signature
         bytes32 message = keccak256(
             abi.encode(
@@ -335,7 +354,6 @@ contract GameControlV3 is
         bytes32 s,
         uint8 v
     ) public notWithdrawYet(_withdrawId) timeNotExpired(_expiryTime) {
-        withdrawIdSet[_withdrawId] = true;
         UserInfo storage _userInfo = userInfo[msg.sender];
         bytes32 message = keccak256(
             abi.encode(
@@ -352,6 +370,16 @@ contract GameControlV3 is
             "withdrawAllNFTs: invalid operator"
         );
 
+        _withdrawAllNFTs(_spentPlayTurns, _withdrawId);
+    }
+
+    function _withdrawAllNFTs(
+        uint64[] memory _spentPlayTurns,
+        bytes32 _withdrawId
+    ) internal {
+        withdrawIdSet[_withdrawId] = true;
+
+        UserInfo storage _userInfo = userInfo[msg.sender];
         uint256[] memory _tokenIds = _userInfo.depositTokenList;
         require(
             _spentPlayTurns.length == _tokenIds.length,
@@ -413,7 +441,6 @@ contract GameControlV3 is
         bytes32 s,
         uint8 v
     ) external notWithdrawYet(_withdrawId) timeNotExpired(_expiryTime) {
-        withdrawIdSet[_withdrawId] = true;
         require(
             tokenDeposits[_tokenId].depositor == msg.sender,
             "withdrawNFT: NFT not yours"
@@ -433,6 +460,16 @@ contract GameControlV3 is
             verifySigner(message, r, s, v),
             "withdrawNFT: invalid operator"
         );
+
+        _withdrawNFT(_tokenId, _spentPlayTurn, _withdrawId);
+    }
+
+    function _withdrawNFT(
+        uint256 _tokenId,
+        uint64 _spentPlayTurn,
+        bytes32 _withdrawId
+    ) internal {
+        withdrawIdSet[_withdrawId] = true;
         UserInfo storage _userInfo = userInfo[msg.sender];
 
         uint256[] memory _tokenIds = _userInfo.depositTokenList;
@@ -470,7 +507,10 @@ contract GameControlV3 is
         }
     }
 
-    function emergencyWithdrawNFT(uint256 _tokenId) external onlyAllowEmergencyWithdraw {
+    function emergencyWithdrawNFT(uint256 _tokenId)
+        external
+        onlyAllowEmergencyWithdraw
+    {
         require(
             tokenDeposits[_tokenId].depositor == msg.sender,
             "withdrawNFT: NFT not yours"
@@ -512,6 +552,7 @@ contract GameControlV3 is
         uint256 _xdraceAmount,
         bytes32 _withdrawId
     ) internal {
+        withdrawIdSet[_withdrawId] = true;
         //distribute rewards
         //xDRACE% released immediately, drace vested
         drace.safeApprove(address(tokenVesting), _draceAmount);
