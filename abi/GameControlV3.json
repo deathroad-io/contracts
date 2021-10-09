@@ -109,9 +109,15 @@
       },
       {
         "indexed": false,
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
+        "internalType": "bytes",
+        "name": "tokenIds",
+        "type": "bytes"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "spentTurns",
+        "type": "bytes"
       },
       {
         "indexed": false,
@@ -353,9 +359,9 @@
         "type": "uint256[]"
       },
       {
-        "internalType": "uint256[]",
+        "internalType": "uint64[]",
         "name": "_freeTurns",
-        "type": "uint256[]"
+        "type": "uint64[]"
       },
       {
         "internalType": "uint256",
@@ -1013,9 +1019,9 @@
         "type": "uint256"
       },
       {
-        "internalType": "uint256",
+        "internalType": "uint64",
         "name": "_spentPlayTurn",
-        "type": "uint256"
+        "type": "uint64"
       },
       {
         "internalType": "bytes32",

@@ -64,8 +64,8 @@ contract GameControlV3 is
     event NFTWithdraw(
         bytes32 withdrawId,
         address withdrawer,
-        uint256 tokenId,
-        uint256 spentTurns,
+        bytes tokenIds,
+        bytes spentTurns,
         uint256 timestamp
     );
 
@@ -154,7 +154,7 @@ contract GameControlV3 is
 
     function depositNFTsToPlay(
         uint256[] memory _tokenIds,
-        uint256[] memory _freeTurns,
+        uint64[] memory _freeTurns,
         uint256 _expiryTime,
         bytes32 r,
         bytes32 s,
@@ -359,41 +359,44 @@ contract GameControlV3 is
                     tokenPlayingTurns[_tokenIds[i]] = 0;
                 }
                 delete tokenDeposits[_tokenIds[i]];
-                emit NFTWithdraw(
-                    _withdrawId,
-                    msg.sender,
-                    _tokenIds[i],
-                    _spentPlayTurns[i],
-                    block.timestamp
-                );
             }
         }
         delete _userInfo.depositTokenList;
+        emit NFTWithdraw(
+            _withdrawId,
+            msg.sender,
+            abi.encode(_tokenIds),
+            abi.encode(_spentPlayTurns),
+            block.timestamp
+        );
     }
 
     function emergencyWithdrawAllNFTs() public {
         UserInfo storage _userInfo = userInfo[msg.sender];
         uint256[] memory _tokenIds = _userInfo.depositTokenList;
+        uint64[] memory _tempSpentTurns = new uint64[](_tokenIds.length);
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             if (tokenDeposits[_tokenIds[i]].depositor == msg.sender) {
                 draceNFT.transferFrom(address(this), msg.sender, _tokenIds[i]);
-                emit NFTWithdraw(
-                    bytes32(0),
-                    msg.sender,
-                    _tokenIds[i],
-                    tokenPlayingTurns[_tokenIds[i]],
-                    block.timestamp
-                );
+                _tempSpentTurns[i] = uint64(tokenPlayingTurns[_tokenIds[i]]);
                 tokenPlayingTurns[_tokenIds[i]] = 0;
                 delete tokenDeposits[_tokenIds[i]];
             }
         }
         delete _userInfo.depositTokenList;
+
+        emit NFTWithdraw(
+            bytes32(0),
+            msg.sender,
+            abi.encode(_tokenIds),
+            abi.encode(_tempSpentTurns),
+            block.timestamp
+        );
     }
 
     function withdrawNFT(
         uint256 _tokenId,
-        uint256 _spentPlayTurn,
+        uint64 _spentPlayTurn,
         bytes32 _withdrawId,
         uint256 _expiryTime,
         bytes32 r,
@@ -426,18 +429,26 @@ contract GameControlV3 is
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             if (_tokenId == _tokenIds[i]) {
                 if (tokenPlayingTurns[_tokenId] >= _spentPlayTurn) {
-                    tokenPlayingTurns[_tokenId] = tokenPlayingTurns[_tokenId] - _spentPlayTurn;
+                    tokenPlayingTurns[_tokenId] =
+                        tokenPlayingTurns[_tokenId] -
+                        _spentPlayTurn;
                 } else {
                     tokenPlayingTurns[_tokenId] = 0;
                 }
 
                 draceNFT.transferFrom(address(this), msg.sender, _tokenIds[i]);
                 delete tokenDeposits[_tokenIds[i]];
+
+                uint256[] memory tempTokenIds = new uint256[](1);
+                tempTokenIds[0] = _tokenIds[i];
+                uint64[] memory tempSpentTurns = new uint64[](1);
+                tempSpentTurns[0] = uint64(_spentPlayTurn);
+
                 emit NFTWithdraw(
                     _withdrawId,
                     msg.sender,
-                    _tokenIds[i],
-                    _spentPlayTurn,
+                    abi.encode(tempTokenIds),
+                    abi.encode(tempSpentTurns),
                     block.timestamp
                 );
                 _userInfo.depositTokenList[i] = _userInfo.depositTokenList[
@@ -458,11 +469,16 @@ contract GameControlV3 is
         uint256[] memory _tokenIds = _userInfo.depositTokenList;
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             if (_tokenId == _tokenIds[i]) {
+                uint256[] memory tempTokenIds = new uint256[](1);
+                tempTokenIds[0] = _tokenIds[i];
+                uint64[] memory tempSpentTurns = new uint64[](1);
+                tempSpentTurns[0] = uint64(tokenPlayingTurns[_tokenId]);
+
                 emit NFTWithdraw(
                     bytes32(0),
                     msg.sender,
-                    _tokenIds[i],
-                    tokenPlayingTurns[_tokenId],
+                    abi.encode(tempTokenIds),
+                    abi.encode(tempSpentTurns),
                     block.timestamp
                 );
 
