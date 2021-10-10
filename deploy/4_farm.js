@@ -27,6 +27,8 @@ const {
     log('  - network id:          ', chainId);
     log(' ');
 
+    if (parseInt(chainId) == 31337) return
+
     log('  Deploying Farming Contract...');
     const MasterChef = await ethers.getContractFactory('MasterChef');
     const MasterChefInstance = await MasterChef.deploy()

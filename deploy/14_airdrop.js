@@ -7,7 +7,7 @@ const {
   } = require("../js-helpers/deploy");
   
   const _ = require('lodash');
-  const constants = require('./constants')
+  const constants = require('../js-helpers/constants')
   module.exports = async (hre) => {
     const { ethers, getNamedAccounts } = hre;
     const { deployer } = await getNamedAccounts();

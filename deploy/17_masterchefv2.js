@@ -28,6 +28,7 @@ module.exports = async (hre) => {
   log(' ')
 
   log('  Deploying Farming Contract...')
+  if (parseInt(chainId) == 31337) return
   const MasterChefV2 = await ethers.getContractFactory('MasterChefV2')
   const MasterChefV2Instance = await MasterChefV2.deploy()
   const masterChef = await MasterChefV2Instance.deployed()

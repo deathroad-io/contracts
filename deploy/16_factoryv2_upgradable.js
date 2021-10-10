@@ -8,7 +8,7 @@ const {
 
 const _ = require('lodash')
 const feeReceiver = '0xd91ce559ab85e32169462BB39739E4ED8babb6FE'
-const constants = require('./constants')
+const constants = require('../js-helpers/constants')
 module.exports = async (hre) => {
   const { ethers, getNamedAccounts, upgrades } = hre
   const { deployer } = await getNamedAccounts()

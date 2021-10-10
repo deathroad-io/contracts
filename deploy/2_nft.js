@@ -8,7 +8,7 @@ const {
   
   const _ = require('lodash');
   const feeReceiver = "0xd91ce559ab85e32169462BB39739E4ED8babb6FE"
-  const constants = require('./constants')
+  const constants = require('../js-helpers/constants')
 
   module.exports = async (hre) => {
     const { ethers, getNamedAccounts } = hre;
@@ -28,6 +28,7 @@ const {
     log('  - Deployer:          ', signers[0].address);
     log('  - network id:          ', chainId);
     log(' ');
+    if (parseInt(chainId) == 31337) return
 
     log('  Deploying NFT Factory Contract...');
 

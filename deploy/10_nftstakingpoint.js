@@ -26,6 +26,7 @@ const {
     log('  - Deployer:          ', signers[0].address);
     log('  - network id:          ', chainId);
     log(' ');
+    if (parseInt(chainId) == 31337) return
 
     log('  Deploying NFTStakingPoint Contract...');
     const NFTStakingPoint = await ethers.getContractFactory('NFTStakingPoint');

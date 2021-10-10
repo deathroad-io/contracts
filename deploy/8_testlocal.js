@@ -27,6 +27,7 @@ const {
     log('  - Deployer:          ', signers[0].address);
     log('  - network id:          ', chainId);
     log(' ');
+    if (parseInt(chainId) == 31337) return
 
     log('  Deploying DRACE Token...');
     const PancakeBuy = await ethers.getContractFactory('PancakeBuy');

@@ -28,6 +28,7 @@ const {
     log(' ');
 
     log('  Deploying NFT Notary upgrade...');
+    if (parseInt(chainId) == 31337) return
 
     //reading DRACE token address
     const FactoryAddress = require(`../deployments/${chainId}/NFTFactory.json`).address

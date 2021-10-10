@@ -7,7 +7,7 @@ const {
   } = require("../js-helpers/deploy");
   
   const _ = require('lodash');
-  const constants = require('./constants')
+  const constants = require('../js-helpers/constants')
   module.exports = async (hre) => {
     const { ethers, getNamedAccounts } = hre;
     const { deployer } = await getNamedAccounts();
@@ -28,6 +28,7 @@ const {
     log(' ');
 
     log('  Deploying NFT Factory Contract...');
+    if (parseInt(chainId) == 31337) return
 
     //reading DRACE token address
     const draceAddress = require(`../deployments/${chainId}/DRACE.json`).address

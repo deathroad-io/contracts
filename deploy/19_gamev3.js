@@ -8,7 +8,7 @@ const {
 
 const _ = require('lodash')
 const feeReceiver = '0xd91ce559ab85e32169462BB39739E4ED8babb6FE'
-const constants = require('./constants')
+const constants = require('../js-helpers/constants')
 module.exports = async (hre) => {
   const { ethers, getNamedAccounts } = hre
   const { deployer } = await getNamedAccounts()
@@ -85,10 +85,12 @@ module.exports = async (hre) => {
     xdraceAddress,
     feeReceiver,
     xdraceDistributor.address
-  )
+  , {gasLimit: 2000000})
 
-  await gameControl.addApprover(constants.getApprover(chainId), true)
+  log('  - Adding approver        ')
 
+  await gameControl.addApprover(constants.getApprover(chainId), true, {gasLimit: 200000})
+  log('  - Setting minter and locker        ')
   //settings
   const xDRACE = await ethers.getContractFactory('xDRACE')
   const xdraceContract = await xDRACE.attach(xdraceAddress)

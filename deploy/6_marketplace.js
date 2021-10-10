@@ -29,6 +29,7 @@ module.exports = async (hre) => {
   log(' ');
 
   log('  Deploying Game Control Contract...');
+  if (parseInt(chainId) == 31337) return
 
   //reading DRACE token address
   const draceAddress = require(`../deployments/${chainId}/DRACE.json`).address

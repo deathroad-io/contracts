@@ -27,6 +27,8 @@ const {
     log('  - network id:          ', chainId);
     log(' ');
 
+    if (parseInt(chainId) == 31337) return
+
     log('  Deploying DRACE Token...');
     const DRACE = await ethers.getContractFactory('DRACE');
     const draceInstance = await DRACE.deploy(signers[0].address)

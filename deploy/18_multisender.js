@@ -7,7 +7,7 @@ const {
   } = require("../js-helpers/deploy");
   
   const _ = require('lodash');
-  const addresses = require('./data/addresses.json')
+  const addresses = require('../js-helpers/data/addresses.json')
   module.exports = async (hre) => {
     const { ethers, getNamedAccounts } = hre;
     const { deployer } = await getNamedAccounts();
@@ -26,6 +26,8 @@ const {
     log('  - Deployer:          ', signers[0].address);
     log('  - network id:          ', chainId);
     log(' ');
+
+    if (parseInt(chainId) == 31337) return
 
     const draceAddress = require(`../deployments/${chainId}/DRACE.json`).address
 
