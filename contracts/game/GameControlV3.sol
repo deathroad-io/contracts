@@ -104,7 +104,7 @@ contract GameControlV3 is
     }
 
     modifier timeNotExpired(uint256 _expiryTime) {
-        require(_expiryTime <= block.timestamp, "Time expired");
+        require(_expiryTime >= block.timestamp, "Time expired");
         _;
     }
 
