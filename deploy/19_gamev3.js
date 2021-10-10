@@ -96,7 +96,7 @@ module.exports = async (hre) => {
   const xdraceContract = await xDRACE.attach(xdraceAddress)
   await xdraceContract.setMinter(gameControl.address, true)
   await tokenVesting.setLockers([gameControl.address], true)
-
+  await xdraceDistributor.setLockers(gameControl.address, true)
   saveDeploymentData(chainId, deployData)
   log('\n  Contract Deployment Data saved to "deployments" directory.')
 
