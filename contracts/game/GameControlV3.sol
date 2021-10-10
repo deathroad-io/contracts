@@ -38,6 +38,8 @@ contract GameControlV3 is
         uint256 draceDeposited;
     }
 
+    uint256 chainId;
+
     address public feeTo;
 
     IDeathRoadNFT public draceNFT;
@@ -136,6 +138,12 @@ contract GameControlV3 is
             mappingApprover[_approver] = true;
         }
         xDraceVesting = IxDraceDistributor(_xDraceVesting);
+
+        uint256 _cid;
+        assembly {
+            _cid := chainid()
+        }
+        chainId = _cid;
     }
 
     function setAllowEmergencyWithdrawNFT(bool _val) external onlyOwner {
@@ -265,9 +273,17 @@ contract GameControlV3 is
                 _userInfo.draceDeposited.sub(_pendingToSpendDrace)
             );
             //burn the pending
-            ERC20Burnable(address(drace)).burn(_pendingToSpendDrace);
+            if (chainId == 56) {
+                ERC20Burnable(address(drace)).burn(_pendingToSpendDrace);
+            } else {
+                drace.safeTransfer(address(1), _pendingToSpendDrace);
+            }
         } else {
-            ERC20Burnable(address(drace)).burn(_userInfo.draceDeposited);
+            if (chainId == 56) {
+                ERC20Burnable(address(drace)).burn(_userInfo.draceDeposited);
+            } else {
+                drace.safeTransfer(address(1), _userInfo.draceDeposited);
+            }
         }
 
         if (_userInfo.xdraceDeposited >= _pendingToSpendxDrace) {
