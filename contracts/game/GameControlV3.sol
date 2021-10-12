@@ -15,6 +15,7 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "../lib/BlackholePrevention.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import "../interfaces/IReferralContract.sol";
 
 contract GameControlV3 is
     Initializable,
@@ -59,6 +60,9 @@ contract GameControlV3 is
     mapping(uint256 => uint256) public tokenLastUseTimestamp;
     mapping(address => UserInfo) public userInfo;
     mapping(bytes32 => bool) public withdrawIdSet;
+    IReferralContract public referralHook;
+    uint256 public draceReferralPercentX100;    //per 10000, 10 => 100 *10/10000 = 0.1%
+    uint256 public xdraceReferralPercentX100;
 
     uint256 public xDracePercent;
     bool public allowEmergencyWithdrawNFT;
@@ -122,7 +126,8 @@ contract GameControlV3 is
         address _tokenVesting,
         address _xdrace,
         address _feeTo,
-        address _xDraceVesting
+        address _xDraceVesting,
+        address _referralHook
     ) external initializer {
         __Ownable_init();
         __Context_init();
@@ -144,6 +149,18 @@ contract GameControlV3 is
             _cid := chainid()
         }
         chainId = _cid;
+        referralHook = IReferralContract(_referralHook);
+        draceReferralPercentX100 = 20;
+        xdraceReferralPercentX100 = 30;
+    }
+
+    function setReferralPercent(uint256 _draceReferralPercentX100, uint256 _xdraceReferralPercentX100) external onlyOwner {
+        draceReferralPercentX100 = _draceReferralPercentX100;
+        xdraceReferralPercentX100 = _xdraceReferralPercentX100;
+    }
+
+    function setReferralHook(address _referralHook) external onlyOwner {
+        referralHook = IReferralContract(_referralHook);
     }
 
     function setAllowEmergencyWithdrawNFT(bool _val) external onlyOwner {
@@ -577,6 +594,22 @@ contract GameControlV3 is
         IMint(address(xdrace)).mint(address(this), _xdraceAmount);
         IERC20(address(xdrace)).approve(address(xDraceVesting), _xdraceAmount);
         xDraceVesting.lock(_recipient, _xdraceAmount);
+
+        //sending rewards to referrer
+        if (address(referralHook) != address(0)) {
+            (address _referrer, bool _canReceive) = referralHook.getReferrer(_recipient);
+            if (_canReceive) {
+                if (_referrer != _recipient) {
+                    if (draceReferralPercentX100 > 0) {
+                        drace.safeTransfer(_referrer, _draceAmount.mul(draceReferralPercentX100).div(10000));
+                    }
+
+                    if (xdraceReferralPercentX100 > 0) {
+                        IMint(address(xdrace)).mint(_referrer, _xdraceAmount.mul(xdraceReferralPercentX100).div(10000));
+                    }
+                }
+            }
+        }
 
         emit RewardDistribution(
             _withdrawId,

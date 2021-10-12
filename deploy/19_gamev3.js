@@ -37,6 +37,8 @@ module.exports = async (hre) => {
   const DeathRoadNFTAddress = require(`../deployments/${chainId}/DeathRoadNFT.json`)
     .address
 
+  const masterChefAddress = require(`../deployments/${chainId}/MasterChefV2.json`).address
+
   const GameControlV3 = await ethers.getContractFactory('GameControlV3')
   const gameControlInstance = await GameControlV3.deploy()
   const gameControl = await gameControlInstance.deployed()
@@ -76,6 +78,19 @@ module.exports = async (hre) => {
     deployTransaction: xdraceDistributor.deployTransaction,
   }
 
+  log('  Deploying Referral Contract...')
+  const ReferralContract = await ethers.getContractFactory('ReferralContract')
+  const ReferralContractInstance = await ReferralContract.deploy()
+  const referral = await ReferralContractInstance.deployed()
+  log('  - ReferralContract:         ', referral.address)
+
+  deployData['ReferralContract'] = {
+    abi: getContractAbi('ReferralContract'),
+    address: referral.address,
+    deployTransaction: referral.deployTransaction,
+  }
+  await referral.initialize(masterChefAddress)
+
   log('  - Initializing  GameControl        ')
   await gameControl.initialize(
     draceAddress,
@@ -84,7 +99,8 @@ module.exports = async (hre) => {
     tokenVesting.address,
     xdraceAddress,
     feeReceiver,
-    xdraceDistributor.address
+    xdraceDistributor.address,
+    referral.address
   , {gasLimit: 2000000})
 
   log('  - Adding approver        ')
@@ -96,7 +112,7 @@ module.exports = async (hre) => {
   const xdraceContract = await xDRACE.attach(xdraceAddress)
   await xdraceContract.setMinter(gameControl.address, true)
   await tokenVesting.setLockers([gameControl.address], true)
-  await xdraceDistributor.setLockers(gameControl.address, true)
+  await xdraceDistributor.setLockers([gameControl.address], true)
   saveDeploymentData(chainId, deployData)
   log('\n  Contract Deployment Data saved to "deployments" directory.')
 

@@ -565,6 +565,19 @@
   },
   {
     "inputs": [],
+    "name": "draceReferralPercentX100",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "emergencyWithdrawAllNFTs",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -704,6 +717,11 @@
         "internalType": "address",
         "name": "_xDraceVesting",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_referralHook",
+        "type": "address"
       }
     ],
     "name": "initialize",
@@ -798,6 +816,19 @@
   },
   {
     "inputs": [],
+    "name": "referralHook",
+    "outputs": [
+      {
+        "internalType": "contract IReferralContract",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "renounceOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -825,6 +856,37 @@
       }
     ],
     "name": "setFeeTo",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_referralHook",
+        "type": "address"
+      }
+    ],
+    "name": "setReferralHook",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_draceReferralPercentX100",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_xdraceReferralPercentX100",
+        "type": "uint256"
+      }
+    ],
+    "name": "setReferralPercent",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1290,6 +1352,19 @@
         "internalType": "contract IERC20",
         "name": "",
         "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "xdraceReferralPercentX100",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
