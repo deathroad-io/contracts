@@ -72,7 +72,7 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
     INFTFactory public factory;
     INFTStakingPoint public nftStakingPointHook;
     uint256 public lockedTime = 12 hours;
-    uint256 public poolLockedTime = 2 days;
+    uint256 public poolLockedTime = 1 days;
 
     // the token rewards container
 
