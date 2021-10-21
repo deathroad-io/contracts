@@ -104,6 +104,8 @@ contract GameControlV3 is
         uint256 timestamp
     );
 
+    event ReferralReward(address player, address referrer, uint256 draceAmount, uint256 xDraceAmount);
+
     modifier notWithdrawYet(bytes32 _withdrawId) {
         require(!withdrawIdSet[_withdrawId], "Already withdraw");
         _;
@@ -607,6 +609,7 @@ contract GameControlV3 is
                     if (xdraceReferralPercentX100 > 0) {
                         IMint(address(xdrace)).mint(_referrer, _xdraceAmount.mul(xdraceReferralPercentX100).div(10000));
                     }
+                    emit ReferralReward(_recipient, _referrer, _draceAmount.mul(draceReferralPercentX100).div(10000), _xdraceAmount.mul(xdraceReferralPercentX100).div(10000));
                 }
             }
         }
