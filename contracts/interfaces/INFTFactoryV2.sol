@@ -53,4 +53,5 @@ interface INFTFactoryV2 {
     function decreaseBoxReward(address addr, uint256 reduced) external;
 
     function boxRewards(address) external view returns (uint256);
+    function alreadyMinted(address) external view returns (bool);
 }

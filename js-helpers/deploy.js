@@ -19,6 +19,12 @@ const log = (...args) => {
   return async (delay = 0) => (delay && await sleep(delay * 1000));
 };
 
+function sleepFor(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
 const chainIdByName = (chainName) => {
   switch (_.toLower(chainName)) {
     case 'mainnet': return 1;
@@ -237,5 +243,6 @@ module.exports = {
   toWei,
   toEth,
   toBN,
-  toStr
+  toStr,
+  sleepFor
 };

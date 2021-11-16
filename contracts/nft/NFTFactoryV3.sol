@@ -14,7 +14,7 @@ import "../interfaces/INFTStorage.sol";
 import "../interfaces/IMint.sol";
 import "../lib/SignerRecover.sol";
 
-contract NFTFactoryV2 is Ownable, INFTFactoryV2, SignerRecover, Initializable {
+contract NFTFactoryV3 is Ownable, INFTFactoryV2, SignerRecover, Initializable {
     using SafeMath for uint256;
 
     address public DRACE;
@@ -594,6 +594,9 @@ contract NFTFactoryV2 is Ownable, INFTFactoryV2, SignerRecover, Initializable {
             ) = nftStorageHook.getFeaturesByIndex(resultIndex);
 
             tokenId = nft.mint(u.user, _featureNames, _featureValues);
+            if (u.useCharm) {
+                nft.decreaseCharm(u.user);
+            }
         }
         u.upgradeStatus = success;
         u.settled = true;
@@ -638,6 +641,13 @@ contract NFTFactoryV2 is Ownable, INFTFactoryV2, SignerRecover, Initializable {
         oldFactory = INFTFactory(_old);
     }
 
+    INFTFactoryV2 public factoryV2 =
+        INFTFactoryV2(0x817e1F3C6987E4185E75db630591244b7B1a17d1);
+
+    function setFactoryV2(address _v2) external onlyOwner {
+        factoryV2 = INFTFactoryV2(_v2);
+    }
+
     function setXDRACE(address _xdrace) external onlyOwner {
         xDrace = IMint(_xdrace);
     }
@@ -656,47 +666,12 @@ contract NFTFactoryV2 is Ownable, INFTFactoryV2, SignerRecover, Initializable {
         );
 
         uint256 _toMint = reward;
-        if (!alreadyMinted[addr]) {
+        if (!alreadyMinted[addr] && factoryV2.alreadyMinted(addr)) {
+            _toMint = oldFactory.boxRewards(addr).add(_toMint);
             alreadyMinted[addr] = true;
-            if (oldFactory.boxRewards(addr) == 0) {
-                //initially, so dont lock here
-                xDrace.mint(addr, _toMint);
-                return;
-            }
-            uint256 _totalRewards = oldFactory.boxRewards(addr).add(_toMint);
-
-            //unlock 20%, remaining vesting over 14 days
-            uint256 _toLock = _totalRewards.mul(80).div(100);
-
-            //mint & lock for _addr
-            xDrace.mint(address(this), _toLock);
-            IERC20(address(xDrace)).approve(address(xDraceVesting), _toLock);
-            xDraceVesting.lock(addr, _toLock);
-
-            //mint 20% immediately
-            xDrace.mint(addr, _totalRewards.mul(20).div(100));
-        } else {
-            //new xdrace rewards
-            //mint immediately, no lock
-            xDrace.mint(addr, _toMint);
         }
-    }
 
-    function manualClaimXDrace() external {
-        require(!alreadyMinted[msg.sender], "already claim xDrace first time");
-        alreadyMinted[msg.sender] = true;
-        uint256 _totalRewards = oldFactory.boxRewards(msg.sender);
-
-        //unlock 20%, remaining vesting over 14 days
-        uint256 _toLock = _totalRewards.mul(80).div(100);
-
-        //mint & lock for _addr
-        xDrace.mint(address(this), _toLock);
-        IERC20(address(xDrace)).approve(address(xDraceVesting), _toLock);
-        xDraceVesting.lock(msg.sender, _toLock);
-
-        //mint 20% immediately
-        xDrace.mint(msg.sender, _totalRewards.mul(20).div(100));
+        xDrace.mint(addr, _toMint);
     }
 
     function boxRewards(address _addr)
