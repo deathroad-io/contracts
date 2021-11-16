@@ -86,7 +86,7 @@ module.exports = async (hre) => {
   await factoryV3.setFactoryV2(factoryV2)
   await factoryV3.setXDRACE(xdraceAddress)
   log('  - setMinter        ')
-  await xdrace.setMinter(factoryV3.address, true)
+  await xdrace.setMinters([factoryV3.address], true)
 
   log('  - Adding approver ')
   await factoryV3.addApprover(
@@ -102,7 +102,7 @@ module.exports = async (hre) => {
     deathRoadNFT.address,
     draceAddress,
     feeReceiver,
-    notaryNFT.address,
+    nftNotaryAddress,
     NFTStorageAddress,
     masterchefV2.address,
     xDraceDistributorAddress,

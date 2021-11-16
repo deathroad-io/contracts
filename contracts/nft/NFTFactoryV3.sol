@@ -658,6 +658,10 @@ contract NFTFactoryV3 is Ownable, INFTFactoryV2, SignerRecover, Initializable {
 
     mapping(address => bool) public override alreadyMinted;
     IxDraceDistributor public xDraceVesting;
+    uint256 public devFundPercent = 10;
+    function setDevFundPercent(uint256 _p) external onlyOwner {
+        devFundPercent = _p;
+    }
 
     function addBoxReward(address addr, uint256 reward) external override {
         require(
@@ -672,6 +676,8 @@ contract NFTFactoryV3 is Ownable, INFTFactoryV2, SignerRecover, Initializable {
         }
 
         xDrace.mint(addr, _toMint);
+        //10% to ecosystem fund
+        xDrace.mint(feeTo, _toMint * devFundPercent / 100);
     }
 
     function boxRewards(address _addr)
