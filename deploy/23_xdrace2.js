@@ -62,6 +62,7 @@ module.exports = async (hre) => {
   let pairAddress = await factory.getPair(xdrace2.address, pairedToken)
   log('Pair', pairAddress)
   await liquidityAdder.setLiquidityPair(pairAddress)
+  await xdrace2.setPancakePairs([pairAddress], true)
 
   deployData['xDRACE2'] = {
     abi: getContractAbi('xDRACE2'),
