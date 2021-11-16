@@ -1,14 +1,21 @@
 pragma solidity ^0.8.0;
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract DraceRewardLocker is Initializable, Ownable {
-    using SafeMath for uint256;
-    using SafeERC20 for IERC20;
+contract DraceRewardLocker is
+    Initializable,
+    ContextUpgradeable,
+    OwnableUpgradeable,
+    UUPSUpgradeable
+{
+    using SafeMathUpgradeable for uint256;
+    using SafeERC20Upgradeable for IERC20Upgradeable;
 
     struct VestingInfo {
         uint256 unlockedFrom;
@@ -17,9 +24,9 @@ contract DraceRewardLocker is Initializable, Ownable {
         uint256 totalAmount;
         uint256 groupPeriod;
     }
-    uint256 public cliffPeriod = 1 days;
-    uint256 public vestingPeriod = 30 days;
-    IERC20 public token;
+    uint256 public cliffPeriod;
+    uint256 public vestingPeriod;
+    IERC20Upgradeable public token;
     mapping(address => VestingInfo[]) public vestings;
     mapping(address => bool) public lockers;
 
@@ -35,16 +42,26 @@ contract DraceRewardLocker is Initializable, Ownable {
         external
         initializer
     {
-        token = IERC20(_token);
+        cliffPeriod = 1 days;
+        vestingPeriod = 30 days;
+        token = IERC20Upgradeable(_token);
         vestingPeriod = _vestingPeriod > 0 ? _vestingPeriod : vestingPeriod;
     }
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() initializer {}
+
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 
     function changeVestingPeriod(uint256 _vestingPeriod) external onlyOwner {
         vestingPeriod = _vestingPeriod;
     }
 
-    function setLockers(address[] memory _lockers, bool val) external onlyOwner {
-        for(uint256 i = 0; i < _lockers.length; i++) {
+    function setLockers(address[] memory _lockers, bool val)
+        external
+        onlyOwner
+    {
+        for (uint256 i = 0; i < _lockers.length; i++) {
             lockers[_lockers[i]] = val;
             emit SetLocker(_lockers[i], val);
         }
@@ -52,10 +69,12 @@ contract DraceRewardLocker is Initializable, Ownable {
 
     function unlock(address _addr, uint256[] memory _indexes) public {
         uint256 totalUnlockable = 0;
-        for(uint256 i = 0; i < _indexes.length; i++) {
+        for (uint256 i = 0; i < _indexes.length; i++) {
             uint256 unlockable = getUnlockableVesting(_addr, _indexes[i]);
             if (unlockable > 0) {
-                vestings[_addr][_indexes[i]].releasedAmount = vestings[_addr][_indexes[i]].releasedAmount.add(unlockable);
+                vestings[_addr][_indexes[i]].releasedAmount = vestings[_addr][
+                    _indexes[i]
+                ].releasedAmount.add(unlockable);
                 totalUnlockable = totalUnlockable.add(unlockable);
             }
         }
@@ -117,13 +136,17 @@ contract DraceRewardLocker is Initializable, Ownable {
     function getUnlockable(address _addr) external view returns (uint256) {
         uint256 ret = 0;
         uint256 l = vestings[_addr].length;
-        for(uint256 i = 0;  i < l; i++) {
+        for (uint256 i = 0; i < l; i++) {
             ret = ret.add(getUnlockableVesting(_addr, i));
         }
         return ret;
     }
 
-    function getUnlockableVesting(address _addr, uint256 _index) public view returns (uint256) {
+    function getUnlockableVesting(address _addr, uint256 _index)
+        public
+        view
+        returns (uint256)
+    {
         if (_index >= vestings[_addr].length) return 0;
         VestingInfo memory vesting = vestings[_addr][_index];
         if (vesting.totalAmount == 0) {
@@ -135,9 +158,7 @@ contract DraceRewardLocker is Initializable, Ownable {
         uint256 period = vesting.unlockedTo.sub(vesting.unlockedFrom);
         uint256 timeElapsed = block.timestamp.sub(vesting.unlockedFrom);
 
-        uint256 releasable = timeElapsed.mul(vesting.totalAmount).div(
-            period
-        );
+        uint256 releasable = timeElapsed.mul(vesting.totalAmount).div(period);
         if (releasable > vesting.totalAmount) {
             releasable = vesting.totalAmount;
         }

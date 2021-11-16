@@ -1,14 +1,23 @@
 pragma solidity ^0.8.0;
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "../interfaces/IxDraceDistributor.sol";
-contract xDraceRewardLocker is Initializable, Ownable {
-    using SafeMath for uint256;
-    using SafeERC20 for IERC20;
+
+contract xDraceRewardLocker is
+    Initializable,
+    ContextUpgradeable,
+    OwnableUpgradeable,
+    UUPSUpgradeable
+{
+    using SafeMathUpgradeable for uint256;
+    using SafeERC20Upgradeable for IERC20Upgradeable;
 
     struct VestingInfo {
         uint256 unlockedFrom;
@@ -16,8 +25,8 @@ contract xDraceRewardLocker is Initializable, Ownable {
         uint256 releasedAmount;
         uint256 totalAmount;
     }
-    uint256 public vestingPeriod = 30 days;
-    IERC20 public token;
+    uint256 public vestingPeriod;
+    IERC20Upgradeable public token;
     mapping(address => VestingInfo) public vestings;
     mapping(address => bool) public lockers;
 
@@ -29,9 +38,15 @@ contract xDraceRewardLocker is Initializable, Ownable {
         external
         initializer
     {
-        token = IERC20(_token);
+        vestingPeriod = 30 days;
+        token = IERC20Upgradeable(_token);
         vestingPeriod = _vestingPeriod > 0 ? _vestingPeriod : vestingPeriod;
     }
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() initializer {}
+
+    function _authorizeUpgrade(address) internal override onlyOwner {}
 
     function setLockers(address[] memory _lockers, bool val)
         external
@@ -46,7 +61,9 @@ contract xDraceRewardLocker is Initializable, Ownable {
     function unlock(address _addr) public {
         uint256 unlockable = getUnlockable(_addr);
         if (unlockable > 0) {
-            vestings[_addr].releasedAmount = vestings[_addr].releasedAmount.add(unlockable);
+            vestings[_addr].releasedAmount = vestings[_addr].releasedAmount.add(
+                unlockable
+            );
             token.safeTransfer(_addr, unlockable);
             emit Unlock(_addr, unlockable);
         }
@@ -88,8 +105,14 @@ contract xDraceRewardLocker is Initializable, Ownable {
         return releasable.sub(vesting.releasedAmount);
     }
 
-    function getLockedInfo(address _addr) external view returns (uint256 _locked, uint256 _releasable) {
+    function getLockedInfo(address _addr)
+        external
+        view
+        returns (uint256 _locked, uint256 _releasable)
+    {
         _releasable = getUnlockable(_addr);
-        _locked = vestings[_addr].totalAmount.sub(vestings[_addr].releasedAmount);
+        _locked = vestings[_addr].totalAmount.sub(
+            vestings[_addr].releasedAmount
+        );
     }
 }
