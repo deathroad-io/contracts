@@ -1026,6 +1026,30 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "totalReferralRewards",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "totalDrace",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "totalxDrace",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "newOwner",
         "type": "address"
       }

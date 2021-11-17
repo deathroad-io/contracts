@@ -35,6 +35,11 @@ contract GameControlV4 is
         uint256 tokenId;
     }
 
+    struct ReferralRewards {
+        uint256 totalDrace;
+        uint256 totalxDrace;
+    }
+
     struct UserInfo {
         uint256[] depositTokenList;
         uint256 xdraceDeposited;
@@ -65,6 +70,7 @@ contract GameControlV4 is
     IReferralContract public referralHook;
     uint256 public draceReferralPercentX100;    //per 10000, 10 => 100 *10/10000 = 0.1%
     uint256 public xdraceReferralPercentX100;
+    mapping(address => ReferralRewards) public totalReferralRewards;
 
     uint256 public xDracePercent;
     bool public allowEmergencyWithdrawNFT;
@@ -611,10 +617,12 @@ contract GameControlV4 is
                 if (_referrer != _recipient) {
                     if (draceReferralPercentX100 > 0) {
                         drace.safeTransfer(_referrer, _draceAmount.mul(draceReferralPercentX100).div(10000));
+                        totalReferralRewards[_referrer].totalDrace += _draceAmount.mul(draceReferralPercentX100).div(10000);
                     }
 
                     if (xdraceReferralPercentX100 > 0) {
                         IMint(address(xdrace)).mint(_referrer, _xdraceAmount.mul(xdraceReferralPercentX100).div(10000));
+                        totalReferralRewards[_referrer].totalxDrace += _xdraceAmount.mul(xdraceReferralPercentX100).div(10000);
                     }
                     emit ReferralReward(_recipient, _referrer, _draceAmount.mul(draceReferralPercentX100).div(10000), _xdraceAmount.mul(xdraceReferralPercentX100).div(10000));
                 }
