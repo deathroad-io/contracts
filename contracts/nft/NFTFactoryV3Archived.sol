@@ -1,11 +1,10 @@
 pragma solidity ^0.8.0;
-import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "../interfaces/INotaryNFT.sol";
 import "../interfaces/IxDraceDistributor.sol";
 import "../interfaces/IDeathRoadNFT.sol";
@@ -15,15 +14,8 @@ import "../interfaces/INFTStorage.sol";
 import "../interfaces/IMint.sol";
 import "../lib/SignerRecover.sol";
 
-contract NFTFactoryV3 is
-    Initializable,
-    ContextUpgradeable,
-    UUPSUpgradeable,
-    OwnableUpgradeable,
-    INFTFactoryV2,
-    SignerRecover
-{
-    using SafeMathUpgradeable for uint256;
+contract NFTFactoryV3Archived is Ownable, INFTFactoryV2, SignerRecover, Initializable {
+    using SafeMath for uint256;
 
     address public DRACE;
     address payable public feeTo;
@@ -44,44 +36,13 @@ contract NFTFactoryV3 is
     uint256 public SETTLE_FEE = 0.01 ether;
     address payable public SETTLE_FEE_RECEIVER;
     mapping(address => bool) public masterChefs;
-    uint256 public boxDiscountPercent;
+    uint256 public boxDiscountPercent = 70;
 
     mapping(address => bool) public mappingApprover;
 
     IDeathRoadNFT public nft;
 
-    //open and settle box data structure
-    mapping(bytes32 => OpenBoxInfo) public _openBoxInfo;
-    mapping(address => bytes32[]) public allOpenBoxes;
-    mapping(uint256 => bool) public committedBoxes;
-    bytes32[] public allBoxCommitments;
-    event CommitOpenBox(
-        address owner,
-        bytes boxType,
-        bytes packType,
-        uint256 boxCount,
-        bytes32 commitment
-    );
-
-    //upgrade datastructure
-    mapping(bytes32 => UpgradeInfo) public _upgradesInfo;
-    mapping(bytes32 => UpgradeInfoV2) public _upgradesInfoV2;
-    mapping(address => bytes32[]) public allUpgrades;
-    bytes32[] public allUpgradeCommitments;
-    event CommitUpgradeFeature(address owner, bytes32 commitment);
-
-    INFTFactory public oldFactory;
-    IMint public xDrace;
-
-    INFTFactoryV2 public factoryV2;
-
-    INotaryNFT public notaryHook;
-    
-    INFTStorage public nftStorageHook;
-
-    constructor() initializer {}
-
-    function _authorizeUpgrade(address) internal override onlyOwner {}
+    constructor() {}
 
     function initialize(
         address _nft,
@@ -93,8 +54,6 @@ contract NFTFactoryV3 is
         address _v,
         address _xDrace
     ) external initializer {
-        __Ownable_init();
-        __Context_init();
         nft = IDeathRoadNFT(_nft);
         DRACE = DRACE_token;
         feeTo = _feeTo;
@@ -103,9 +62,6 @@ contract NFTFactoryV3 is
         nftStorageHook = INFTStorage(_nftStorageHook);
         xDraceVesting = IxDraceDistributor(_v);
         xDrace = IMint(_xDrace);
-        boxDiscountPercent = 70;
-        oldFactory = INFTFactory(0x9accf295895595D694b5D9E781082686dfa2801A);
-        factoryV2 = INFTFactoryV2(0x817e1F3C6987E4185E75db630591244b7B1a17d1);
     }
 
     modifier onlyBoxOwner(uint256 boxId) {
@@ -154,6 +110,13 @@ contract NFTFactoryV3 is
         nft.addPacks(_packs);
     }
 
+    //    function addFeature(bytes memory _box, bytes memory _feature)
+    //        public
+    //        onlyOwner
+    //    {
+    //        nft.addFeature(_box, _feature);
+    //    }
+
     function setBoxDiscountPercent(uint256 _discount) external onlyOwner {
         boxDiscountPercent = _discount;
     }
@@ -166,6 +129,25 @@ contract NFTFactoryV3 is
         emit NewBox(msg.sender, boxId);
         return boxId;
     }
+
+    // function buyBox(
+    //     bytes memory _box,
+    //     bytes memory _pack,
+    //     uint256 _price,
+    //     uint256 _expiryTime,
+    //     bytes32 r,
+    //     bytes32 s,
+    //     uint8 v
+    // ) external {
+    //     require(block.timestamp <= _expiryTime, "Expired");
+    //     bytes32 message = keccak256(
+    //         abi.encode("buyBox", msg.sender, _box, _pack, _price, _expiryTime)
+    //     );
+    //     require(verifySignature(r, s, v, message), "buyBox: Signature invalid");
+    //     IERC20 erc20 = IERC20(DRACE);
+    //     erc20.transferFrom(msg.sender, feeTo, _price);
+    //     _buyBox(_box, _pack);
+    // }
 
     function buyCharm(
         uint256 _price,
@@ -183,6 +165,18 @@ contract NFTFactoryV3 is
         transferBoxFee(_price, _useXdrace);
         nft.buyCharm(msg.sender);
     }
+
+    mapping(bytes32 => OpenBoxInfo) public _openBoxInfo;
+    mapping(address => bytes32[]) public allOpenBoxes;
+    mapping(uint256 => bool) public committedBoxes;
+    bytes32[] public allBoxCommitments;
+    event CommitOpenBox(
+        address owner,
+        bytes boxType,
+        bytes packType,
+        uint256 boxCount,
+        bytes32 commitment
+    );
 
     function getAllBoxCommitments() external view returns (bytes32[] memory) {
         return allBoxCommitments;
@@ -220,7 +214,7 @@ contract NFTFactoryV3 is
             "updateFeature: only token owner"
         );
         require(block.timestamp <= _expiryTime, "buyAndCommitOpenBox:Expired");
-        IERC20Upgradeable erc20 = IERC20Upgradeable(DRACE);
+        IERC20 erc20 = IERC20(DRACE);
         if (_draceFee > 0) {
             erc20.transferFrom(msg.sender, feeTo, _draceFee);
         }
@@ -242,6 +236,8 @@ contract NFTFactoryV3 is
 
         nft.updateFeature(msg.sender, tokenId, featureName, featureValue);
     }
+
+    INFTStorage public nftStorageHook;
 
     function setNFTStorage(address _storage) external onlyOwner {
         nftStorageHook = INFTStorage(_storage);
@@ -326,12 +322,12 @@ contract NFTFactoryV3 is
     }
 
     function transferBoxFee(uint256 _price, bool _useBoxReward) internal {
-        IERC20Upgradeable erc20 = IERC20Upgradeable(DRACE);
+        IERC20 erc20 = IERC20(DRACE);
         if (!_useBoxReward) {
             erc20.transferFrom(msg.sender, feeTo, _price);
         } else {
             uint256 boxRewardSpent = _price.mul(boxDiscountPercent).div(100);
-            ERC20BurnableUpgradeable(address(xDrace)).burnFrom(msg.sender, boxRewardSpent);
+            ERC20Burnable(address(xDrace)).burnFrom(msg.sender, boxRewardSpent);
             erc20.transferFrom(msg.sender, feeTo, _price.sub(boxRewardSpent));
         }
     }
@@ -408,6 +404,12 @@ contract NFTFactoryV3 is
     {
         return nft.existTokenFeatures(tokenId);
     }
+
+    mapping(bytes32 => UpgradeInfo) public _upgradesInfo;
+    mapping(bytes32 => UpgradeInfoV2) public _upgradesInfoV2;
+    mapping(address => bytes32[]) public allUpgrades;
+    bytes32[] public allUpgradeCommitments;
+    event CommitUpgradeFeature(address owner, bytes32 commitment);
 
     function getAllUpgradeCommitments()
         external
@@ -615,6 +617,8 @@ contract NFTFactoryV3 is
         }
     }
 
+    INotaryNFT public notaryHook;
+
     function setNotaryHook(address _notaryHook) external onlyOwner {
         notaryHook = INotaryNFT(_notaryHook);
     }
@@ -629,9 +633,16 @@ contract NFTFactoryV3 is
         emit SetMasterChef(_masterChef, false);
     }
 
+    INFTFactory public oldFactory =
+        INFTFactory(0x9accf295895595D694b5D9E781082686dfa2801A);
+    IMint public xDrace;
+
     function setOldFactory(address _old) external onlyOwner {
         oldFactory = INFTFactory(_old);
     }
+
+    INFTFactoryV2 public factoryV2 =
+        INFTFactoryV2(0x817e1F3C6987E4185E75db630591244b7B1a17d1);
 
     function setFactoryV2(address _v2) external onlyOwner {
         factoryV2 = INFTFactoryV2(_v2);
@@ -648,7 +659,6 @@ contract NFTFactoryV3 is
     mapping(address => bool) public override alreadyMinted;
     IxDraceDistributor public xDraceVesting;
     uint256 public devFundPercent = 10;
-
     function setDevFundPercent(uint256 _p) external onlyOwner {
         devFundPercent = _p;
     }
@@ -667,7 +677,7 @@ contract NFTFactoryV3 is
 
         xDrace.mint(addr, _toMint);
         //10% to ecosystem fund
-        xDrace.mint(feeTo, (_toMint * devFundPercent) / 100);
+        xDrace.mint(feeTo, _toMint * devFundPercent / 100);
     }
 
     function boxRewards(address _addr)
@@ -679,7 +689,7 @@ contract NFTFactoryV3 is
         if (!alreadyMinted[_addr]) {
             return oldFactory.boxRewards(_addr);
         }
-        return IERC20Upgradeable(address(xDrace)).balanceOf(_addr);
+        return IERC20(address(xDrace)).balanceOf(_addr);
     }
 
     function getXDraceLockInfo(address _addr)

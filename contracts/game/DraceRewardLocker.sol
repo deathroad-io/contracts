@@ -42,6 +42,8 @@ contract DraceRewardLocker is
         external
         initializer
     {
+        __Ownable_init();
+        __Context_init();
         cliffPeriod = 1 days;
         vestingPeriod = 30 days;
         token = IERC20Upgradeable(_token);

@@ -38,6 +38,8 @@ contract xDraceRewardLocker is
         external
         initializer
     {
+        __Ownable_init();
+        __Context_init();
         vestingPeriod = 30 days;
         token = IERC20Upgradeable(_token);
         vestingPeriod = _vestingPeriod > 0 ? _vestingPeriod : vestingPeriod;

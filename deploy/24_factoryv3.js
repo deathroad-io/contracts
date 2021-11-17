@@ -32,7 +32,8 @@ module.exports = async (hre) => {
   if (parseInt(chainId) == 31337) return
   //reading DRACE token address
   const draceAddress = require(`../deployments/${chainId}/DRACE.json`).address
-  const xdraceAddress = require(`../deployments/${chainId}/xDRACE2.json`).address
+  const xdraceAddress = require(`../deployments/${chainId}/xDRACE2.json`)
+    .address
   const DeathRoadNFTAddress = require(`../deployments/${chainId}/DeathRoadNFT.json`)
     .address
   const NFTStorageAddress = require(`../deployments/${chainId}/NFTStorage.json`)
@@ -46,9 +47,9 @@ module.exports = async (hre) => {
   const factoryV2 = require(`../deployments/${chainId}/NFTFactoryV2.json`)
     .address
   const nftNotaryAddress = require(`../deployments/${chainId}/NotaryNFT.json`)
-  .address
+    .address
   const xDraceDistributorAddress = require(`../deployments/${chainId}/xDraceDistributor.json`)
-  .address
+    .address
 
   // const GameControlAddress = require(`../deployments/${chainId}/GameControl.json`)
   //   .address
@@ -64,8 +65,13 @@ module.exports = async (hre) => {
 
   log('  Deploying NFT Factoryv3 Contract...')
   const NFTFactoryV3 = await ethers.getContractFactory('NFTFactoryV3')
-  const nftFactoryV3Instance = await NFTFactoryV3.deploy()
-  const factoryV3 = await nftFactoryV3Instance.deployed()
+
+  const factoryV3 = upgrades.deployProxy(NFTFactoryV3, 
+    [deathRoadNFT.address, draceAddress, feeReceiver, nftNotaryAddress, NFTStorageAddress, masterchefV2.address, xDraceDistributorAddress, xdraceAddress], {
+    unsafeAllow: ['delegatecall'],
+    kind: 'uups',
+    gasLimit: 2000000,
+  })
   log('  - NFTFactoryV3:         ', factoryV3.address)
 
   const xDRACE = await ethers.getContractFactory('xDRACE2')
@@ -89,25 +95,8 @@ module.exports = async (hre) => {
   await xdrace.setMinters([factoryV3.address], true)
 
   log('  - Adding approver ')
-  await factoryV3.addApprover(
-    constants.getApprover(chainId),
-    true,
-  )
-  await factoryV3.setSettleFeeReceiver(
-    constants.getSettler(chainId)
-  )
-
-  log('  - Initializing  NFTFactory        ')
-  await factoryV3.initialize(
-    deathRoadNFT.address,
-    draceAddress,
-    feeReceiver,
-    nftNotaryAddress,
-    NFTStorageAddress,
-    masterchefV2.address,
-    xDraceDistributorAddress,
-    xdraceAddress,
-  )
+  await factoryV3.addApprover(constants.getApprover(chainId), true)
+  await factoryV3.setSettleFeeReceiver(constants.getSettler(chainId))
 
   await factoryV3.setMasterChef(masterchef.address)
 
