@@ -66,7 +66,7 @@ module.exports = async (hre) => {
   log('  Deploying NFT Factoryv3 Contract...')
   const NFTFactoryV3 = await ethers.getContractFactory('NFTFactoryV3')
 
-  const factoryV3 = upgrades.deployProxy(NFTFactoryV3, 
+  const factoryV3 = await upgrades.deployProxy(NFTFactoryV3, 
     [deathRoadNFT.address, draceAddress, feeReceiver, nftNotaryAddress, NFTStorageAddress, masterchefV2.address, xDraceDistributorAddress, xdraceAddress], {
     unsafeAllow: ['delegatecall'],
     kind: 'uups',

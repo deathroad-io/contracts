@@ -41,7 +41,7 @@ contract NFTFactoryV3 is
     event SetMasterChef(address addr, bool val);
 
     //commit reveal needs 2 steps, the reveal step needs to pay fee by bot, this fee is to compensate for bots
-    uint256 public SETTLE_FEE = 0.01 ether;
+    uint256 public SETTLE_FEE;
     address payable public SETTLE_FEE_RECEIVER;
     mapping(address => bool) public masterChefs;
     uint256 public boxDiscountPercent;
@@ -79,6 +79,11 @@ contract NFTFactoryV3 is
     
     INFTStorage public nftStorageHook;
 
+    mapping(address => bool) public override alreadyMinted;
+    IxDraceDistributor public xDraceVesting;
+    uint256 public devFundPercent;
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
@@ -95,6 +100,8 @@ contract NFTFactoryV3 is
     ) external initializer {
         __Ownable_init();
         __Context_init();
+        SETTLE_FEE = 0.01 ether;
+        devFundPercent = 10;
         nft = IDeathRoadNFT(_nft);
         DRACE = DRACE_token;
         feeTo = _feeTo;
@@ -644,10 +651,6 @@ contract NFTFactoryV3 is
     function setXDraceVesting(address _v) external onlyOwner {
         xDraceVesting = IxDraceDistributor(_v);
     }
-
-    mapping(address => bool) public override alreadyMinted;
-    IxDraceDistributor public xDraceVesting;
-    uint256 public devFundPercent = 10;
 
     function setDevFundPercent(uint256 _p) external onlyOwner {
         devFundPercent = _p;

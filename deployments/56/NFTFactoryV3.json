@@ -1,0 +1,1743 @@
+{
+	"abi": [
+		{
+			"inputs": [],
+			"stateMutability": "nonpayable",
+			"type": "constructor"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": false,
+					"internalType": "address",
+					"name": "previousAdmin",
+					"type": "address"
+				},
+				{
+					"indexed": false,
+					"internalType": "address",
+					"name": "newAdmin",
+					"type": "address"
+				}
+			],
+			"name": "AdminChanged",
+			"type": "event"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": true,
+					"internalType": "address",
+					"name": "beacon",
+					"type": "address"
+				}
+			],
+			"name": "BeaconUpgraded",
+			"type": "event"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": false,
+					"internalType": "address",
+					"name": "addr",
+					"type": "address"
+				},
+				{
+					"indexed": false,
+					"internalType": "uint256",
+					"name": "reward",
+					"type": "uint256"
+				}
+			],
+			"name": "BoxRewardUpdated",
+			"type": "event"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": false,
+					"internalType": "address",
+					"name": "owner",
+					"type": "address"
+				},
+				{
+					"indexed": false,
+					"internalType": "bytes",
+					"name": "boxType",
+					"type": "bytes"
+				},
+				{
+					"indexed": false,
+					"internalType": "bytes",
+					"name": "packType",
+					"type": "bytes"
+				},
+				{
+					"indexed": false,
+					"internalType": "uint256",
+					"name": "boxCount",
+					"type": "uint256"
+				},
+				{
+					"indexed": false,
+					"internalType": "bytes32",
+					"name": "commitment",
+					"type": "bytes32"
+				}
+			],
+			"name": "CommitOpenBox",
+			"type": "event"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": false,
+					"internalType": "address",
+					"name": "owner",
+					"type": "address"
+				},
+				{
+					"indexed": false,
+					"internalType": "bytes32",
+					"name": "commitment",
+					"type": "bytes32"
+				}
+			],
+			"name": "CommitUpgradeFeature",
+			"type": "event"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": false,
+					"internalType": "address",
+					"name": "owner",
+					"type": "address"
+				},
+				{
+					"indexed": false,
+					"internalType": "uint256",
+					"name": "boxId",
+					"type": "uint256"
+				}
+			],
+			"name": "NewBox",
+			"type": "event"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": false,
+					"internalType": "address",
+					"name": "owner",
+					"type": "address"
+				},
+				{
+					"indexed": false,
+					"internalType": "uint256",
+					"name": "boxId",
+					"type": "uint256"
+				},
+				{
+					"indexed": false,
+					"internalType": "uint256",
+					"name": "tokenId",
+					"type": "uint256"
+				}
+			],
+			"name": "OpenBox",
+			"type": "event"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": true,
+					"internalType": "address",
+					"name": "previousOwner",
+					"type": "address"
+				},
+				{
+					"indexed": true,
+					"internalType": "address",
+					"name": "newOwner",
+					"type": "address"
+				}
+			],
+			"name": "OwnershipTransferred",
+			"type": "event"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": false,
+					"internalType": "address",
+					"name": "addr",
+					"type": "address"
+				},
+				{
+					"indexed": false,
+					"internalType": "bool",
+					"name": "val",
+					"type": "bool"
+				}
+			],
+			"name": "SetMasterChef",
+			"type": "event"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": false,
+					"internalType": "address",
+					"name": "owner",
+					"type": "address"
+				},
+				{
+					"indexed": false,
+					"internalType": "uint256[3]",
+					"name": "oldTokenId",
+					"type": "uint256[3]"
+				},
+				{
+					"indexed": false,
+					"internalType": "bool",
+					"name": "upgradeStatus",
+					"type": "bool"
+				},
+				{
+					"indexed": false,
+					"internalType": "bool",
+					"name": "useCharm",
+					"type": "bool"
+				},
+				{
+					"indexed": false,
+					"internalType": "uint256",
+					"name": "tokenId",
+					"type": "uint256"
+				}
+			],
+			"name": "UpgradeToken",
+			"type": "event"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": true,
+					"internalType": "address",
+					"name": "implementation",
+					"type": "address"
+				}
+			],
+			"name": "Upgraded",
+			"type": "event"
+		},
+		{
+			"inputs": [],
+			"name": "DRACE",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "SETTLE_FEE",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "SETTLE_FEE_RECEIVER",
+			"outputs": [
+				{
+					"internalType": "address payable",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes32",
+					"name": "",
+					"type": "bytes32"
+				}
+			],
+			"name": "_openBoxInfo",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "user",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "boxIdFrom",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "boxCount",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bool",
+					"name": "settled",
+					"type": "bool"
+				},
+				{
+					"internalType": "bool",
+					"name": "openBoxStatus",
+					"type": "bool"
+				},
+				{
+					"internalType": "bytes32",
+					"name": "previousBlockHash",
+					"type": "bytes32"
+				},
+				{
+					"internalType": "uint256",
+					"name": "blockNumber",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes32",
+					"name": "",
+					"type": "bytes32"
+				}
+			],
+			"name": "_upgradesInfo",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "user",
+					"type": "address"
+				},
+				{
+					"internalType": "bool",
+					"name": "useCharm",
+					"type": "bool"
+				},
+				{
+					"internalType": "bool",
+					"name": "settled",
+					"type": "bool"
+				},
+				{
+					"internalType": "bool",
+					"name": "upgradeStatus",
+					"type": "bool"
+				},
+				{
+					"internalType": "uint256",
+					"name": "failureRate",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bytes32",
+					"name": "previousBlockHash",
+					"type": "bytes32"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes32",
+					"name": "",
+					"type": "bytes32"
+				}
+			],
+			"name": "_upgradesInfoV2",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "user",
+					"type": "address"
+				},
+				{
+					"internalType": "bool",
+					"name": "useCharm",
+					"type": "bool"
+				},
+				{
+					"internalType": "bool",
+					"name": "settled",
+					"type": "bool"
+				},
+				{
+					"internalType": "bool",
+					"name": "upgradeStatus",
+					"type": "bool"
+				},
+				{
+					"internalType": "uint256",
+					"name": "failureRate",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bytes32",
+					"name": "previousBlockHash",
+					"type": "bytes32"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_approver",
+					"type": "address"
+				},
+				{
+					"internalType": "bool",
+					"name": "_val",
+					"type": "bool"
+				}
+			],
+			"name": "addApprover",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes",
+					"name": "_box",
+					"type": "bytes"
+				}
+			],
+			"name": "addBox",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "addr",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "reward",
+					"type": "uint256"
+				}
+			],
+			"name": "addBoxReward",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes[]",
+					"name": "_boxes",
+					"type": "bytes[]"
+				}
+			],
+			"name": "addBoxes",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes",
+					"name": "_pack",
+					"type": "bytes"
+				}
+			],
+			"name": "addPack",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes[]",
+					"name": "_packs",
+					"type": "bytes[]"
+				}
+			],
+			"name": "addPacks",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"name": "allBoxCommitments",
+			"outputs": [
+				{
+					"internalType": "bytes32",
+					"name": "",
+					"type": "bytes32"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"name": "allOpenBoxes",
+			"outputs": [
+				{
+					"internalType": "bytes32",
+					"name": "",
+					"type": "bytes32"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"name": "allUpgradeCommitments",
+			"outputs": [
+				{
+					"internalType": "bytes32",
+					"name": "",
+					"type": "bytes32"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"name": "allUpgrades",
+			"outputs": [
+				{
+					"internalType": "bytes32",
+					"name": "",
+					"type": "bytes32"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"name": "alreadyMinted",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "boxDiscountPercent",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_addr",
+					"type": "address"
+				}
+			],
+			"name": "boxRewards",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes",
+					"name": "_box",
+					"type": "bytes"
+				},
+				{
+					"internalType": "bytes",
+					"name": "_pack",
+					"type": "bytes"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_numBox",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_price",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint16[]",
+					"name": "_featureValueIndexesSet",
+					"type": "uint16[]"
+				},
+				{
+					"internalType": "bool",
+					"name": "_useBoxReward",
+					"type": "bool"
+				},
+				{
+					"internalType": "bytes32",
+					"name": "_commitment",
+					"type": "bytes32"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_expiryTime",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bytes32",
+					"name": "r",
+					"type": "bytes32"
+				},
+				{
+					"internalType": "bytes32",
+					"name": "s",
+					"type": "bytes32"
+				},
+				{
+					"internalType": "uint8",
+					"name": "v",
+					"type": "uint8"
+				}
+			],
+			"name": "buyAndCommitOpenBox",
+			"outputs": [],
+			"stateMutability": "payable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_price",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bool",
+					"name": "_useXdrace",
+					"type": "bool"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_expiryTime",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bytes32",
+					"name": "r",
+					"type": "bytes32"
+				},
+				{
+					"internalType": "bytes32",
+					"name": "s",
+					"type": "bytes32"
+				},
+				{
+					"internalType": "uint8",
+					"name": "v",
+					"type": "uint8"
+				}
+			],
+			"name": "buyCharm",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256[3]",
+					"name": "_tokenIds",
+					"type": "uint256[3]"
+				},
+				{
+					"internalType": "uint256[]",
+					"name": "_featureValueIndexesSet",
+					"type": "uint256[]"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_failureRate",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bool",
+					"name": "_useCharm",
+					"type": "bool"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_upgradeFee",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bool",
+					"name": "_useXDrace",
+					"type": "bool"
+				},
+				{
+					"internalType": "bytes32",
+					"name": "_commitment",
+					"type": "bytes32"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_expiryTime",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bytes32[2]",
+					"name": "rs",
+					"type": "bytes32[2]"
+				},
+				{
+					"internalType": "uint8",
+					"name": "v",
+					"type": "uint8"
+				}
+			],
+			"name": "commitUpgradeFeatures",
+			"outputs": [],
+			"stateMutability": "payable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"name": "committedBoxes",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "addr",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "reduced",
+					"type": "uint256"
+				}
+			],
+			"name": "decreaseBoxReward",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "devFundPercent",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "tokenId",
+					"type": "uint256"
+				}
+			],
+			"name": "existTokenFeatures",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "factoryV2",
+			"outputs": [
+				{
+					"internalType": "contract INFTFactoryV2",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "feeTo",
+			"outputs": [
+				{
+					"internalType": "address payable",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "getAllBoxCommitments",
+			"outputs": [
+				{
+					"internalType": "bytes32[]",
+					"name": "",
+					"type": "bytes32[]"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "getAllUpgradeCommitments",
+			"outputs": [
+				{
+					"internalType": "bytes32[]",
+					"name": "",
+					"type": "bytes32[]"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "getBoxes",
+			"outputs": [
+				{
+					"internalType": "bytes[]",
+					"name": "",
+					"type": "bytes[]"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_addr",
+					"type": "address"
+				}
+			],
+			"name": "getLatestTokenMinted",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "getPacks",
+			"outputs": [
+				{
+					"internalType": "bytes[]",
+					"name": "",
+					"type": "bytes[]"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "tokenId",
+					"type": "uint256"
+				}
+			],
+			"name": "getTokenFeatures",
+			"outputs": [
+				{
+					"internalType": "bytes[]",
+					"name": "_featureNames",
+					"type": "bytes[]"
+				},
+				{
+					"internalType": "bytes[]",
+					"name": "",
+					"type": "bytes[]"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_addr",
+					"type": "address"
+				}
+			],
+			"name": "getXDraceLockInfo",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_nft",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "DRACE_token",
+					"type": "address"
+				},
+				{
+					"internalType": "address payable",
+					"name": "_feeTo",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_notaryHook",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_nftStorageHook",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_masterChef",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_v",
+					"type": "address"
+				},
+				{
+					"internalType": "address",
+					"name": "_xDrace",
+					"type": "address"
+				}
+			],
+			"name": "initialize",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"name": "mappingApprover",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"name": "masterChefs",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "nft",
+			"outputs": [
+				{
+					"internalType": "contract IDeathRoadNFT",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "nftStorageHook",
+			"outputs": [
+				{
+					"internalType": "contract INFTStorage",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "notaryHook",
+			"outputs": [
+				{
+					"internalType": "contract INotaryNFT",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "oldFactory",
+			"outputs": [
+				{
+					"internalType": "contract INFTFactory",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes32",
+					"name": "_comm",
+					"type": "bytes32"
+				}
+			],
+			"name": "openBoxInfo",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "address",
+							"name": "user",
+							"type": "address"
+						},
+						{
+							"internalType": "uint256",
+							"name": "boxIdFrom",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256",
+							"name": "boxCount",
+							"type": "uint256"
+						},
+						{
+							"internalType": "bool",
+							"name": "settled",
+							"type": "bool"
+						},
+						{
+							"internalType": "bool",
+							"name": "openBoxStatus",
+							"type": "bool"
+						},
+						{
+							"internalType": "uint16[]",
+							"name": "featureValuesSet",
+							"type": "uint16[]"
+						},
+						{
+							"internalType": "bytes32",
+							"name": "previousBlockHash",
+							"type": "bytes32"
+						},
+						{
+							"internalType": "uint256",
+							"name": "blockNumber",
+							"type": "uint256"
+						}
+					],
+					"internalType": "struct INFTFactoryV2.OpenBoxInfo",
+					"name": "",
+					"type": "tuple"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "owner",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_masterChef",
+					"type": "address"
+				}
+			],
+			"name": "removeMasterChef",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "renounceOwnership",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "boxId",
+					"type": "uint256"
+				}
+			],
+			"name": "revokeBoxId",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_discount",
+					"type": "uint256"
+				}
+			],
+			"name": "setBoxDiscountPercent",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_p",
+					"type": "uint256"
+				}
+			],
+			"name": "setDevFundPercent",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_v2",
+					"type": "address"
+				}
+			],
+			"name": "setFactoryV2",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address payable",
+					"name": "_feeTo",
+					"type": "address"
+				}
+			],
+			"name": "setFeeTo",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_masterChef",
+					"type": "address"
+				}
+			],
+			"name": "setMasterChef",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_storage",
+					"type": "address"
+				}
+			],
+			"name": "setNFTStorage",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_notaryHook",
+					"type": "address"
+				}
+			],
+			"name": "setNotaryHook",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_old",
+					"type": "address"
+				}
+			],
+			"name": "setOldFactory",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "_fee",
+					"type": "uint256"
+				}
+			],
+			"name": "setSettleFee",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address payable",
+					"name": "_bot",
+					"type": "address"
+				}
+			],
+			"name": "setSettleFeeReceiver",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_xdrace",
+					"type": "address"
+				}
+			],
+			"name": "setXDRACE",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "_v",
+					"type": "address"
+				}
+			],
+			"name": "setXDraceVesting",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes32[]",
+					"name": "_boxCommitments",
+					"type": "bytes32[]"
+				},
+				{
+					"internalType": "bytes32[]",
+					"name": "_upgradeCommitments",
+					"type": "bytes32[]"
+				}
+			],
+			"name": "settleAllRemainingCommitments",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes32",
+					"name": "secret",
+					"type": "bytes32"
+				}
+			],
+			"name": "settleOpenBox",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes32",
+					"name": "secret",
+					"type": "bytes32"
+				}
+			],
+			"name": "settleUpgradeFeatures",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "newOwner",
+					"type": "address"
+				}
+			],
+			"name": "transferOwnership",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "tokenId",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bytes",
+					"name": "featureName",
+					"type": "bytes"
+				},
+				{
+					"internalType": "bytes",
+					"name": "featureValue",
+					"type": "bytes"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_draceFee",
+					"type": "uint256"
+				},
+				{
+					"internalType": "uint256",
+					"name": "_expiryTime",
+					"type": "uint256"
+				},
+				{
+					"internalType": "bytes32",
+					"name": "r",
+					"type": "bytes32"
+				},
+				{
+					"internalType": "bytes32",
+					"name": "s",
+					"type": "bytes32"
+				},
+				{
+					"internalType": "uint8",
+					"name": "v",
+					"type": "uint8"
+				}
+			],
+			"name": "updateFeature",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "newImplementation",
+					"type": "address"
+				}
+			],
+			"name": "upgradeTo",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "newImplementation",
+					"type": "address"
+				},
+				{
+					"internalType": "bytes",
+					"name": "data",
+					"type": "bytes"
+				}
+			],
+			"name": "upgradeToAndCall",
+			"outputs": [],
+			"stateMutability": "payable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes32",
+					"name": "_comm",
+					"type": "bytes32"
+				}
+			],
+			"name": "upgradesInfo",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "address",
+							"name": "user",
+							"type": "address"
+						},
+						{
+							"internalType": "bool",
+							"name": "useCharm",
+							"type": "bool"
+						},
+						{
+							"internalType": "bool",
+							"name": "settled",
+							"type": "bool"
+						},
+						{
+							"internalType": "bool",
+							"name": "upgradeStatus",
+							"type": "bool"
+						},
+						{
+							"internalType": "uint256",
+							"name": "failureRate",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256[3]",
+							"name": "tokenIds",
+							"type": "uint256[3]"
+						},
+						{
+							"internalType": "bytes[]",
+							"name": "targetFeatureNames",
+							"type": "bytes[]"
+						},
+						{
+							"internalType": "bytes[][]",
+							"name": "targetFeatureValuesSet",
+							"type": "bytes[][]"
+						},
+						{
+							"internalType": "bytes32",
+							"name": "previousBlockHash",
+							"type": "bytes32"
+						}
+					],
+					"internalType": "struct INFTFactoryV2.UpgradeInfo",
+					"name": "",
+					"type": "tuple"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes32",
+					"name": "_comm",
+					"type": "bytes32"
+				}
+			],
+			"name": "upgradesInfoV2",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "address",
+							"name": "user",
+							"type": "address"
+						},
+						{
+							"internalType": "bool",
+							"name": "useCharm",
+							"type": "bool"
+						},
+						{
+							"internalType": "bool",
+							"name": "settled",
+							"type": "bool"
+						},
+						{
+							"internalType": "bool",
+							"name": "upgradeStatus",
+							"type": "bool"
+						},
+						{
+							"internalType": "uint256",
+							"name": "failureRate",
+							"type": "uint256"
+						},
+						{
+							"internalType": "uint256[3]",
+							"name": "tokenIds",
+							"type": "uint256[3]"
+						},
+						{
+							"internalType": "uint256[]",
+							"name": "featureValueIndexesSet",
+							"type": "uint256[]"
+						},
+						{
+							"internalType": "bytes32",
+							"name": "previousBlockHash",
+							"type": "bytes32"
+						}
+					],
+					"internalType": "struct INFTFactoryV2.UpgradeInfoV2",
+					"name": "",
+					"type": "tuple"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "xDrace",
+			"outputs": [
+				{
+					"internalType": "contract IMint",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "xDraceVesting",
+			"outputs": [
+				{
+					"internalType": "contract IxDraceDistributor",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		}
+	],
+	"address": "0xa82Dd4821e3715fb4728F69F1926418CDfAC1Ccd",
+	"deployTransaction": {
+		"hash": "0x93b6c5ba29c07a2a35a292d399c7900bda56d441ca179cdb392d755a03c39f30",
+		"type": 0,
+		"accessList": null,
+		"blockHash": null,
+		"blockNumber": null,
+		"transactionIndex": null,
+		"confirmations": 0,
+		"from": "0xaAd511EaDEa628e9FBb4a74F13b80Bbdfc3f8AcF",
+		"gasPrice": {
+			"type": "BigNumber",
+			"hex": "0x02540be400"
+		},
+		"gasLimit": {
+			"type": "BigNumber",
+			"hex": "0x08c6ea"
+		},
+		"to": null,
+		"value": {
+			"type": "BigNumber",
+			"hex": "0x00"
+		},
+		"nonce": 180,
+		"data": "0x6080604052604051610772380380610772833981016040819052610022916102f7565b61004d60017f360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbd61040f565b60008051602061072b8339815191521461007757634e487b7160e01b600052600160045260246000fd5b6100838282600061008a565b5050610474565b610093836100f4565b6040516001600160a01b038416907fbc7cd75a20ee27fd9adebab32041f755214dbc6bffa90cc0225b39da2e5c2d3b90600090a26000825111806100d45750805b156100ef576100ed83836101b460201b6100291760201c565b505b505050565b610107816101e060201b6100551760201c565b61016e5760405162461bcd60e51b815260206004820152602d60248201527f455243313936373a206e657720696d706c656d656e746174696f6e206973206e60448201526c1bdd08184818dbdb9d1c9858dd609a1b60648201526084015b60405180910390fd5b8061019360008051602061072b83398151915260001b6101e660201b61005b1760201c565b80546001600160a01b0319166001600160a01b039290921691909117905550565b60606101d9838360405180606001604052806027815260200161074b602791396101e9565b9392505050565b3b151590565b90565b6060833b6102485760405162461bcd60e51b815260206004820152602660248201527f416464726573733a2064656c65676174652063616c6c20746f206e6f6e2d636f6044820152651b9d1c9858dd60d21b6064820152608401610165565b600080856001600160a01b03168560405161026391906103c0565b600060405180830381855af49150503d806000811461029e576040519150601f19603f3d011682016040523d82523d6000602084013e6102a3565b606091505b5090925090506102b48282866102be565b9695505050505050565b606083156102cd5750816101d9565b8251156102dd5782518084602001fd5b8160405162461bcd60e51b815260040161016591906103dc565b60008060408385031215610309578182fd5b82516001600160a01b038116811461031f578283fd5b60208401519092506001600160401b038082111561033b578283fd5b818501915085601f83011261034e578283fd5b8151818111156103605761036061045e565b604051601f8201601f19908116603f011681019083821181831017156103885761038861045e565b816040528281528860208487010111156103a0578586fd5b6103b1836020830160208801610432565b80955050505050509250929050565b600082516103d2818460208701610432565b9190910192915050565b60006020825282518060208401526103fb816040850160208701610432565b601f01601f19169190910160400192915050565b60008282101561042d57634e487b7160e01b81526011600452602481fd5b500390565b60005b8381101561044d578181015183820152602001610435565b838111156100ed5750506000910152565b634e487b7160e01b600052604160045260246000fd5b6102a8806104836000396000f3fe60806040523661001357610011610017565b005b6100115b61002761002261005e565b610096565b565b606061004e838360405180606001604052806027815260200161024c602791396100ba565b9392505050565b3b151590565b90565b60006100917f360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc546001600160a01b031690565b905090565b3660008037600080366000845af43d6000803e8080156100b5573d6000f35b3d6000fd5b6060833b61011e5760405162461bcd60e51b815260206004820152602660248201527f416464726573733a2064656c65676174652063616c6c20746f206e6f6e2d636f6044820152651b9d1c9858dd60d21b60648201526084015b60405180910390fd5b600080856001600160a01b03168560405161013991906101cc565b600060405180830381855af49150503d8060008114610174576040519150601f19603f3d011682016040523d82523d6000602084013e610179565b606091505b5091509150610189828286610193565b9695505050505050565b606083156101a257508161004e565b8251156101b25782518084602001fd5b8160405162461bcd60e51b815260040161011591906101e8565b600082516101de81846020870161021b565b9190910192915050565b600060208252825180602084015261020781604085016020870161021b565b601f01601f19169190910160400192915050565b60005b8381101561023657818101518382015260200161021e565b83811115610245576000848401525b5050505056fe416464726573733a206c6f772d6c6576656c2064656c65676174652063616c6c206661696c6564a26469706673582212209b8470f06e8a3960c912103fc2be177edaad69584ee3c7d2809ee737e79408e764736f6c63430008020033360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc416464726573733a206c6f772d6c6576656c2064656c65676174652063616c6c206661696c6564000000000000000000000000655193949d85190e9d3c2cc3f17693c8479c5dad000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000001048a29e2de000000000000000000000000124493e991632e5a2af58116e35d67f5a983afaa000000000000000000000000a6c897caaca3db7fd6e2d2ce1a00744f40ab87bb000000000000000000000000d91ce559ab85e32169462bb39739e4ed8babb6fe000000000000000000000000d577f6c9dc1a72bce704584b1fcbee3ff64559c000000000000000000000000060f3c1991997135db139eb1e81324762332f9c280000000000000000000000007ea253d31aaf943f44cf375ce540f0920cea40530000000000000000000000008f1535aef2502e63fb76d1d15bc3eb4c522b730b0000000000000000000000007cdfbb5d09b6ef6c06764872134a9b281f050f8f00000000000000000000000000000000000000000000000000000000",
+		"r": "0xe09c0beb967ebe879605051f4d3158977c4a2f0396913eb7e2abc984ac9d8e14",
+		"s": "0x6a33bf05dd8a18391b86f7dfed0c14a3953a43e7bb8b6256daf66056021d1f39",
+		"v": 147,
+		"creates": "0xa82Dd4821e3715fb4728F69F1926418CDfAC1Ccd",
+		"chainId": 56
+	}
+}
