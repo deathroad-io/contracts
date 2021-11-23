@@ -663,7 +663,7 @@ contract NFTFactoryV3 is
         );
 
         uint256 _toMint = reward;
-        if (!alreadyMinted[addr] && factoryV2.alreadyMinted(addr)) {
+        if (!alreadyMinted[addr] && !factoryV2.alreadyMinted(addr)) {
             _toMint = oldFactory.boxRewards(addr).add(_toMint);
             alreadyMinted[addr] = true;
         }
@@ -680,9 +680,11 @@ contract NFTFactoryV3 is
         returns (uint256)
     {
         if (!alreadyMinted[_addr]) {
-            return oldFactory.boxRewards(_addr);
+            if (!factoryV2.alreadyMinted(_addr)) {
+                return oldFactory.boxRewards(_addr);
+            }
         }
-        return IERC20Upgradeable(address(xDrace)).balanceOf(_addr);
+        return IERC20Upgradeable(0x2F7694695d71CAaaE29FDF3F140530d057de970B).balanceOf(_addr);
     }
 
     function getXDraceLockInfo(address _addr)

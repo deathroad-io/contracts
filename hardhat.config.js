@@ -44,8 +44,8 @@ module.exports = {
     hardhat: {
     },
     bsc: {
-      url: `https://bsc-dataseed.binance.org/`,
-      gasPrice: 6e9,
+      url: `https://speedy-nodes-nyc.moralis.io/09c66d5666d23bdcbca3932e/bsc/mainnet`,
+      gasPrice: 10e9,
       blockGasLimit: 22400000,
       accounts: [process.env.PRIVATE_KEY_BSC]
     },
