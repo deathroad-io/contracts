@@ -19,7 +19,7 @@ module.exports = async (hre) => {
   const chainId = chainIdByName(network.name)
 
   log('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-  log('DeathRoad GameV3 deployment')
+  log('DeathRoad RewardLocker deployment')
   log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 
   log('  Using Network: ', chainNameById(chainId))
@@ -28,7 +28,7 @@ module.exports = async (hre) => {
   log('  - network id:          ', chainId)
   log(' ')
 
-  log('  Deploying GameControlV3 Contract...')
+  log('  Deploying RewardLocker Contract...')
   if (parseInt(chainId) == 31337) return
 
   //reading DRACE token address
@@ -36,8 +36,7 @@ module.exports = async (hre) => {
   const xdraceAddress = require(`../deployments/${chainId}/xDRACE2.json`).address
   const DeathRoadNFTAddress = require(`../deployments/${chainId}/DeathRoadNFT.json`)
     .address
-  const liquidityAddingAddress = require(`../deployments/${chainId}/LiquidityAdding.json`).address
-  const masterChefAddress = require(`../deployments/${chainId}/MasterChefV2.json`).address
+  const GameControlV4Address = require(`../deployments/${chainId}/GameControlV4.json`).address
 
   const DraceRewardLocker = await ethers.getContractFactory('DraceRewardLocker')
   const draceRewardLocker = await upgrades.deployProxy(
@@ -67,42 +66,15 @@ module.exports = async (hre) => {
     deployTransaction: xdraceRewardLocker.deployTransaction,
   }
 
-  log('  Deploying Referral Contract...')
-  const ReferralContract = await ethers.getContractFactory('ReferralContract')
-  const ReferralContractInstance = await ReferralContract.deploy()
-  const referral = await ReferralContractInstance.deployed()
-  log('  - ReferralContract:         ', referral.address)
-
-  deployData['ReferralContract'] = {
-    abi: getContractAbi('ReferralContract'),
-    address: referral.address,
-    deployTransaction: referral.deployTransaction,
-  }
-  await referral.initialize(masterChefAddress)
-
   if (chainId == 56) {
     feeReceiver = require(`../deployments/${chainId}/RevenueDistributor.json`).address
   }
 
   const GameControlV4 = await ethers.getContractFactory('GameControlV4')
-  const gameControl = await upgrades.deployProxy(
-    GameControlV4,
-    [draceAddress, DeathRoadNFTAddress, constants.getApprover(chainId), draceRewardLocker.address, xdraceAddress, feeReceiver, xdraceRewardLocker.address, referral.address],
-    { unsafeAllow: ['delegatecall'], kind: 'uups', gasLimit: 1000000 },
-  )
+  const gameControl = await GameControlV4.attach(GameControlV4Address)
 
   log('  - GameControlV4:         ', gameControl.address)
 
-  deployData['GameControlV4'] = {
-    abi: getContractAbi('GameControlV4'),
-    address: gameControl.address,
-    deployTransaction: gameControl.deployTransaction,
-  }
-
-  log('  - Adding approver        ')
-
-  await gameControl.addApprover(constants.getApprover(chainId), true, {gasLimit: 200000})
-  log('  - Setting minter and locker        ')
   //settings
   const xDRACE = await ethers.getContractFactory('xDRACE2')
   const xdraceContract = await xDRACE.attach(xdraceAddress)
@@ -111,13 +83,11 @@ module.exports = async (hre) => {
   await draceRewardLocker.setLockers([gameControl.address], true, {gasLimit: 200000})
   await xdraceRewardLocker.setLockers([gameControl.address], true, {gasLimit: 200000})
 
-  const LiquidityAdding = await ethers.getContractFactory('LiquidityAdding')
-  const liquidityAdding = await LiquidityAdding.attach(liquidityAddingAddress)
-  await LiquidityAdding.setWhitelist([xdraceRewardLocker.address], true)
-
+  await gameControl.setTokenVesting(draceRewardLocker.address)
+  await gameControl.setXDraceVesting(xdraceRewardLocker.address)
   saveDeploymentData(chainId, deployData)
   log('\n  Contract Deployment Data saved to "deployments" directory.')
   log('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 }
 
-module.exports.tags = ['gamev4']
+module.exports.tags = ['rewardlockerupgradeabledeploy']
