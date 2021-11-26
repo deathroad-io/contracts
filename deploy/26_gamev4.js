@@ -113,7 +113,7 @@ module.exports = async (hre) => {
 
   const LiquidityAdding = await ethers.getContractFactory('LiquidityAdding')
   const liquidityAdding = await LiquidityAdding.attach(liquidityAddingAddress)
-  await LiquidityAdding.setWhitelist([xdraceRewardLocker.address], true)
+  await liquidityAdding.setWhitelist([xdraceRewardLocker.address], true)
 
   saveDeploymentData(chainId, deployData)
   log('\n  Contract Deployment Data saved to "deployments" directory.')
