@@ -24,5 +24,11 @@ module.exports = {
             return "0xe9e7cea3dedca5984780bafc599bd69add087d56" //busd on mainnet
         }
         return "0x4fb99590ca95fc3255d9fa66a1ca46c43c34b09a" //banana on bsc testnet
+    },
+    getDAOPaymentToken: function(chainId) {
+        if (chainId == 56) {
+            return "0xe9e7cea3dedca5984780bafc599bd69add087d56" //busd on mainnet
+        }
+        return "0x82CFC816E3f777fc4F1557Bb861D49e17ebD603C" //drace on bsc testnet
     }
 }
