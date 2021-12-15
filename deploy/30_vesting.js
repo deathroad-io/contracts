@@ -27,8 +27,20 @@ module.exports = async (hre) => {
   log('  - network id:          ', chainId)
   log(' ')
 
-  log('  Deploying DeathRoadHPLDAO Contract...')
+  log('  Deploying Vesting Contract...')
   if (parseInt(chainId) == 31337) return
+
+  let privateSales = require(`../data/vesting/${chainId}.json`)
+  let privateAddresses = []
+  let privateAmounts = []
+  let total = 0
+  for (const p of privateSales) {
+    privateAddresses.push(p.address)
+    privateAmounts.push(ethers.utils.parseEther(`${p.totalAmount}`))
+    total += p.totalAmount
+  }
+  console.log(total)
+
   const draceAddress = require(`../deployments/${chainId}/DRACE.json`).address
   const Vesting = await ethers.getContractFactory('Vesting')
   const vesting = await upgrades.deployProxy(Vesting, [draceAddress, 0], {
@@ -39,13 +51,7 @@ module.exports = async (hre) => {
   log('  - Vesting:         ', vesting.address)
 
   log('  - Adding vesting         ')
-  let privateSales = require(`../data/vesting/${chainId}.json`)
-  let privateAddresses = []
-  let privateAmounts = []
-  for (const p of privateSales) {
-    privateAddresses.push(p.address)
-    privateAmounts.push(ethers.utils.parseEther(`${p.totalAmount}`))
-  }
+
   await vesting.addVesting(privateAddresses, privateAmounts)
 
   deployData['Vesting'] = {
