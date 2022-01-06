@@ -2,57 +2,66 @@
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "../DRACE.sol";
-import "../lib/SignerRecover.sol";
-import "../interfaces/INFTFactory.sol";
-import "../interfaces/ITokenLock.sol";
-import "../interfaces/INFTStakingPoint.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+// import "hardhat/console.sol";
 
-contract MasterChefV2 is Ownable, SignerRecover, Initializable {
-    using SafeMath for uint256;
-    using SafeERC20 for IERC20;
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol"; // OZ contracts v4
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol"; // OZ contracts v4
+import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
+import "../lib/BlackholePreventionUpgradeable.sol";
+import "../interfaces/IDaoRewardPool.sol";
+import "../interfaces/INFTStakingPoint.sol";
+import "../interfaces/ITokenLock.sol";
+
+contract DeathRoadDaoStake is
+    Initializable,
+    ContextUpgradeable,
+    OwnableUpgradeable,
+    UUPSUpgradeable,
+    ReentrancyGuardUpgradeable
+{
+    using SafeMathUpgradeable for uint256;
+    using SafeERC20Upgradeable for IERC20Upgradeable;
+    struct TokenStake {
+        uint256 stakedAmount;
+        uint256 lockedTill;
+    }
+
+    struct NFTStake {
+        uint256 tokenId;
+        uint256 nftPoint;
+        uint256 lockedTill;
+    }
     // Info of each user.
     struct UserInfo {
         uint256 amount; // How many LP tokens the user has provided.
         uint256 rewardDebt; // Reward debt. See explanation below.
         uint256 nftPoint;
-        uint256[] stakedNFTs;
-        mapping(uint256 => uint256) nftDepositPoint;
-        uint256 lastNFTDepositTimestamp;
-        //
-        // We do some fancy math here. Basically, any point in time, the amount of DRACE
-        // entitled to a user but is pending to be distributed is:
-        //
-        //   pending reward = (user.amount * pool.accDRACEPerShare) - user.rewardDebt
-        //
-        // Whenever a user deposits or withdraws LP tokens to a pool. Here's what happens:
-        //   1. The pool's `accDRACEPerShare` (and `lastRewardBlock`) gets updated.
-        //   2. User receives the pending reward sent to his/her address.
-        //   3. User's `amount` gets updated.
-        //   4. User's `rewardDebt` gets updated.
+        NFTStake[] stakedNFTs;
+        TokenStake[] stakedTokens;
     }
     // Info of each pool.
     struct PoolInfo {
-        IERC20 lpToken; // Address of LP token contract., address is 0 if it is NFT pool
+        IERC20Upgradeable lpToken; // Address of LP token contract., address is 0 if it is NFT pool
         uint256 allocPoint; // How many allocation points assigned to this pool. DRACEPoint to distribute per block.
         uint256 lastRewardBlock; // Last block number that DRACEPoint distribution occurs.
         uint256 accDRACEPerShare; // Accumulated DRACEPoint per share, times 1e12. See below.
         uint256 totalNFTPoint;
     }
     // The DRACE TOKEN!
-    DRACE public drace;
-    IERC721 public nft;
-    INFTFactory public factory;
+    IERC20Upgradeable public drace;
+    IERC721Upgradeable public nft;
+    IDaoRewardPool public rewardPool;
     INFTStakingPoint public nftStakingPointHook;
-    uint256 public lockedTime = 12 hours;
-    uint256 public poolLockedTime = 1 days;
+    uint256 public lockedDuration;
+    uint256 public nftLockedDuration;
+    uint256 public poolLockedTime;
 
     // the token rewards container
 
@@ -98,24 +107,34 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
         uint256 amount
     );
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() initializer {}
+
+    function _authorizeUpgrade(address) internal override onlyOwner {}
+
     function initialize(
-        address _factory,
+        address _rewardPool,
         address _draceNFT,
-        DRACE _drace,
+        address _drace,
         address _nftStakingPointHook,
         uint256 _dracePerBlock,
         uint256 _startBlock,
         address _tokenLock
     ) external initializer onlyOwner {
-        factory = INFTFactory(_factory);
-        nft = IERC721(_draceNFT);
+        lockedDuration = 60 days;
+        poolLockedTime = 1 days;
+        nftLockedDuration = 60 days;
+
+        rewardPool = IDaoRewardPool(_rewardPool);
+        nft = IERC721Upgradeable(_draceNFT);
         nftStakingPointHook = INFTStakingPoint(_nftStakingPointHook);
-        drace = _drace;
+        drace = IERC20Upgradeable(_drace);
         dracePerBlock = _dracePerBlock;
         startBlock = _startBlock > 0 ? _startBlock : block.number;
         bonusEndBlock = startBlock.add(50000);
         tokenLock = ITokenLock(_tokenLock);
         allowEmergencyWithdraw = false;
+
         //add nft pool
         add(1000, address(0), false);
         //DRACE staking pool
@@ -137,21 +156,12 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
         poolLockedTime = _lockedTime;
     }
 
-    function setNFTContract(address _factory, address _nft) external onlyOwner {
-        factory = INFTFactory(_factory);
-        nft = IERC721(_nft);
-    }
-
     function isNFTPool(uint256 pid) public view returns (bool) {
         return address(poolInfo[pid].lpToken) == address(0);
     }
 
     function poolLength() external view returns (uint256) {
         return poolInfo.length;
-    }
-
-    function setNFTContract(address _nft) external onlyOwner {
-        nft = IERC721(_nft);
     }
 
     function setNFTStakingPointHook(address _nftStakingPointHook)
@@ -161,8 +171,8 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
         nftStakingPointHook = INFTStakingPoint(_nftStakingPointHook);
     }
 
-    function setFactory(address _factory) external onlyOwner {
-        factory = INFTFactory(_factory);
+    function setRewardPol(address _rewardPool) external onlyOwner {
+        rewardPool = IDaoRewardPool(_rewardPool);
     }
 
     // Add a new lp to the pool. Can only be called by the owner.
@@ -185,7 +195,7 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
         totalAllocPoint = totalAllocPoint.add(_allocPoint);
         poolInfo.push(
             PoolInfo({
-                lpToken: IERC20(_lpToken),
+                lpToken: IERC20Upgradeable(_lpToken),
                 allocPoint: _allocPoint,
                 lastRewardBlock: lastRewardBlock,
                 accDRACEPerShare: 0,
@@ -218,23 +228,6 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
         );
         poolInfo[_pid].allocPoint = _allocPoint;
     }
-
-    // // Set the migrator contract. Can only be called by the owner.
-    // function setMigrator(IMigratorChef _migrator) public onlyOwner {
-    //     migrator = _migrator;
-    // }
-
-    // // Migrate lp token to another lp contract. Can be called by anyone. We trust that migrator contract is good.
-    // function migrate(uint256 _pid) public {
-    //     require(address(migrator) != address(0), "migrate: no migrator");
-    //     PoolInfo storage pool = poolInfo[_pid];
-    //     IERC20 lpToken = pool.lpToken;
-    //     uint256 bal = lpToken.balanceOf(address(this));
-    //     lpToken.safeApprove(address(migrator), bal);
-    //     IERC20 newLpToken = migrator.migrate(lpToken);
-    //     require(bal == newLpToken.balanceOf(address(this)), "migrate: bad");
-    //     pool.lpToken = newLpToken;
-    // }
 
     // Return reward multiplier over the given _from to _to block.
     function getMultiplier(uint256 _from, uint256 _to)
@@ -334,12 +327,18 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
                 .mul(pool.accDRACEPerShare)
                 .div(1e12)
                 .sub(user.rewardDebt);
-            addRecordedReward(msg.sender, pending);
+            payReward(msg.sender, pending);
         }
         pool.lpToken.safeTransferFrom(
             address(msg.sender),
             address(this),
             _amount
+        );
+        user.stakedTokens.push(
+            TokenStake({
+                stakedAmount: _amount,
+                lockedTill: block.timestamp + lockedDuration
+            })
         );
         user.amount = user.amount.add(_amount);
         user.rewardDebt = user.amount.mul(pool.accDRACEPerShare).div(1e12);
@@ -359,7 +358,7 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
                 .mul(pool.accDRACEPerShare)
                 .div(1e12)
                 .sub(user.rewardDebt);
-            addRecordedReward(msg.sender, pending);
+            payReward(msg.sender, pending);
         }
 
         uint256 addedPoint = 0;
@@ -367,8 +366,6 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
             uint256 _tokenId = _tokenIds[i];
 
             nft.transferFrom(msg.sender, address(this), _tokenId);
-            user.stakedNFTs.push(_tokenId);
-
             uint256 stakingPoint = nftStakingPointHook.getStakingPoint(
                 _tokenId,
                 address(nft)
@@ -377,7 +374,15 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
                 stakingPoint > 0,
                 "depositNFT:NFT is not allocated for staking point"
             );
-            user.nftDepositPoint[_tokenId] = stakingPoint;
+
+            user.stakedNFTs.push(
+                NFTStake({
+                    tokenId: _tokenId,
+                    nftPoint: stakingPoint,
+                    lockedTill: block.timestamp + nftLockedDuration
+                })
+            );
+
             addedPoint = addedPoint.add(stakingPoint);
 
             emit NFTDeposit(msg.sender, nftPoolId, _tokenId, stakingPoint);
@@ -386,24 +391,39 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
         user.nftPoint = user.nftPoint.add(addedPoint);
         user.rewardDebt = user.nftPoint.mul(pool.accDRACEPerShare).div(1e12);
         pool.totalNFTPoint = pool.totalNFTPoint.add(addedPoint);
-
-        user.lastNFTDepositTimestamp = block.timestamp;
     }
 
     // Withdraw LP tokens from MasterChef.
-    function withdraw(uint256 _pid, uint256 _amount) public {
+    function withdraw(
+        uint256 _pid,
+        uint256 _amount,
+        uint256 _depositId
+    ) public {
         require(!isNFTPool(_pid), "Pool ID must not be NFT pool");
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
-        require(user.amount >= _amount, "withdraw: not good");
+
+        TokenStake storage _deposit = user.stakedTokens[_depositId];
+        require(_deposit.stakedAmount >= _amount, "withdraw: not good");
+        require(
+            _deposit.lockedTill < block.timestamp,
+            "withdraw: not unlock time"
+        );
+
         updatePool(_pid);
         uint256 pending = user.amount.mul(pool.accDRACEPerShare).div(1e12).sub(
             user.rewardDebt
         );
-        addRecordedReward(msg.sender, pending);
+        payReward(msg.sender, pending);
         user.amount = user.amount.sub(_amount);
         user.rewardDebt = user.amount.mul(pool.accDRACEPerShare).div(1e12);
-
+        _deposit.stakedAmount -= _amount;
+        if (_deposit.stakedAmount == 0) {
+            user.stakedTokens[_depositId] = user.stakedTokens[
+                user.stakedTokens.length - 1
+            ];
+            user.stakedTokens.pop();
+        }
         //lock in tokenLock
         pool.lpToken.safeApprove(address(tokenLock), _amount);
         tokenLock.lock(
@@ -432,7 +452,7 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
             );
         }
 
-        addRecordedReward(msg.sender, pending);
+        payReward(msg.sender, pending);
         if (_pid == nftPoolId) {
             user.rewardDebt = user.nftPoint.mul(pool.accDRACEPerShare).div(
                 1e12
@@ -446,10 +466,7 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
     function claimRewardsNFTPool() external {
         require(nftPoolId != type(uint256).max, "NFT Pool not exist");
         UserInfo storage user = userInfo[nftPoolId][msg.sender];
-        require(
-            user.lastNFTDepositTimestamp.add(lockedTime) <= block.timestamp,
-            "Can only claim rewards after 12hs of stake"
-        );
+
         uint256 _pid = nftPoolId;
         PoolInfo storage pool = poolInfo[_pid];
         updatePool(nftPoolId);
@@ -458,13 +475,9 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
             user.rewardDebt
         );
 
-        addRecordedReward(msg.sender, pending);
+        payReward(msg.sender, pending);
         user.rewardDebt = user.nftPoint.mul(pool.accDRACEPerShare).div(1e12);
         emit ClaimRewards(msg.sender, _pid, pending);
-    }
-
-    function setLockedTime(uint256 _lockedTime) external onlyOwner {
-        lockedTime = _lockedTime;
     }
 
     //always withdraw all NFTs
@@ -474,11 +487,7 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
 
         PoolInfo storage pool = poolInfo[nftPoolId];
         UserInfo storage user = userInfo[nftPoolId][msg.sender];
-        require(user.stakedNFTs.length > 0, "withdrawNFT: not good");
-        require(
-            user.lastNFTDepositTimestamp.add(lockedTime) <= block.timestamp,
-            "withdrawNFT: NFTs only available for withdrawal after deposit locked time"
-        );
+        require(user.stakedNFTs.length > 0, "withdrawNFT: no nft");
 
         updatePool(nftPoolId);
         uint256 pending = user
@@ -489,11 +498,19 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
 
         //transfer nfts back
         for (uint256 i = 0; i < user.stakedNFTs.length; i++) {
-            nft.transferFrom(address(this), msg.sender, user.stakedNFTs[i]);
+            require(
+                user.stakedNFTs[i].lockedTill < block.timestamp,
+                "withdrawNFT: not unlock time"
+            );
+            nft.transferFrom(
+                address(this),
+                msg.sender,
+                user.stakedNFTs[i].tokenId
+            );
         }
         delete user.stakedNFTs;
 
-        addRecordedReward(msg.sender, pending);
+        payReward(msg.sender, pending);
         pool.totalNFTPoint = pool.totalNFTPoint.sub(user.nftPoint);
         user.nftPoint = 0;
         user.rewardDebt = user.nftPoint.mul(pool.accDRACEPerShare).div(1e12);
@@ -507,10 +524,6 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
         PoolInfo storage pool = poolInfo[nftPoolId];
         UserInfo storage user = userInfo[nftPoolId][msg.sender];
         require(user.stakedNFTs.length > 0, "withdrawNFT: not good");
-        require(
-            user.lastNFTDepositTimestamp.add(lockedTime) <= block.timestamp,
-            "withdrawNFT: NFTs only available for withdrawal after deposit locked time"
-        );
 
         updatePool(nftPoolId);
         uint256 pending = user
@@ -524,10 +537,14 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
         //transfer nfts back
         for (uint256 k = 0; k < _tokenIds.length; k++) {
             for (uint256 i = 0; i < user.stakedNFTs.length; i++) {
-                if (_tokenIds[k] == user.stakedNFTs[i]) {
+                require(
+                    user.stakedNFTs[i].lockedTill < block.timestamp,
+                    "withdrawSomeNFTs: not unlock time"
+                );
+                if (_tokenIds[k] == user.stakedNFTs[i].tokenId) {
                     nft.transferFrom(address(this), msg.sender, _tokenIds[k]);
                     minusNFTPoint = minusNFTPoint.add(
-                        user.nftDepositPoint[_tokenIds[k]]
+                        user.stakedNFTs[i].nftPoint
                     );
 
                     //delete from the stakedNFTs list
@@ -541,7 +558,7 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
         }
         //delete user.stakedNFTs;
 
-        addRecordedReward(msg.sender, pending);
+        payReward(msg.sender, pending);
         pool.totalNFTPoint = pool.totalNFTPoint.sub(minusNFTPoint);
         user.nftPoint = user.nftPoint.sub(minusNFTPoint);
         user.rewardDebt = user.nftPoint.mul(pool.accDRACEPerShare).div(1e12);
@@ -566,8 +583,12 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
         UserInfo storage user = userInfo[nftPoolId][msg.sender];
 
         for (uint256 i = 0; i < user.stakedNFTs.length; i++) {
-            if (nft.ownerOf(user.stakedNFTs[i]) == address(this)) {
-                nft.transferFrom(address(this), msg.sender, user.stakedNFTs[i]);
+            if (nft.ownerOf(user.stakedNFTs[i].tokenId) == address(this)) {
+                nft.transferFrom(
+                    address(this),
+                    msg.sender,
+                    user.stakedNFTs[i].tokenId
+                );
             }
         }
         delete user.stakedNFTs;
@@ -581,8 +602,8 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
     }
 
     // Safe DRACE transfer function, just in case if rounding error causes pool to not have enough DRACE.
-    function addRecordedReward(address _to, uint256 _amount) internal {
-        factory.addBoxReward(_to, _amount);
+    function payReward(address _to, uint256 _amount) internal {
+        rewardPool.transferReward(_to, _amount);
     }
 
     function getUserInfo(uint256 _pid, address _user)
@@ -592,8 +613,8 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
             uint256 amount, // How many LP tokens the user has provided.
             uint256 rewardDebt, // Reward debt. See explanation below.
             uint256 nftPoint,
-            uint256[] memory stakedNFTs,
-            uint256 lastNFTDepositTimestamp
+            NFTStake[] memory stakedNFTs,
+            TokenStake[] memory stakedTokens
         )
     {
         UserInfo storage user = userInfo[_pid][_user];
@@ -602,7 +623,7 @@ contract MasterChefV2 is Ownable, SignerRecover, Initializable {
             user.rewardDebt,
             user.nftPoint,
             user.stakedNFTs,
-            user.lastNFTDepositTimestamp
+            user.stakedTokens
         );
     }
 

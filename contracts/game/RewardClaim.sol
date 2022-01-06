@@ -135,10 +135,13 @@ contract RewardClaim is
         uint256 _totalxDraceAmount,
         uint256 _lastGameIdToClaim,
         uint256 _lastRoomIndexToClaim,
+        uint256 _expiryTime,
         bytes32 r,
         bytes32 s,
         uint8 v
     ) external {
+        require(_expiryTime >= block.timestamp, "Time expired");
+
         //verify signature
         bytes32 message = keccak256(
             abi.encode(
@@ -146,7 +149,8 @@ contract RewardClaim is
                 _totalDraceAmount,
                 _totalxDraceAmount,
                 _lastGameIdToClaim,
-                _lastRoomIndexToClaim
+                _lastRoomIndexToClaim,
+                _expiryTime
             )
         );
 
